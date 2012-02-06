@@ -21,6 +21,7 @@ Planetoid.prototype.initialize = function(game, startX, startY, mass, radius) {
     Planetoid.prototype.parent.initialize.call(this, game, startX, startY);
     this.mass = mass;
     this.radius = radius;
+    this.is_planetoid = true;
     this.fillStyle = "rgb(0,0,0)"; // override me!
 
     this.radiusSquared = Math.pow(this.radius,2);
@@ -36,6 +37,12 @@ Planetoid.prototype.draw = function() {
     ctx.fillStyle = this.fillStyle;
     ctx.fill();
     ctx.restore();
+}
+
+Planetoid.prototype.impacted = function(object) {
+    if (this.damage && object.is_planetoid == false) {
+	object.decHealth( this.damage );
+    }
 }
 
 /*********************************************************************
@@ -66,21 +73,24 @@ Planet.prototype.incHealth = function(delta) {
 /*********************************************************************
  * Asteroid class
  */
-function Asteroid(game, startX, startY, mass, radius, vX, vY, facing, rotation) {
-    if (game) return this.initialize(game, startX, startY, mass, radius, vX, vY, facing, rotation);
+function Asteroid(game, startX, startY, mass, radius, vX, vY, facing, spin) {
+    if (game) return this.initialize(game, startX, startY, mass, radius, vX, vY, facing, spin);
     return this;
 }
 
 Asteroid.inheritsFrom( Planetoid );
 
-Asteroid.prototype.initialize = function(game, startX, startY, mass, radius, vX, vY, facing, rotation) {
+Asteroid.prototype.initialize = function(game, startX, startY, mass, radius, vX, vY, facing, spin) {
     Asteroid.prototype.parent.initialize.call(this, game, startX, startY, mass, radius);
-    this.velocityX = vX;
-    this.velocityY = vY;
+
+    this.vX = vX;
+    this.vY = vY;
     this.facing = facing;
-    this.rotation = rotation;
+    this.spin = spin;
     this.fillStyle = "rgba(0,100,100,1)";
     this.is_asteroid = true;
+    this.health = 15;
+    this.damage = 2;
 
     return this;
 }

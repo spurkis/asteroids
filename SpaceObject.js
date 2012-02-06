@@ -25,8 +25,8 @@ SpaceObject.prototype.initialize = function(game, startX, startY) {
     this.maxX = this.ctx.canvas.width;
     this.maxY = this.ctx.canvas.height;
 
-    this.velocityX = 0;  // speed along X axis in pixels/sec
-    this.velocityY = 0;  // speed along Y axis in pixels/sec
+    this.vX = 0;  // speed along X axis in pixels/sec
+    this.vY = 0;  // speed along Y axis in pixels/sec
     this.maxVelocityX = 2;
     this.maxVelocityY = 2;
 
@@ -58,6 +58,7 @@ SpaceObject.prototype.updatePositions = function(objects) {
     if (objects) {
 	for (var i=0; i < objects.length; i++) {
 	    var object = objects[i];
+	    if (object == this || object.ship == this || this.ship == object) continue;
 	    if (object.mass <= 0) continue;
 	    if (! object.update) continue;
 
@@ -67,6 +68,8 @@ SpaceObject.prototype.updatePositions = function(objects) {
 	    // var dist = sqrt(pow(x2-x1, 2) + pow(y2-y1, 2)); // slow
 
 	    if (dist_squared > object.radiusSquared) {
+		// F2 = G*m1*m2/r^2
+		// a2 = F/m2 = G*m1/r^2
 		var accel = object.mass / dist_squared;
 		if (accel > 1) accel = 1;
 		//var accel = F/this.mass;
@@ -76,19 +79,19 @@ SpaceObject.prototype.updatePositions = function(objects) {
 
 		this.incVelocity(scaleX, scaleY);
 	    } else {
+		// so close they've impacted
 		this.game.impact( this, object );
-		// so close they've impacted, stop unless they're thrusting
 		// TODO: don't accelerate through object
-		if (this.thrust == 0) {
-		    this.velocityX = 0;
-		    this.velocityY = 0;
-		}
+		/*if (this.thrust == 0) {
+		    this.vX = 0;
+		    this.vY = 0;
+		}*/
 	    }
 	}
     }
 
-    this.incX(this.velocityX);
-    this.incY(this.velocityY);
+    this.incX(this.vX);
+    this.incY(this.vY);
 }
 
 
@@ -106,19 +109,19 @@ SpaceObject.prototype.incY = function(dY) {
 
 SpaceObject.prototype.incVelocity = function(dX, dY) {
     if (dX != 0) {
-	this.velocityX += dX;
-	if (this.velocityX > this.maxVelocityX) {
-	    this.velocityX = this.maxVelocityX;
-	} else if (this.velocityX < -this.maxVelocityX) {
-	    this.velocityX = -this.maxVelocityX;
+	this.vX += dX;
+	if (this.vX > this.maxVelocityX) {
+	    this.vX = this.maxVelocityX;
+	} else if (this.vX < -this.maxVelocityX) {
+	    this.vX = -this.maxVelocityX;
 	}
     }
     if (dY != 0) {
-	this.velocityY += dY;
-	if (this.velocityY > this.maxVelocityY) {
-	    this.velocityY = this.maxVelocityY;
-	} else if (this.velocityY < -this.maxVelocityY) {
-	    this.velocityY = -this.maxVelocityY;
+	this.vY += dY;
+	if (this.vY > this.maxVelocityY) {
+	    this.vY = this.maxVelocityY;
+	} else if (this.vY < -this.maxVelocityY) {
+	    this.vY = -this.maxVelocityY;
 	}
     }
 }
@@ -129,8 +132,10 @@ SpaceObject.prototype.accelerateAlong = function(angle, thrust) {
     this.incVelocity(scaleX, scaleY);
 }
 
-SpaceObject.prototype.impacted = function(object) {
-    // do nothing by default
+SpaceObject.prototype.impacted = function(object, collision_state) {
+    if (this.damage) {
+	object.decHealth( this.damage );
+    }
 }
 
 SpaceObject.prototype.decHealth = function(delta) {

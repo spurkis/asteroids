@@ -14,6 +14,7 @@ function AsteroidsGame(ctx) {
     this.refreshRate = 10; // ms
     this.maxX = ctx.canvas.width;
     this.maxY = ctx.canvas.height;
+
     this.weaponsFired = [];
     this.asteroids = [];
     this.planets = [];
@@ -26,16 +27,16 @@ function AsteroidsGame(ctx) {
 		      new Planet(this, 5/7*this.maxX, 4/5*this.maxY, 10, 10),
 		      new Planet(this, 1/2*this.maxX, 2/3*this.maxY, 10, 20) );
 
-    this.asteroids.push(new Asteroid(this, 1/10*this.maxX, 1/10*this.maxY, 1, 4, -0.1, 0.5, 0, 0 ),
-			new Asteroid(this, 1/10*this.maxX, 2/10*this.maxY, 1, 5, -0.1, 0.4, 0, 0 ),
-			new Asteroid(this, 5/10*this.maxX, 1/10*this.maxY, 1, 6, -0.2, 0.3, 0, 0 ),
-			new Asteroid(this, 5/10*this.maxX, 2/10*this.maxY, 1, 7, -0.3, 0.2, 0, 0 ),
-			new Asteroid(this, 6/10*this.maxX, 8/10*this.maxY, 1, 6, -0.4, 0.1, 0, 0 ),
-			new Asteroid(this, 6/10*this.maxX, 9/10*this.maxY, 1, 7, 0.5, -0.5, 0, 0 ),
-			new Asteroid(this, 9/10*this.maxX, 8/10*this.maxY, 1, 6, 0.6, 0.4, 0, 0 ),
-			new Asteroid(this, 9/10*this.maxX, 9/10*this.maxY, 1, 7, 0.7, 0.6, 0, 0 ),
-			new Asteroid(this, 3/10*this.maxX, 1/10*this.maxY, 1, 6, 0.8, -0.2, 0, 0 ),
-			new Asteroid(this, 3/10*this.maxX, 2/10*this.maxY, 1, 7, 0.9, -0.1, 0, 0 ) );
+    this.asteroids.push(new Asteroid(this, 1/10*this.maxX, 1/10*this.maxY, 0.1, 4, 0, 0.5, 0, 0 ),
+			new Asteroid(this, 1/10*this.maxX, 2/10*this.maxY, 0.2, 5, 0, -0.5, 0, 0 ),
+			new Asteroid(this, 5/10*this.maxX, 1/10*this.maxY, 0.1, 6, -0.2, 0.3, 0, 0 ),
+			new Asteroid(this, 5/10*this.maxX, 2/10*this.maxY, 0.1, 7, -0.3, 0.2, 0, 0 ),
+			new Asteroid(this, 6/10*this.maxX, 8/10*this.maxY, 0.1, 6, -0.4, 0.1, 0, 0 ),
+			new Asteroid(this, 6/10*this.maxX, 9/10*this.maxY, 0.1, 7, 0.5, -0.5, 0, 0 ),
+			new Asteroid(this, 9/10*this.maxX, 8/10*this.maxY, 0.1, 6, 0.6, 0.4, 0, 0 ),
+			new Asteroid(this, 9/10*this.maxX, 9/10*this.maxY, 0.1, 7, 0.7, 0.6, 0, 0 ),
+			new Asteroid(this, 3/10*this.maxX, 1/10*this.maxY, 0.1, 6, 0.8, -0.2, 0, 0 ),
+			new Asteroid(this, 3/10*this.maxX, 2/10*this.maxY, 0.1, 7, 0.9, -0.1, 0, 0 ) );
 
     this.setDefaultCanvasState();
     this.bindDefaultKeys();
@@ -51,6 +52,117 @@ AsteroidsGame.prototype.setDefaultCanvasState = function() {
     ctx.lineWidth = 1;
     ctx.save();
 }
+
+AsteroidsGame.prototype.startGameLoop = function() {
+    if (this.intervalId) {
+	console.log("startGameLoop aborted: already started with interval="+ this.intervalId);
+	return;
+    }
+
+    // separate computation from re-drawing...
+    var self = this;
+    this.intervalId = setInterval(function(){
+	self.updatePositions();
+    }, this.refreshRate);
+
+    this.intervalId = setInterval(function(){
+	self.draw();
+    }, this.refreshRate);
+};  
+
+AsteroidsGame.prototype.draw = function() {
+    this.ctx.clearRect(0,0, this.maxX,this.maxY); // clear canvas
+
+    for (var i=0; i < this.planets.length; i++) {
+	this.planets[i].draw();
+    }
+    for (var i=0; i < this.asteroids.length; i++) {
+	this.asteroids[i].draw();
+    }
+    this.ship.draw();
+    for (var id in this.weaponsFired) {
+	this.weaponsFired[id].draw();
+    }
+};
+
+AsteroidsGame.prototype.updatePositions = function() {
+    var objects = [];
+    objects = objects.concat(this.planets,
+			     this.asteroids,
+			     this.weaponsFired,
+			     [this.ship]);
+
+    this.ship.updatePositions(objects);
+    for (var i=0; i < this.asteroids.length; i++) {
+	this.asteroids[i].updatePositions(objects);
+    }
+    for (var id in this.weaponsFired) {
+	this.weaponsFired[id].updatePositions(objects);
+    }
+};
+
+
+AsteroidsGame.prototype.objectDied = function(object) {
+    if (object.is_weapon) {
+	delete this.weaponsFired['t'+object.timeoutId];
+    } else if (object.is_asteroid) {
+	var i = this.asteroids.indexOf(object);
+	this.asteroids.splice(i,1);
+	// spawn new asteroids?
+    } else if (object.is_planet) {
+	// allowed?
+    } else if (object.is_ship) {
+	throw "Game Over!";
+    }
+}
+
+
+AsteroidsGame.prototype.fireWeapon = function(weapon) {
+    var self = this;
+    weapon.timeoutId = setTimeout(function(){
+	self.weaponTimeout(weapon);
+    }, weapon.ttl);
+    // force associative array by prepending a 't':
+    this.weaponsFired['t'+weapon.timeoutId] = weapon;
+}
+
+AsteroidsGame.prototype.weaponTimeout = function(weapon) {
+    // let the weapon delete itself
+    //delete this.weaponsFired['t'+weapon.timeoutId];
+    weapon.weaponTimeout();
+}
+
+AsteroidsGame.prototype.impact = function(object1, object2) {
+    var state1 = {};
+    var state2 = {};
+    if (object1.mass > 0 && object2.mass > 0) {
+	// bounce: http://www.emanueleferonato.com/2007/08/19/managing-ball-vs-ball-collision-with-flash/
+	var dX = object1.x - object2.x;
+	var dY = object1.y - object2.y;
+	var collisionision_angle = Math.atan2(dY, dX);
+	var magnitude_1 = Math.sqrt(object1.vX*object1.vX + object1.vY*object1.vY);
+	var magnitude_2 = Math.sqrt(object2.vX*object2.vX + object2.vY*object2.vY);
+	var direction_1 = Math.atan2(object1.vY, object1.vX);
+	var direction_2 = Math.atan2(object2.vY, object2.vX);
+	var new_vX_1 = magnitude_1*Math.cos(direction_1-collisionision_angle);
+	var new_vY_1 = magnitude_1*Math.sin(direction_1-collisionision_angle);
+	var new_vX_2 = magnitude_2*Math.cos(direction_2-collisionision_angle);
+	var new_vY_2 = magnitude_2*Math.sin(direction_2-collisionision_angle);
+	var final_vX_1 = ((object1.mass-object2.mass)*new_vX_1+(object2.mass+object2.mass)*new_vX_2)/(object1.mass+object2.mass);
+	var final_vX_2 = ((object1.mass+object1.mass)*new_vX_1+(object2.mass-object1.mass)*new_vX_2)/(object1.mass+object2.mass);
+	var final_vY_1 = new_vY_1;
+	var final_vY_2 = new_vY_2;
+
+	object1.vX = Math.cos(collisionision_angle)*final_vX_1 + Math.cos(collisionision_angle + PI/2)*final_vY_1;
+	object1.vY = Math.sin(collisionision_angle)*final_vX_1 + Math.sin(collisionision_angle + PI/2)*final_vY_1;
+	object2.vX = Math.cos(collisionision_angle)*final_vX_2 + Math.cos(collisionision_angle + PI/2)*final_vY_2;
+	object2.vY = Math.sin(collisionision_angle)*final_vX_2 + Math.sin(collisionision_angle + PI/2)*final_vY_2;
+    }
+
+    object1.impacted(object2, state2);
+    object2.impacted(object1, state1);
+}
+
 
 AsteroidsGame.prototype.bindDefaultKeys = function() {
     var self = this;
@@ -119,78 +231,3 @@ AsteroidsGame.prototype.handleKeyEvent = function(event) {
 }
 
 
-AsteroidsGame.prototype.startGameLoop = function() {
-    if (this.intervalId) {
-	console.log("startGameLoop aborted: already started with interval="+ this.intervalId);
-	return;
-    }
-
-    // separate computation from re-drawing...
-    var self = this;
-    this.intervalId = setInterval(function(){
-	self.updatePositions();
-    }, this.refreshRate);
-    this.intervalId = setInterval(function(){
-	self.draw();
-    }, this.refreshRate);
-};  
-
-AsteroidsGame.prototype.draw = function() {
-    this.ctx.clearRect(0,0, this.maxX,this.maxY); // clear canvas
-    for (var i=0; i < this.planets.length; i++) {
-	this.planets[i].draw();
-    }
-    for (var i=0; i < this.asteroids.length; i++) {
-	this.asteroids[i].draw();
-    }
-    this.ship.draw();
-    for (var id in this.weaponsFired) {
-	this.weaponsFired[id].draw();
-    }
-};
-
-AsteroidsGame.prototype.updatePositions = function() {
-    this.ship.updatePositions(this.planets);
-    for (var i=0; i < this.asteroids.length; i++) {
-	this.asteroids[i].updatePositions(this.planets);
-    }
-    for (var id in this.weaponsFired) {
-	this.weaponsFired[id].updatePositions(this.planets);
-    }
-};
-
-
-AsteroidsGame.prototype.objectDied = function(object) {
-    if (object.is_weapon) {
-	delete this.weaponsFired['t'+object.timeoutId];
-    } else if (object.is_asteroid) {
-	var i = this.asteroids.indexOf(object);
-	this.asteroids.splice(i,1);
-	// spawn new asteroids?
-    } else if (object.is_planet) {
-	// allowed?
-    } else if (object.is_ship) {
-	// end game!
-    }
-}
-
-
-AsteroidsGame.prototype.fireWeapon = function(weapon) {
-    var self = this;
-    weapon.timeoutId = setTimeout(function(){
-	self.weaponTimeout(weapon);
-    }, weapon.ttl);
-    // force associative array by prepending a 't':
-    this.weaponsFired['t'+weapon.timeoutId] = weapon;
-}
-
-AsteroidsGame.prototype.weaponTimeout = function(weapon) {
-    // let the weapon delete itself
-    //delete this.weaponsFired['t'+weapon.timeoutId];
-    weapon.weaponTimeout();
-}
-
-AsteroidsGame.prototype.impact = function(object1, object2) {
-    object1.impacted(object2);
-    object2.impacted(object1);
-}

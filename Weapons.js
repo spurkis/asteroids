@@ -16,9 +16,9 @@ Bullet.prototype.initialize = function(ship, startX, startY, facing, vX, vY) {
     Bullet.prototype.parent.initialize.call(this, ship.game, startX, startY);
     this.ship = ship;
     this.facing = facing;
-    this.velocityX = vX;
-    this.velocityY = vY;
-    this.mass = 0.1;
+    this.vX = vX;
+    this.vY = vY;
+    this.mass = 0.01;
     this.ttl = 2500;
     this.damage = 5;
     this.exploding = false;

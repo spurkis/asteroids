@@ -26,6 +26,11 @@ Ship.prototype.initialize = function(game, startX, startY) {
     this.decelerate = false;
     this.firing = false;
 
+    // for calculating impact:
+    this.radius = 7;
+    this.radiusSquared = Math.pow(7,2);
+    this.damage = 2;
+
     return this;
 }
 
@@ -161,21 +166,21 @@ Ship.prototype.stopSlowingDown = function() {
 }
 
 Ship.prototype.slowDown = function() {
-    if (this.velocityX > 0) {
-	this.velocityX -= 0.01; // drag
-    } else if (this.velocityX < 0) {
-	this.velocityX += 0.01; // drag
+    if (this.vX > 0) {
+	this.vX -= 0.01; // drag
+    } else if (this.vX < 0) {
+	this.vX += 0.01; // drag
     }
-    if (this.velocityY > 0) {
-	this.velocityY -= 0.01; // drag
-    } else if (this.velocityY < 0) {
-	this.velocityY += 0.01; // drag
+    if (this.vY > 0) {
+	this.vY -= 0.01; // drag
+    } else if (this.vY < 0) {
+	this.vY += 0.01; // drag
     }
 
-    if (Math.abs(this.velocityX) <= 0.01) this.velocityX = 0;
-    if (Math.abs(this.velocityY) <= 0.01) this.velocityY = 0;
+    if (Math.abs(this.vX) <= 0.01) this.vX = 0;
+    if (Math.abs(this.vY) <= 0.01) this.vY = 0;
 
-    if (this.velocityX == 0 && this.velocityY == 0) {
+    if (this.vX == 0 && this.vY == 0) {
 	console.log('done slowing down');
 	this.stopSlowingDown();
     }
@@ -238,7 +243,7 @@ Ship.prototype.stopDecreaseSpin = function() {
 
     this.startSlowDownSpin();
     this.decreaseSpin = false;
-};
+}
 
 Ship.prototype.incSpin = function(delta) {
     if (delta != 0) {
@@ -304,8 +309,8 @@ Ship.prototype.fireWeapon = function() {
     var fireThrust = 1.5;
     var scaleX = Math.sin(this.facing) * fireThrust;
     var scaleY = -Math.cos(this.facing) * fireThrust;
-    var vX = this.velocityX + scaleX;
-    var vY = this.velocityY + scaleY;
+    var vX = this.vX + scaleX;
+    var vY = this.vY + scaleY;
     var bullet = new Bullet(this, this.x, this.y, this.facing, vX, vY);
     this.game.fireWeapon(bullet);
 }
