@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>HTML5 test</title>
+		<link href="asteroids-style.css" rel="stylesheet" type="text/css" />
+		<script src="jquery-min.js" type="text/javascript"></script>
+		<script src="asteroids.js" type="text/javascript"></script>
+<script language="javascript">
+$(document).ready(setupCanvas);
+</script>
+  </head>
+  <body>
+		<header>
+			<h1>Steve's Asteroids Canvas test</h1>
+			<nav class="top">
+				<ul>
+					<li><a href="#">new game</a></li>
+					<li><a href="#">about</a></li>
+				</ul>
+			</nav>
+		</header>
+
+		<section id="asteroid-game">
+			<canvas id="game" width="800" height="400">if you had a real broswer, this would be a canvas</canvas>
+			<label for="target">Click to control:</label>
+			<input id="target" type="text" />
+			<p>Controls:
+				<ul>
+					<li>up: accelerate forward</li>
+					<li>down: accelerate backward</li>
+					<li>left: spin ccw</li>
+					<li>right: spin cw</li>
+					<li>space: shoot</li>
+					<li>tab: switch weapon</li>
+				</ul>
+			</p>
+		</section>
+
+	</body>
+</html>

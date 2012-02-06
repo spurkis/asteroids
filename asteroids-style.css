@@ -1,0 +1,42 @@
+/*********************************************************************
+ * Top Nav
+ */
+nav.top {
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+
+  width: 100%;
+  max-width: 1024px;
+  height: auto;
+
+  text-align: left;
+  font-size: 15px;
+
+  height: 15px;
+  border: solid 1px #aca;
+}
+
+nav.top ul {
+    margin: 0px;
+}
+
+nav.top li {
+    float: left;
+    margin-left: 10px;
+    text-decoration: none;
+    list-style: none;
+}
+
+
+/*********************************************************************
+ * Top Nav
+ */
+canvas#game {
+    position: relative;
+    clear: left;
+    margin-top: 10px;
+    border: solid 1px #a0a;
+}
+
+
