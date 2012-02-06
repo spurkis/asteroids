@@ -40,3 +40,16 @@ canvas#game {
 }
 
 
+/*********************************************************************
+ * Control Box
+ */
+div#controlBox {
+    float: right;
+    margin: 5px;
+    padding: 5px;
+    outline: solid 1px #aaa;
+    font-family: Verdana, Arial, "Times New Roman", Helvetica;
+    font-size:   60%;
+}
+
+
