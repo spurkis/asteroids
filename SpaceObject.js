@@ -5,6 +5,8 @@
 
 require('asteroidUtils.js');
 
+var objectId=0;
+
 function SpaceObject(game, startX, startY) {
     if (game) return this.initialize(game, startX, startY);
     return this;
@@ -17,6 +19,7 @@ SpaceObject.prototype.draw = function() {
 SpaceObject.prototype.initialize = function(game, startX, startY) {
     this.game = game;
     this.ctx = game.ctx; // canvas context
+    this.id = this.createObjectId();
 
     this.health = 100; // percentage
 
@@ -37,9 +40,15 @@ SpaceObject.prototype.initialize = function(game, startX, startY) {
     this.mass = 0;
     this.maxSpin = deg_to_rad[10];
 
+    this.attached = [];
+
     this.update = true;
 
     return this;
+}
+
+SpaceObject.prototype.createObjectId = function() {
+    return 'obj' + objectId++;
 }
 
 
@@ -153,3 +162,17 @@ SpaceObject.prototype.incHealth = function(delta) {
 SpaceObject.prototype.die = function() {
     this.game.objectDied( this );
 }
+
+SpaceObject.prototype.attachTo = function(object) {
+    this.attached[object.id] = object;
+}
+
+SpaceObject.prototype.attachedTo = function(object) {
+    if (this.attached[object.id]) return true;
+    return false;
+}
+
+SpaceObject.prototype.detachFrom = function(object) {
+    delete this.attached[object.id];
+}
+
