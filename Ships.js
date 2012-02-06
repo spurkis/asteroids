@@ -17,6 +17,7 @@ Ship.prototype.initialize = function(game, startX, startY) {
     Ship.prototype.parent.initialize.call(this, game, startX, startY);
     this.mass = 1;
     this.maxSpin = deg_to_rad[10];
+    this.is_ship = true;
 
     // current state of action:
     this.increaseSpin = false;

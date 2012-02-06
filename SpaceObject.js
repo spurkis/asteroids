@@ -18,6 +18,8 @@ SpaceObject.prototype.initialize = function(game, startX, startY) {
     this.game = game;
     this.ctx = game.ctx; // canvas context
 
+    this.health = 100; // percentage
+
     this.x = startX;  // position on the grid
     this.y = startY;  // position on the grid
     this.maxX = this.ctx.canvas.width;
@@ -35,11 +37,15 @@ SpaceObject.prototype.initialize = function(game, startX, startY) {
     this.mass = 0;
     this.maxSpin = deg_to_rad[10];
 
+    this.update = true;
+
     return this;
 }
 
 
 SpaceObject.prototype.updatePositions = function(objects) {
+    if (! this.update) return;
+
     this.facing += this.spin;
     if (this.facing >= deg_to_rad[360] || this.facing <= deg_to_rad[360]) {
 	this.facing = this.facing % deg_to_rad[360];
@@ -53,6 +59,7 @@ SpaceObject.prototype.updatePositions = function(objects) {
 	for (var i=0; i < objects.length; i++) {
 	    var object = objects[i];
 	    if (object.mass <= 0) continue;
+	    if (! object.update) continue;
 
 	    var dX = this.x-object.x;
 	    var dY = this.y-object.y;
@@ -69,7 +76,9 @@ SpaceObject.prototype.updatePositions = function(objects) {
 
 		this.incVelocity(scaleX, scaleY);
 	    } else {
+		this.game.impact( this, object );
 		// so close they've impacted, stop unless they're thrusting
+		// TODO: don't accelerate through object
 		if (this.thrust == 0) {
 		    this.velocityX = 0;
 		    this.velocityY = 0;
@@ -95,7 +104,6 @@ SpaceObject.prototype.incY = function(dY) {
     if (this.y > this.maxY) this.y = this.y - this.maxY;
 }
 
-
 SpaceObject.prototype.incVelocity = function(dX, dY) {
     if (dX != 0) {
 	this.velocityX += dX;
@@ -115,9 +123,28 @@ SpaceObject.prototype.incVelocity = function(dX, dY) {
     }
 }
 
-Ship.prototype.accelerateAlong = function(angle, thrust) {
+SpaceObject.prototype.accelerateAlong = function(angle, thrust) {
     var scaleX = Math.sin(angle) * thrust;
     var scaleY = -Math.cos(angle) * thrust;
     this.incVelocity(scaleX, scaleY);
 }
 
+SpaceObject.prototype.impacted = function(object) {
+    // do nothing by default
+}
+
+SpaceObject.prototype.decHealth = function(delta) {
+    this.health -= delta;
+    if (this.health <= 0) {
+	this.die();
+    }
+}
+
+SpaceObject.prototype.incHealth = function(delta) {
+    this.health += delta;
+    if (this.health > 100) this.health = 100;
+}
+
+SpaceObject.prototype.die = function() {
+    this.game.objectDied( this );
+}

@@ -159,6 +159,22 @@ AsteroidsGame.prototype.updatePositions = function() {
     }
 };
 
+
+AsteroidsGame.prototype.objectDied = function(object) {
+    if (object.is_weapon) {
+	delete this.weaponsFired['t'+object.timeoutId];
+    } else if (object.is_asteroid) {
+	var i = this.asteroids.indexOf(object);
+	this.asteroids.splice(i,1);
+	// spawn new asteroids?
+    } else if (object.is_planet) {
+	// allowed?
+    } else if (object.is_ship) {
+	// end game!
+    }
+}
+
+
 AsteroidsGame.prototype.fireWeapon = function(weapon) {
     var self = this;
     weapon.timeoutId = setTimeout(function(){
@@ -169,7 +185,12 @@ AsteroidsGame.prototype.fireWeapon = function(weapon) {
 }
 
 AsteroidsGame.prototype.weaponTimeout = function(weapon) {
-    delete this.weaponsFired['t'+weapon.timeoutId];
+    // let the weapon delete itself
+    //delete this.weaponsFired['t'+weapon.timeoutId];
     weapon.weaponTimeout();
 }
 
+AsteroidsGame.prototype.impact = function(object1, object2) {
+    object1.impacted(object2);
+    object2.impacted(object1);
+}
