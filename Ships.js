@@ -41,6 +41,12 @@ Ship.prototype.initialize = function(game, startX, startY) {
     this.shield = 100;
     this.shieldActive = true;
 
+    // health
+    this.healthWidth = 100;
+    this.healthHeight = 10;
+    this.healthX = this.maxX - this.healthWidth - 10;
+    this.healthY = 10;
+
     return this;
 }
 
@@ -51,8 +57,12 @@ Ship.prototype.draw = function() {
     if (this.facing > 0) ctx.rotate( this.facing );
 
     // TODO: replace these with .png's?
-    var r = 200 - this.health*2;
-    ctx.strokeStyle = 'rgb('+ r +',0,0)';
+
+    if (this.healthChanged || this.healthRedVal == null) {
+	this.healthRedVal = 200 - this.health*2;
+    }
+
+    ctx.strokeStyle = 'rgb('+ this.healthRedVal +',0,0)';
     ctx.beginPath();
     ctx.moveTo(-7,7);
     ctx.lineTo(0,-7);
@@ -91,21 +101,80 @@ Ship.prototype.draw = function() {
 
     ctx.closePath();
     ctx.stroke();
+    ctx.restore();
 
-    if (this.shieldActive) {
-	ctx.beginPath();
-	ctx.arc(0, 0, this.radius+2, 0, deg_to_rad[360], false);
-	var r = 0;
-	var g = this.shield*2;
-	var b = this.shield*2 + 55;
-	var a = 0.5;
-	ctx.strokeStyle = 'rgba('+ r +','+ g +','+ b +','+ a +')';
-	ctx.closePath();
-	ctx.stroke();
+    this.drawHealth();
+    this.drawShield();
+}
+
+Ship.prototype.drawHealth = function() {
+    if (this.healthChanged || this.healthCache == null) {
+	this.healthCache = {
+	    r: 200 - this.health*2,
+	    g: this.health*2 + 50,
+	    b: this.health,
+	    fillWidth: Math.floor(this.health/100 * this.healthWidth)
+	};
     }
 
+    var ctx = this.ctx;
+    var hc = this.healthCache;
+    ctx.save();
+    ctx.translate( this.healthX, this.healthY );
+
+    ctx.beginPath();
+    ctx.fillStyle = 'rgba('+ hc.r +','+ hc.g +','+ hc.b +',0.5)';
+    ctx.fillRect(0,0,hc.fillWidth, this.healthHeight);
+    ctx.strokeStyle = 'rgba(5,5,5,0.75)';
+    ctx.strokeRect(0,0,this.healthWidth,this.healthHeight);
+    ctx.closePath();
+
     ctx.restore();
-};
+}
+
+Ship.prototype.drawShield = function() {
+    if (! this.shieldActive) return;
+
+    if (this.shieldChanged || this.shieldCache == null) {
+	this.shieldCache = {
+	    // shield colour displayed around ship
+	    r: this.shield,
+	    g: this.shield*2,
+	    b: this.shield*2+55,
+	    a: 0.5,
+	    bar: {
+		fillWidth: Math.floor(this.shield/100 * this.healthWidth),
+		startY: Math.floor(this.healthHeight/3),
+		height: Math.floor(this.healthHeight/3),
+	    }
+	};
+    }
+
+    var ctx = this.ctx;
+    var sc = this.shieldCache;
+
+    // draw shield as a circle around ship
+    ctx.save();
+    ctx.translate( this.x, this.y );
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba('+ sc.r +','+ sc.g +','+ sc.b +','+ sc.a +')';
+    ctx.arc(0, 0, this.radius+2, 0, deg_to_rad[360], false);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.restore();
+
+    // draw shield status on top of health bar:
+    ctx.save();
+    ctx.translate( this.healthX, this.healthY );
+    ctx.beginPath();
+    ctx.fillStyle = 'rgba(100,100,225,0.8)';
+    ctx.fillRect(0,sc.bar.startY, sc.bar.fillWidth, sc.bar.height);
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.restore();
+}
+
 
 
 /*********************************************************************
@@ -332,6 +401,9 @@ Ship.prototype.fireWeapon = function() {
     this.game.fireWeapon(bullet);
 }
 
+/*********************************************************************
+ * Health & Shield
+ */
 Ship.prototype.decHealth = function(delta) {
     if (this.shieldActive) {
 	delta = this.decShield(delta);
@@ -340,6 +412,7 @@ Ship.prototype.decHealth = function(delta) {
 }
 
 Ship.prototype.decShield = function(delta) {
+    this.shieldChanged = true;
     this.shield -= delta;
     if (this.shield <= 0) {
 	delta = -this.shield;
@@ -347,4 +420,10 @@ Ship.prototype.decShield = function(delta) {
 	this.shieldActive = false;
 	return delta;
     }
+}
+
+SpaceObject.prototype.incShield = function(delta) {
+    this.shieldChanged = true;
+    this.shield += delta;
+    if (this.shield > 100) this.shield = 100;
 }

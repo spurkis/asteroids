@@ -21,7 +21,9 @@ SpaceObject.prototype.initialize = function(game, startX, startY) {
     this.ctx = game.ctx; // canvas context
     this.id = this.createObjectId();
 
-    this.health = 100; // percentage
+    this.health = 100; // 100%
+    this.healthChanged = false;
+    this.damage = 0; // damage on impact
 
     this.x = startX;  // position on the grid
     this.y = startY;  // position on the grid
@@ -171,6 +173,7 @@ SpaceObject.prototype.impacted = function(object, collision_state) {
 }
 
 SpaceObject.prototype.decHealth = function(delta) {
+    this.healthChanged = true;
     this.health -= delta;
     if (this.health <= 0) {
 	this.die();
@@ -178,6 +181,7 @@ SpaceObject.prototype.decHealth = function(delta) {
 }
 
 SpaceObject.prototype.incHealth = function(delta) {
+    this.healthChanged = true;
     this.health += delta;
     if (this.health > 100) this.health = 100;
 }
