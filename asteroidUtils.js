@@ -5,6 +5,7 @@
 
 /* cache some commonly used calculations in the global namespace */
 var PI = Math.PI;
+var halfPI = PI/2;
 var deg_to_rad = [];
 for (var i=0; i<=360; i++) {
     deg_to_rad[i] = i*PI/180;

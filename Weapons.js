@@ -6,23 +6,20 @@
 require('asteroidUtils.js');
 require('SpaceObject.js');
 
-function Bullet(ship, startX, startY, facing, vX, vY) {
-    if (ship) return this.initialize(ship, startX, startY, facing, vX, vY);
+function Bullet(ship, spatial) {
+    if (ship) return this.initialize(ship, spatial);
     return this;
 }
 Bullet.inheritsFrom( SpaceObject );
 
-Bullet.prototype.initialize = function(ship, startX, startY, facing, vX, vY) {
-    Bullet.prototype.parent.initialize.call(this, ship.game, startX, startY);
+Bullet.prototype.initialize = function(ship, spatial) {
+    spatial.radius = 1;
+    spatial.mass = 0.01;
+    spatial.damage = 5;
+    Bullet.prototype.parent.initialize.call(this, ship.game, spatial);
+
     this.ship = ship;
-    this.facing = facing;
-    this.vX = vX;
-    this.vY = vY;
-    this.radius = 1;
-    this.radiusSquared = 1;
-    this.mass = 0.01;
     this.ttl = 2500;
-    this.damage = 5;
     this.exploding = false;
     this.fading = -1;
     this.is_weapon = true;

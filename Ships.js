@@ -6,36 +6,35 @@
 require('asteroidUtils.js');
 require('SpaceObject.js');
 
-function Ship(game, startX, startY) {
-    if (game) return this.initialize(game, startX, startY);
+function Ship(game, spatial) {
+    if (game) return this.initialize(game, spatial);
     return this;
 }
 
 Ship.inheritsFrom( SpaceObject );
 
-Ship.prototype.initialize = function(game, startX, startY) {
-    Ship.prototype.parent.initialize.call(this, game, startX, startY);
-    this.mass = 10;
+Ship.prototype.initialize = function(game, spatial) {
+    spatial.mass = 10;
+    spatial.radius = 7;
+    spatial.damage = 2;
+    spatial.thrust = 0;
+    spatial.spin = 0;
+    spatial.maxSpin = deg_to_rad[6];
+
+    Ship.prototype.parent.initialize.call(this, game, spatial);
+
     this.is_ship = true;
 
-    // current state of action:
+    // current state of user action:
     this.increaseSpin = false;
     this.decreaseSpin = false;
     this.accelerate = false;
     this.decelerate = false;
     this.firing = false;
 
-    // for calculating impact:
-    this.radius = 7;
-    this.radiusSquared = Math.pow(this.radius,2);
-    this.damage = 2;
-
     // for moving about:
-    this.thrust = 0;
     this.thrustIncrement = 0.01;
-    this.spin = 0;
     this.spinIncrement = deg_to_rad[0.5];
-    this.maxSpin = deg_to_rad[6];
 
     // shields
     this.shield = 100;
@@ -397,7 +396,13 @@ Ship.prototype.fireWeapon = function() {
     var scaleY = -Math.cos(this.facing) * fireThrust;
     var vX = this.vX + scaleX;
     var vY = this.vY + scaleY;
-    var bullet = new Bullet(this, this.x, this.y, this.facing, vX, vY);
+    var bullet = new Bullet(this, {
+	x: this.x,
+	y: this.y,
+	facing: this.facing,
+	vX: vX,
+	vY: vY
+    });
     this.game.fireWeapon(bullet);
 }
 

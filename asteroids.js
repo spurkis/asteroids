@@ -15,7 +15,12 @@ function setupCanvas() {
 	var ctx = canvas.getContext('2d');
 	console.log("canvas available");
 	asteroids = new AsteroidsGame(ctx);
-	asteroids.startGameLoop();
+	try {
+	    asteroids.startGameLoop();
+	} catch (e) {
+	    console.log("caught exception: " + e);
+	    asteroids.stop();
+	}
     } else {
 	console.log("no canvas available");
     }

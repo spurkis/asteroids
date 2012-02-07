@@ -1,14 +1,16 @@
 /*********************************************************************
  * SpaceObject - base class, where a lot of the game physics happens
  * Copyright (c) 2012 Steve Purkis
+ *
+ * var o = new SpaceObject( game, spatial );
  */
 
 require('asteroidUtils.js');
 
-var objectId=0;
+var _spaceObjectId = 0; // OID: use a counter for now...
 
-function SpaceObject(game, startX, startY) {
-    if (game) return this.initialize(game, startX, startY);
+function SpaceObject(game, spatial) {
+    if (game) return this.initialize(game, spatial);
     return this;
 }
 
@@ -16,34 +18,40 @@ SpaceObject.prototype.draw = function() {
     throw this + ".draw not overriden";
 };
 
-SpaceObject.prototype.initialize = function(game, startX, startY) {
+SpaceObject.prototype.initialize = function(game, spatial) {
+    // if (spatial == null) spatial = {};
+
     this.game = game;
     this.ctx = game.ctx; // canvas context
     this.id = this.createObjectId();
 
-    this.health = 100; // 100%
+    this.health = spatial.health || 100;      // health as a percentage
     this.healthChanged = false;
-    this.damage = 0; // damage on impact
+    this.damage = spatial.damage || 0;        // damage on impact
 
-    this.x = startX;  // position on the grid
-    this.y = startY;  // position on the grid
+    this.x = spatial.x;                       // starting position on x axis
+    this.y = spatial.y;                       // starting position on y axis
     this.maxX = this.ctx.canvas.width;
     this.maxY = this.ctx.canvas.height;
 
-    this.vX = 0;  // speed along X axis in pixels/sec
-    this.vY = 0;  // speed along Y axis in pixels/sec
-    this.maxV = 2; // max velocity
-    this.maxVSquared = this.maxV*this.maxV; // cached
+    this.vX = spatial.vX || 0;                // speed along X axis
+    this.vY = spatial.vY || 0;                // speed along Y axis
+    this.maxV = spatial.maxV || 2;            // max velocity
+    this.maxVSquared = this.maxV*this.maxV;   // cache for speed
 
-    this.mass = 0;
-    this.thrust = 0; // thrust along current facing
-    this.maxThrust = 0.5;
+    this.mass = spatial.mass || 0;            // mass of object
+    this.radius = spatial.radius || 1;        // radius of object
+    this.radiusSquared = Math.pow(this.radius,2); // cache for speed
 
-    this.facing = 0;  // angle in Rad, not heading!
-    this.spin = 0;    // spin in Rad/sec
-    this.maxSpin = deg_to_rad[10];
 
-    this.attached = [];
+    this.thrust = spatial.initialThrust || 0; // thrust along facing
+    this.maxThrust = spatial.maxThrust || 0.5;
+
+    this.facing = spatial.facing || 0;        // currently facing angle (rad)
+    this.spin = spatial.spin || 0;            // spin in Rad/sec
+    this.maxSpin = deg_to_rad[10];            // max spin
+
+    this.attached = [];                       // object this is attached to
 
     this.update = true;
 
@@ -51,7 +59,7 @@ SpaceObject.prototype.initialize = function(game, startX, startY) {
 }
 
 SpaceObject.prototype.createObjectId = function() {
-    return 'obj' + objectId++;
+    return 'obj' + _spaceObjectId++;
 }
 
 
@@ -94,7 +102,7 @@ SpaceObject.prototype.updatePositions = function(objects) {
 		    var scaleX = -Math.sin(angle) * accel;
 		    var scaleY = -Math.cos(angle) * accel;
 
-		    this.incVelocity(scaleX, scaleY);
+		    this.updateVelocity(scaleX, scaleY);
 		}
 	    } else {
 		if (this.attachedTo(object)) {
@@ -106,10 +114,16 @@ SpaceObject.prototype.updatePositions = function(objects) {
 		    var scaleX = Math.sin(angle) * accel;
 		    var scaleY = Math.cos(angle) * accel;
 
-		    this.incVelocity(scaleX, scaleY);
+		    this.updateVelocity(scaleX, scaleY);
 		} else {
+		    var collision = {
+			dX: dX,
+			dY: dY,
+			dist_squared: dist_squared,
+			total_radius_squared: totalR2
+		    };
 		    // so close they've impacted:
-		    this.game.impact( this, object );
+		    this.game.impact( this, object, collision );
 		}
 	    }
 	}
@@ -132,7 +146,7 @@ SpaceObject.prototype.incY = function(dY) {
     if (this.y > this.maxY) this.y = this.y - this.maxY;
 }
 
-SpaceObject.prototype.incVelocity = function(dX, dY) {
+SpaceObject.prototype.updateVelocity = function(dX, dY) {
     var newVx = this.vX + dX;
     var newVy = this.vY + dY;
     
@@ -148,11 +162,16 @@ SpaceObject.prototype.incVelocity = function(dX, dY) {
     this.vY = newVy;
 }
 
+SpaceObject.prototype.setVelocity = function(vX, vY) {
+    this.vX = vX;
+    this.vY = vY;
+}
+
 SpaceObject.prototype.accelerateAlong = function(angle, thrust) {
     var accel = thrust/this.mass;
     var scaleX = Math.sin(angle) * accel;
     var scaleY = -Math.cos(angle) * accel;
-    this.incVelocity(scaleX, scaleY);
+    this.updateVelocity(scaleX, scaleY);
 }
 
 SpaceObject.prototype.incSpin = function(delta) {
@@ -166,7 +185,7 @@ SpaceObject.prototype.incSpin = function(delta) {
     }
 }
 
-SpaceObject.prototype.impacted = function(object, collision_state) {
+SpaceObject.prototype.impacted = function(object, collision) {
     if (this.damage) {
 	object.decHealth( this.damage );
     }
@@ -176,6 +195,7 @@ SpaceObject.prototype.decHealth = function(delta) {
     this.healthChanged = true;
     this.health -= delta;
     if (this.health <= 0) {
+	this.health = -1;
 	this.die();
     }
 }
