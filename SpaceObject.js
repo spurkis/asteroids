@@ -59,7 +59,8 @@ SpaceObject.prototype.initialize = function(game, spatial) {
 }
 
 SpaceObject.prototype.createObjectId = function() {
-    return 'obj' + _spaceObjectId++;
+    var prefix = this.oid_prefix || 'obj'
+    return prefix + _spaceObjectId++;
 }
 
 
@@ -72,61 +73,6 @@ SpaceObject.prototype.updatePositions = function(objects) {
     }
     if (this.facing < 0) {
 	this.facing = deg_to_rad[360] + this.facing;
-    }
-
-    // apply gravity
-    if (objects) {
-	for (var i=0; i < objects.length; i++) {
-	    var object = objects[i];
-	    if (object == this || object.ship == this || this.ship == object) continue;
-	    if (object.mass <= 0) continue;
-	    if (! object.update) continue;
-
-	    var dX = this.x-object.x;
-	    var dY = this.y-object.y;
-	    var dist_squared = Math.pow(dX, 2) + Math.pow(dY, 2);
-	    // var dist = sqrt(pow(x2-x1, 2) + pow(y2-y1, 2)); // slow
-
-	    var totalR2 = Math.pow(this.radius + object.radius, 2);
-	    if (dist_squared > totalR2) {
-		if (this.attachedTo(object)) {
-		    this.game.maybeDetachObjects(this, object);
-		    // don't appy any acceleration from attached objects
-		} else {
-		    // F2 = G*m1*m2/r^2
-		    // a2 = F/m2 = G*m1/r^2
-		    var accel = 0.1*object.mass / dist_squared;
-		    if (accel > this.game.maxAccel) accel = this.game.maxAccel;
-		    //var accel = F/this.mass;
-		    var angle = Math.atan2(dX, dY);
-		    var scaleX = -Math.sin(angle) * accel;
-		    var scaleY = -Math.cos(angle) * accel;
-
-		    this.updateVelocity(scaleX, scaleY);
-		}
-	    } else {
-		if (this.attachedTo(object)) {
-		    // appy some negative acceleration from attached objects
-		    var accel = object.mass / dist_squared;
-		    if (accel > this.game.maxAccel) accel = this.game.maxAccel;
-		    //var accel = F/this.mass;
-		    var angle = Math.atan2(dX, dY);
-		    var scaleX = Math.sin(angle) * accel;
-		    var scaleY = Math.cos(angle) * accel;
-
-		    this.updateVelocity(scaleX, scaleY);
-		} else {
-		    var collision = {
-			dX: dX,
-			dY: dY,
-			dist_squared: dist_squared,
-			total_radius_squared: totalR2
-		    };
-		    // so close they've impacted:
-		    this.game.impact( this, object, collision );
-		}
-	    }
-	}
     }
 
     this.incX(this.vX);
@@ -187,7 +133,12 @@ SpaceObject.prototype.incSpin = function(delta) {
 
 SpaceObject.prototype.impacted = function(object, collision) {
     if (this.damage) {
-	object.decHealth( this.damage );
+	var damageDone = this.damage;
+	if (collision.impactSpeed != null) {
+	    damageDone = Math.ceil(damageDone * collision.impactSpeed);
+	}
+	object.decHealth( damageDone );
+	// console.log( this.id + " -->X " + object.id + " damage: " + damageDone );
     }
 }
 

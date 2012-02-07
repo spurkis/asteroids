@@ -14,6 +14,8 @@ function Ship(game, spatial) {
 Ship.inheritsFrom( SpaceObject );
 
 Ship.prototype.initialize = function(game, spatial) {
+    this.oid_prefix = "shp";
+
     spatial.mass = 10;
     spatial.radius = 7;
     spatial.damage = 2;
@@ -182,7 +184,7 @@ Ship.prototype.drawShield = function() {
 Ship.prototype.startAccelerate = function() {
     if (this.accelerate) return;
     this.accelerate = true;
-    console.log("thrust++");
+    //console.log("thrust++");
 
     this.stopSlowingDown();
 
@@ -199,7 +201,7 @@ Ship.prototype.increaseThrust = function() {
 
 
 Ship.prototype.stopAccelerate = function() {
-    console.log("stop thrust++");
+    //console.log("stop thrust++");
     if (this.incThrustIntervalId) {
 	clearInterval(this.incThrustIntervalId);
 	this.incThrustIntervalId = null;
@@ -213,7 +215,7 @@ Ship.prototype.stopAccelerate = function() {
 Ship.prototype.startDecelerate = function() {
     if (this.decelerate) return;
     this.decelerate = true;
-    console.log("thrust--");
+    //console.log("thrust--");
 
     this.stopSlowingDown();
 
@@ -229,7 +231,7 @@ Ship.prototype.decreaseThrust = function() {
 }
 
 Ship.prototype.stopDecelerate = function() {
-    console.log("stop thrust--");
+    // console.log("stop thrust--");
     if (this.decThrustIntervalId) {
 	clearInterval(this.decThrustIntervalId);
 	this.decThrustIntervalId = null;
@@ -242,7 +244,7 @@ Ship.prototype.stopDecelerate = function() {
 
 
 Ship.prototype.startSlowingDown = function() {
-    console.log("slowing down...");
+    // console.log("slowing down...");
     if (this.slowDownIntervalId) return;
 
     var self = this;
@@ -275,7 +277,7 @@ Ship.prototype.slowDown = function() {
     if (Math.abs(this.vY) <= vDrag) this.vY = 0;
 
     if (this.vX == 0 && this.vY == 0) {
-	console.log('done slowing down');
+	// console.log('done slowing down');
 	this.stopSlowingDown();
     }
 }
@@ -286,7 +288,7 @@ Ship.prototype.slowDown = function() {
 Ship.prototype.startIncreaseSpin = function() {
     if (this.increaseSpin) return;
     this.increaseSpin = true;
-    console.log("spin++");
+    // console.log("spin++");
 
     if (this.stopSpinIntervalId) {
 	clearInterval(this.stopSpinIntervalId);
@@ -302,7 +304,7 @@ Ship.prototype.startIncreaseSpin = function() {
 };
   
 Ship.prototype.stopIncreaseSpin = function() {
-    console.log("stop spin++");
+    // console.log("stop spin++");
     if (this.incSpinIntervalId) {
 	clearInterval(this.incSpinIntervalId);
 	this.incSpinIntervalId = null;
@@ -316,7 +318,7 @@ Ship.prototype.stopIncreaseSpin = function() {
 Ship.prototype.startDecreaseSpin = function() {
     if (this.decreaseSpin) return;
     this.decreaseSpin = true;
-    console.log("spin--");
+    // console.log("spin--");
 
     if (this.stopSpinIntervalId) {
 	clearInterval(this.stopSpinIntervalId);
@@ -331,7 +333,7 @@ Ship.prototype.startDecreaseSpin = function() {
 };
 
 Ship.prototype.stopDecreaseSpin = function() {
-    console.log("stop spin--");
+    // console.log("stop spin--");
     if (this.decSpinIntervalId) {
 	clearInterval(this.decSpinIntervalId);
 	this.decSpinIntervalId = null;
@@ -342,7 +344,7 @@ Ship.prototype.stopDecreaseSpin = function() {
 }
 
 Ship.prototype.startSlowDownSpin = function() {
-    console.log("stopping spin...");
+    // console.log("stopping spin...");
 
     if (this.stopSpinIntervalId) return;
 
@@ -359,7 +361,7 @@ Ship.prototype.slowDownSpin = function() {
 	this.spin += deg_to_rad[1];
     } else {
 	this.spin = 0;
-	console.log("spin stopped.");
+	// console.log("spin stopped.");
 	if (this.stopSpinIntervalId) {
 	    clearInterval(this.stopSpinIntervalId);
 	    this.stopSpinIntervalId = null;
@@ -369,7 +371,7 @@ Ship.prototype.slowDownSpin = function() {
 
 Ship.prototype.startFireWeapon = function() {
     if (this.firing) return;
-    console.log("firing");
+    // console.log("firing");
 
     var self = this;
     this.fireWeapon();
@@ -381,7 +383,7 @@ Ship.prototype.startFireWeapon = function() {
 };
 
 Ship.prototype.stopFireWeapon = function() {
-    console.log("stop firing");
+    // console.log("stop firing");
     if (this.firingIntervalId) {
 	clearInterval(this.firingIntervalId);
 	this.firingIntervalId = null;

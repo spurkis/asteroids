@@ -15,6 +15,7 @@ function AsteroidsGame(ctx) {
     this.maxX = ctx.canvas.width;
     this.maxY = ctx.canvas.height;
     this.maxAccel = 1;
+    this.G = 0.1;
 
     this.elasticity = 0.7;       // collision elasticity: velocity modifier
     this.attachThreshold = 0.01; // min dVelocity before objects become attached
@@ -27,21 +28,40 @@ function AsteroidsGame(ctx) {
     // hard-code 1 player for now & start co-ords
     this.ship = new Ship(this, {x: 1/5*this.maxX, y: 2/3*this.maxY});
 
-    this.planets.push( new Planet(this, {x: 3/4*this.maxX, y: 1/4*this.maxY, mass: 195, radius: 45, vX: -0.5, vY: 0}) /*,
+    this.planets.push( new Planet(this, {x: 3/4*this.maxX, y: 1/4*this.maxY, mass: 195, radius: 45, vX: -0.5, vY: 0}) ,
 		       new Planet(this, {x: 1/5*this.maxX, y: 2/5*this.maxY, mass: 15, radius: 15}),
 		       new Planet(this, {x: 5/7*this.maxX, y: 4/5*this.maxY, mass: 30, radius: 20}),
-		       new Planet(this, {x: 1/2*this.maxX, y: 2/3*this.maxY, mass: 120, radius: 30})*/ );
+		       new Planet(this, {x: 1/2*this.maxX, y: 2/3*this.maxY, mass: 120, radius: 30}) );
 
-    this.asteroids.push(new Asteroid(this, {x: 1/10*this.maxX, y: 1/10*this.maxY, mass: 1, radius: 4, vX: 0, vY: 0 }),
-			new Asteroid(this, {x: 1/10*this.maxX, y: 2/10*this.maxY, mass: 1, radius: 5, vX: 0, vY: -0.1 }),
-			new Asteroid(this, {x: 5/10*this.maxX, y: 1/10*this.maxY, mass: 1, radius: 6, vX: -0.2, vY: 0.3 }),
-			new Asteroid(this, {x: 5/10*this.maxX, y: 2/10*this.maxY, mass: 1, radius: 7, vX: -0.3, vY: 0.2 }),
-			new Asteroid(this, {x: 6/10*this.maxX, y: 8/10*this.maxY, mass: 1, radius: 6, vX: -0.4, vY: 0.1 }),
-			new Asteroid(this, {x: 6/10*this.maxX, y: 9/10*this.maxY, mass: 1, radius: 7, vX: 0.5, vY: -0.5 }),
-			new Asteroid(this, {x: 9/10*this.maxX, y: 8/10*this.maxY, mass: 1, radius: 6, vX: 0.6, vY: 0.4 }),
-			new Asteroid(this, {x: 9/10*this.maxX, y: 9/10*this.maxY, mass: 1, radius: 7, vX: 0.7, vY: 0.6 }),
-			new Asteroid(this, {x: 3/10*this.maxX, y: 1/10*this.maxY, mass: 1, radius: 6, vX: 0.8, vY: -0.2 }),
-			new Asteroid(this, {x: 3/10*this.maxX, y: 2/10*this.maxY, mass: 1, radius: 7, vX: 0.9, vY: -0.1 }));
+
+    for (var i=0; i<this.maxX; i+= 100) {
+	for (var j=0; j<this.maxY; j+= 100) {
+	    var a = new Asteroid(this, {
+		x: i,
+		y: j,
+		mass: getRandomInt(1, 3),
+		radius: getRandomInt(3, 10),
+		vX: Math.random()*2,
+		vY: Math.random()*2,
+	    });
+	    // vary the velocities:
+	    if (i%200) a.vX = -a.vX;
+	    if (j%200) a.vY = -a.vY;
+	    this.asteroids.push(a);
+	}
+    }
+
+/*    this.asteroids.push(new Asteroid(this, {x: 1/10*this.maxX, y: 1/10*this.maxY, mass: 0.5, radius: 4, vX: 0, vY: 0 }),
+                        new Asteroid(this, {x: 1/10*this.maxX, y: 2/10*this.maxY, mass: 1, radius: 5, vX: 0, vY: -0.1 }),
+                        new Asteroid(this, {x: 5/10*this.maxX, y: 1/10*this.maxY, mass: 2, radius: 6, vX: -0.2, vY: 0.3 }),
+                        new Asteroid(this, {x: 5/10*this.maxX, y: 2/10*this.maxY, mass: 3, radius: 8, vX: -0.3, vY: 0.2 }),
+                        new Asteroid(this, {x: 6/10*this.maxX, y: 8/10*this.maxY, mass: 2, radius: 6, vX: -0.4, vY: 0.1 }),
+                        new Asteroid(this, {x: 6/10*this.maxX, y: 9/10*this.maxY, mass: 3, radius: 8, vX: 0.5, vY: -0.5 }),
+                        new Asteroid(this, {x: 9/10*this.maxX, y: 8/10*this.maxY, mass: 2, radius: 6, vX: 0.6, vY: 0.4 }),
+                        new Asteroid(this, {x: 9/10*this.maxX, y: 9/10*this.maxY, mass: 3, radius: 8, vX: 0.7, vY: 0.6 }),
+                        new Asteroid(this, {x: 3/10*this.maxX, y: 1/10*this.maxY, mass: 2, radius: 6, vX: 0.8, vY: -0.2 }),
+                        new Asteroid(this, {x: 3/10*this.maxX, y: 2/10*this.maxY, mass: 3, radius: 8, vX: 0.9, vY: -0.1 }));
+*/
 
     this.setDefaultCanvasState();
     this.bindDefaultKeys();
@@ -99,16 +119,15 @@ AsteroidsGame.prototype.stop = function() {
 AsteroidsGame.prototype.draw = function() {
     this.ctx.clearRect(0,0, this.maxX,this.maxY); // clear canvas
 
-    // TODO: replace with this.objects[]
-    for (var i=0; i < this.planets.length; i++) {
-	this.planets[i].draw();
-    }
-    for (var i=0; i < this.asteroids.length; i++) {
-	this.asteroids[i].draw();
-    }
-    this.ship.draw();
-    for (var id in this.weaponsFired) {
-	this.weaponsFired[id].draw();
+    var objects = [];
+    // order is important:
+    objects = objects.concat(this.planets,
+			     this.asteroids,
+			     this.weaponsFired,
+			     [this.ship]);
+
+    for (var i=0; i < objects.length; i++) {
+	objects[i].draw();
     }
 };
 
@@ -125,30 +144,97 @@ AsteroidsGame.prototype.drawGameOver = function() {
 
 AsteroidsGame.prototype.updatePositions = function() {
     var objects = [];
+    // order is important:
     objects = objects.concat(this.planets,
 			     this.asteroids,
 			     this.weaponsFired,
 			     [this.ship]);
 
-    this.ship.updatePositions(objects);
-    for (var i=0; i < this.planets.length; i++) {
-	this.planets[i].updatePositions(objects);
-    }
-    for (var i=0; i < this.asteroids.length; i++) {
-	this.asteroids[i].updatePositions(objects);
-    }
-    for (var id in this.weaponsFired) {
-	this.weaponsFired[id].updatePositions(objects);
-    }
+    // apply gravity & detect collisions
+    for (var i=0; i < objects.length; i++) {
+	var object1 = objects[i];
+	// we update both i & j below, so to avoid repeating calcs
+	// we start j at the next position:
+	for (var j=i+1; j < objects.length; j++) {
+	    var object2 = objects[j];
+
+	    if (object2 == object1) continue;
+	    if (object2.ship == object1 || object1.ship == object2) continue;
+	    if (object2.mass <= 0) continue;
+	    if (! object1.update || ! object2.update) continue;
+
+	    var dX = object1.x - object2.x;
+	    var dY = object1.y - object2.y;
+	    var dist_squared = dX*dX + dY*dY; // avoid sqrt, we don't need magnitude
+	    // var dist = sqrt(pow(x2-x1, 2) + pow(y2-y1, 2)); // slow
+
+	    // now check if they're touching:
+	    var total_radius_squared = Math.pow(object1.radius + object2.radius, 2);
+	    if (dist_squared > total_radius_squared) {
+		if (object1.attachedTo(object2)) {
+		    // don't appy any acceleration from attached objects
+		    // that may be detaching...
+		    this.maybeDetachObjects(object1, object2);
+		} else {
+		    // F1 = G*m1*m2/r^2
+		    // a1 = F/m1 = G*m2/r^2
+		    var accel_1 = this.G * object2.mass / dist_squared;
+		    if (accel_1 > this.maxAccel) accel_1 = this.maxAccel;
+		    var angle_1 = Math.atan2(dX, dY);
+		    var dX_1 = -Math.sin(angle_1) * accel_1;
+		    var dY_1 = -Math.cos(angle_1) * accel_1;
+
+		    var accel_2 = this.G * object1.mass / dist_squared;
+		    if (accel_2 > this.maxAccel) accel_2 = this.maxAccel;
+		    var angle_2 = Math.atan2(-dX, -dY); // note the - signs
+		    var dX_2 = -Math.sin(angle_2) * accel_2;
+		    var dY_2 = -Math.cos(angle_2) * accel_2;
+
+		    object1.updateVelocity(dX_1, dY_1);
+		    object2.updateVelocity(dX_2, dY_2);
+		}
+	    } else {
+		if (object1.attachedTo(object2) && object2.attachedTo(object1)) {
+		    // appy some negative acceleration from attached objects
+		    var accel_1 = this.G * object2.mass / dist_squared;
+		    if (accel_1 > this.maxAccel) accel_1 = this.maxAccel;
+		    var angle_1 = Math.atan2(dX, dY);
+		    var dX_1 = Math.sin(angle_1) * accel_1;
+		    var dY_1 = Math.cos(angle_1) * accel_1;
+
+		    var accel_2 = this.G * object1.mass / dist_squared;
+		    if (accel_2 > this.maxAccel) accel_2 = this.maxAccel;
+		    var angle_2 = Math.atan2(-dX, -dY); // note the - signs
+		    var dX_2 = Math.sin(angle_2) * accel_2;
+		    var dY_2 = Math.cos(angle_2) * accel_2;
+
+		    object1.updateVelocity(dX_1, dY_1);
+		    object2.updateVelocity(dX_2, dY_2);
+		} else {
+		    var collision = {
+			dX: dX,
+			dY: dY,
+			dist_squared: dist_squared,
+			total_radius_squared: total_radius_squared
+		    };
+		    // so close they've impacted:
+		    this.impact( object1, object2, collision );
+		}
+	    }
+	} // for obj2
+
+	object1.updatePositions();
+    } // for obj1
 };
 
 
 AsteroidsGame.prototype.objectDied = function(object) {
     if (object.is_weapon) {
-	delete this.weaponsFired['t'+object.timeoutId];
+	var i = this.weaponsFired.indexOf(object);
+	if (i >= 0) this.weaponsFired.splice(i,1);
     } else if (object.is_asteroid) {
 	var i = this.asteroids.indexOf(object);
-	this.asteroids.splice(i,1);
+	if (i >= 0) this.asteroids.splice(i,1);
 	// spawn new asteroids?
     } else if (object.is_planet) {
 	// allowed?
@@ -163,13 +249,11 @@ AsteroidsGame.prototype.fireWeapon = function(weapon) {
     weapon.timeoutId = setTimeout(function(){
 	self.weaponTimeout(weapon);
     }, weapon.ttl);
-    // force associative array by prepending a 't':
-    this.weaponsFired['t'+weapon.timeoutId] = weapon;
+    this.weaponsFired.push(weapon);
 }
 
 AsteroidsGame.prototype.weaponTimeout = function(weapon) {
-    // let the weapon delete itself
-    //delete this.weaponsFired['t'+weapon.timeoutId];
+    // note: weapons are only removed when they call die()
     weapon.weaponTimeout();
 }
 
@@ -180,7 +264,9 @@ AsteroidsGame.prototype.impact = function(object1, object2, collision) {
 	return;
     }
 
-    if (object1.mass > 0 && object2.mass > 0) {
+    // console.log(object1.id + ' <=> ' + object2.id + ' collided');
+
+    if (object1.mass > 0.1 && object2.mass > 0.1) {
 	// bounce algorithm from:
 	// http://www.emanueleferonato.com/2007/08/19/managing-ball-vs-ball-collision-with-flash/
 	collision.angle = Math.atan2(collision.dY, collision.dX);
@@ -198,21 +284,34 @@ AsteroidsGame.prototype.impact = function(object1, object2, collision) {
 	var final_vY_1 = new_vY_1;
 	var final_vY_2 = new_vY_2;
 
-//	if (! object1.is_planet) {
 	var cos_collision_angle = Math.cos(collision.angle);
 	var sin_collision_angle = Math.sin(collision.angle);
 	var cos_collision_angle_halfPI = Math.cos(collision.angle + halfPI);
 	var sin_collision_angle_halfPI = Math.sin(collision.angle + halfPI);
 
-	var vX = cos_collision_angle*final_vX_1 + cos_collision_angle_halfPI*final_vY_1;
-	var vY = sin_collision_angle*final_vX_1 + sin_collision_angle_halfPI*final_vY_1;
-	object1.setVelocity(vX, vY);
-//	}
-//	if (! object2.is_planet) {
-	var vX = cos_collision_angle*final_vX_2 + cos_collision_angle_halfPI*final_vY_2;
-	var vY = sin_collision_angle*final_vX_2 + sin_collision_angle_halfPI*final_vY_2;
-	object2.setVelocity(vX, vY);
-//	}
+	var vX1 = cos_collision_angle*final_vX_1 + cos_collision_angle_halfPI*final_vY_1;
+	var vY1 = sin_collision_angle*final_vX_1 + sin_collision_angle_halfPI*final_vY_1;
+	object1.setVelocity(vX1, vY1);
+
+	var vX2 = cos_collision_angle*final_vX_2 + cos_collision_angle_halfPI*final_vY_2;
+	var vY2 = sin_collision_angle*final_vX_2 + sin_collision_angle_halfPI*final_vY_2;
+	object2.setVelocity(vX2, vY2);
+
+
+	collision.impactSpeed = Math.abs(new_vX_2 - new_vX_1);
+	// console.log(object1.id + ' <=> ' + object2.id + ' collided @ ' + collision.impactSpeed);
+
+	collision[object1.id] = {
+	    collision_plane_vX: new_vX_1,
+	    collision_plane_vY: new_vY_1,
+	    magnitude: magnitude_1
+	}
+	
+	collision[object2.id] = {
+	    cplane: {vX: new_vX_2, vY: new_vY_2}, // relative to collision plane
+	    magnitude: magnitude_2
+	}
+	
 
 	// attach objects?
 	var dVx = final_vX_1 - final_vX_2;
@@ -224,8 +323,8 @@ AsteroidsGame.prototype.impact = function(object1, object2, collision) {
 	}
     }
 
-    object1.impacted(object2);
-    object2.impacted(object1);
+    object1.impacted(object2, collision);
+    object2.impacted(object1, collision);
 }
 
 AsteroidsGame.prototype.maybeDetachObjects = function(object1, object2) {

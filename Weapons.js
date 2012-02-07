@@ -13,6 +13,8 @@ function Bullet(ship, spatial) {
 Bullet.inheritsFrom( SpaceObject );
 
 Bullet.prototype.initialize = function(ship, spatial) {
+    this.oid_prefix = "blt";
+
     spatial.radius = 1;
     spatial.mass = 0.01;
     spatial.damage = 5;
@@ -76,7 +78,15 @@ Bullet.prototype.draw = function() {
     ctx.restore();
 }
 
+
+Bullet.prototype.decHealth = function(delta) {
+    // do nothing - bullets are indescructable
+}
+
 Bullet.prototype.impacted = function(object) {
+    if (object.ship == this.ship) {
+	// don't damage our own stuff
+    }
     object.decHealth( this.damage );
     this.explode();
 }

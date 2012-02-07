@@ -19,8 +19,10 @@ Planetoid.inheritsFrom( SpaceObject );
 
 Planetoid.prototype.initialize = function(game, spatial) {
     Planetoid.prototype.parent.initialize.call(this, game, spatial);
+
     this.is_planetoid = true;
     this.fillStyle = "rgb(0,0,0)"; // override me!
+
     return this;
 }
 
@@ -54,18 +56,31 @@ function Planet(game, spatial) {
 Planet.inheritsFrom( Planetoid );
 
 Planet.prototype.initialize = function(game, spatial) {
+    this.oid_prefix = 'pln';
+
     spatial.damage = spatial.mass;
     Planet.prototype.parent.initialize.call(this, game, spatial);
+
     this.fillStyle = "rgba(100,0,0,0.75)";
     this.is_planet = true;
+    this.landingThreshold = 0.2;
+
     return this;
 }
 
-Planet.prototype.updatePositions = function(objects) {
-    Planet.prototype.parent.updatePositions.call(this, objects);
-    1;
+Planet.prototype.impacted = function(object, collision) {
+    if (object.is_ship) {
+	// if the magnitude of the delta-V is small & the ship is
+	// facing away from this, then let them land without damage
+	if (collision.impactSpeed < this.landingThreshold) {
+	    console.log(object.id + " landed on " + this.id);
+	    this.attach(object);
+	    object.attach(this);
+	    return;
+	}
+    }
+    this.parent.impacted.call( this, object, collision );
 }
-
 
 /*
 Planet.prototype.updateVelocity = function(dX, dY) {
@@ -95,17 +110,20 @@ function Asteroid(game, spatial) {
 Asteroid.inheritsFrom( Planetoid );
 
 Asteroid.prototype.initialize = function(game, spatial) {
+    this.oid_prefix = 'ast';
+
     spatial.health = 30;
-    spatial.damage = 4;
+    if (spatial.damage == null) spatial.damage = spatial.mass*10;
     Asteroid.prototype.parent.initialize.call(this, game, spatial);
 
     this.fillStyle = "rgba(0,100,100,1)";
     this.is_asteroid = true;
+
     return this;
 }
 
-Asteroid.prototype.impacted = function(object) {
+Asteroid.prototype.impacted = function(object, collision) {
     if (! object.is_asteroid) {
-	this.parent.decHealth.call( this, object );
+	this.parent.impacted.call( this, object, collision );
     }
 }
