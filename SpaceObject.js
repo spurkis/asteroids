@@ -76,25 +76,38 @@ SpaceObject.prototype.updatePositions = function(objects) {
 	    var dist_squared = Math.pow(dX, 2) + Math.pow(dY, 2);
 	    // var dist = sqrt(pow(x2-x1, 2) + pow(y2-y1, 2)); // slow
 
-	    if (dist_squared > object.radiusSquared) {
-		// F2 = G*m1*m2/r^2
-		// a2 = F/m2 = G*m1/r^2
-		var accel = object.mass / dist_squared;
-		if (accel > 1) accel = 1;
-		//var accel = F/this.mass;
-		var angle = Math.atan2(dX, dY);
-		var scaleX = -Math.sin(angle) * accel;
-		var scaleY = -Math.cos(angle) * accel;
+	    var totalR2 = Math.pow(this.radius + object.radius, 2);
+	    if (dist_squared > totalR2) {
+		if (this.attachedTo(object)) {
+		    this.game.maybeDetachObjects(this, object);
+		    // don't appy any acceleration from attached objects
+		} else {
+		    // F2 = G*m1*m2/r^2
+		    // a2 = F/m2 = G*m1/r^2
+		    var accel = object.mass / dist_squared;
+		    if (accel > this.game.maxAccel) accel = this.game.maxAccel;
+		    //var accel = F/this.mass;
+		    var angle = Math.atan2(dX, dY);
+		    var scaleX = -Math.sin(angle) * accel;
+		    var scaleY = -Math.cos(angle) * accel;
 
-		this.incVelocity(scaleX, scaleY);
+		    this.incVelocity(scaleX, scaleY);
+		}
 	    } else {
-		// so close they've impacted
-		this.game.impact( this, object );
-		// TODO: don't accelerate through object
-		/*if (this.thrust == 0) {
-		    this.vX = 0;
-		    this.vY = 0;
-		}*/
+		if (this.attachedTo(object)) {
+		    // appy some negative acceleration from attached objects
+		    var accel = object.mass / dist_squared;
+		    if (accel > this.game.maxAccel) accel = this.game.maxAccel;
+		    //var accel = F/this.mass;
+		    var angle = Math.atan2(dX, dY);
+		    var scaleX = Math.sin(angle) * accel;
+		    var scaleY = Math.cos(angle) * accel;
+
+		    this.incVelocity(scaleX, scaleY);
+		} else {
+		    // so close they've impacted:
+		    this.game.impact( this, object );
+		}
 	    }
 	}
     }
@@ -163,7 +176,7 @@ SpaceObject.prototype.die = function() {
     this.game.objectDied( this );
 }
 
-SpaceObject.prototype.attachTo = function(object) {
+SpaceObject.prototype.attach = function(object) {
     this.attached[object.id] = object;
 }
 
@@ -172,7 +185,7 @@ SpaceObject.prototype.attachedTo = function(object) {
     return false;
 }
 
-SpaceObject.prototype.detachFrom = function(object) {
+SpaceObject.prototype.detach = function(object) {
     delete this.attached[object.id];
 }
 
