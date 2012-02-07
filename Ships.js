@@ -37,6 +37,10 @@ Ship.prototype.initialize = function(game, startX, startY) {
     this.spinIncrement = deg_to_rad[0.5];
     this.maxSpin = deg_to_rad[6];
 
+    // shields
+    this.shield = 100;
+    this.shieldActive = true;
+
     return this;
 }
 
@@ -47,12 +51,13 @@ Ship.prototype.draw = function() {
     if (this.facing > 0) ctx.rotate( this.facing );
 
     // TODO: replace these with .png's?
+    var r = 200 - this.health*2;
+    ctx.strokeStyle = 'rgb('+ r +',0,0)';
     ctx.beginPath();
     ctx.moveTo(-7,7);
     ctx.lineTo(0,-7);
     ctx.lineTo(7,7);
     ctx.quadraticCurveTo(0,0, -7,7);
-    ctx.closePath();
 
     if (this.accelerate) {
 	ctx.moveTo(-3,4);
@@ -84,7 +89,21 @@ Ship.prototype.draw = function() {
 	ctx.lineTo(6,-5);
     }
 
+    ctx.closePath();
     ctx.stroke();
+
+    if (this.shieldActive) {
+	ctx.beginPath();
+	ctx.arc(0, 0, this.radius+2, 0, deg_to_rad[360], false);
+	var r = 0;
+	var g = this.shield*2;
+	var b = this.shield*2 + 55;
+	var a = 0.5;
+	ctx.strokeStyle = 'rgba('+ r +','+ g +','+ b +','+ a +')';
+	ctx.closePath();
+	ctx.stroke();
+    }
+
     ctx.restore();
 };
 
@@ -311,4 +330,21 @@ Ship.prototype.fireWeapon = function() {
     var vY = this.vY + scaleY;
     var bullet = new Bullet(this, this.x, this.y, this.facing, vX, vY);
     this.game.fireWeapon(bullet);
+}
+
+Ship.prototype.decHealth = function(delta) {
+    if (this.shieldActive) {
+	delta = this.decShield(delta);
+    }
+    if (delta) this.parent.decHealth.call(this, delta);
+}
+
+Ship.prototype.decShield = function(delta) {
+    this.shield -= delta;
+    if (this.shield <= 0) {
+	delta = -this.shield;
+	this.shield = 0;
+	this.shieldActive = false;
+	return delta;
+    }
 }

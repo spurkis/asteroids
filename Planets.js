@@ -40,7 +40,7 @@ Planetoid.prototype.draw = function() {
 }
 
 Planetoid.prototype.impacted = function(object) {
-    if (this.damage && object.is_planetoid == false) {
+    if (this.damage && !object.is_planetoid) {
 	object.decHealth( this.damage );
     }
 }
@@ -89,8 +89,8 @@ Asteroid.prototype.initialize = function(game, startX, startY, mass, radius, vX,
     this.spin = spin;
     this.fillStyle = "rgba(0,100,100,1)";
     this.is_asteroid = true;
-    this.health = 15;
-    this.damage = 2;
+    this.health = 30;
+    this.damage = 4;
 
     return this;
 }
