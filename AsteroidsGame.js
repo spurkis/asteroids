@@ -27,21 +27,21 @@ function AsteroidsGame(ctx) {
     // hard-code 1 player for now & start co-ords
     this.ship = new Ship(this, 1/5*this.maxX, 2/3*this.maxY);
 
-    this.planets.push( new Planet(this, 3/4*this.maxX, 1/4*this.maxY, 20, 25),
-		       new Planet(this, 1/5*this.maxX, 2/5*this.maxY, 5, 10),
-		       new Planet(this, 5/7*this.maxX, 4/5*this.maxY, 10, 10),
-		       new Planet(this, 1/2*this.maxX, 2/3*this.maxY, 10, 20) );
+    this.planets.push( new Planet(this, 3/4*this.maxX, 1/4*this.maxY, 195, 45),
+		       new Planet(this, 1/5*this.maxX, 2/5*this.maxY, 15, 15),
+		       new Planet(this, 5/7*this.maxX, 4/5*this.maxY, 30, 20),
+		       new Planet(this, 1/2*this.maxX, 2/3*this.maxY, 120, 30) );
 
-    this.asteroids.push(new Asteroid(this, 1/10*this.maxX, 1/10*this.maxY, 0.1, 4, 0, 0, 0, 0 ),
-			new Asteroid(this, 1/10*this.maxX, 2/10*this.maxY, 0.1, 5, 0, -0.1, 0, 0 ),
-			new Asteroid(this, 5/10*this.maxX, 1/10*this.maxY, 0.1, 6, -0.2, 0.3, 0, 0 ),
-			new Asteroid(this, 5/10*this.maxX, 2/10*this.maxY, 0.1, 7, -0.3, 0.2, 0, 0 ),
-			new Asteroid(this, 6/10*this.maxX, 8/10*this.maxY, 0.1, 6, -0.4, 0.1, 0, 0 ),
-			new Asteroid(this, 6/10*this.maxX, 9/10*this.maxY, 0.1, 7, 0.5, -0.5, 0, 0 ),
-			new Asteroid(this, 9/10*this.maxX, 8/10*this.maxY, 0.1, 6, 0.6, 0.4, 0, 0 ),
-			new Asteroid(this, 9/10*this.maxX, 9/10*this.maxY, 0.1, 7, 0.7, 0.6, 0, 0 ),
-			new Asteroid(this, 3/10*this.maxX, 1/10*this.maxY, 0.1, 6, 0.8, -0.2, 0, 0 ),
-			new Asteroid(this, 3/10*this.maxX, 2/10*this.maxY, 0.1, 7, 0.9, -0.1, 0, 0 ));
+    this.asteroids.push(new Asteroid(this, 1/10*this.maxX, 1/10*this.maxY, 1, 4, 0, 0, 0, 0 ),
+			new Asteroid(this, 1/10*this.maxX, 2/10*this.maxY, 1, 5, 0, -0.1, 0, 0 ),
+			new Asteroid(this, 5/10*this.maxX, 1/10*this.maxY, 1, 6, -0.2, 0.3, 0, 0 ),
+			new Asteroid(this, 5/10*this.maxX, 2/10*this.maxY, 1, 7, -0.3, 0.2, 0, 0 ),
+			new Asteroid(this, 6/10*this.maxX, 8/10*this.maxY, 1, 6, -0.4, 0.1, 0, 0 ),
+			new Asteroid(this, 6/10*this.maxX, 9/10*this.maxY, 1, 7, 0.5, -0.5, 0, 0 ),
+			new Asteroid(this, 9/10*this.maxX, 8/10*this.maxY, 1, 6, 0.6, 0.4, 0, 0 ),
+			new Asteroid(this, 9/10*this.maxX, 9/10*this.maxY, 1, 7, 0.7, 0.6, 0, 0 ),
+			new Asteroid(this, 3/10*this.maxX, 1/10*this.maxY, 1, 6, 0.8, -0.2, 0, 0 ),
+			new Asteroid(this, 3/10*this.maxX, 2/10*this.maxY, 1, 7, 0.9, -0.1, 0, 0 ));
 
     this.setDefaultCanvasState();
     this.bindDefaultKeys();

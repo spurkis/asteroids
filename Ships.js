@@ -15,8 +15,7 @@ Ship.inheritsFrom( SpaceObject );
 
 Ship.prototype.initialize = function(game, startX, startY) {
     Ship.prototype.parent.initialize.call(this, game, startX, startY);
-    this.mass = 0.1;
-    this.maxSpin = deg_to_rad[10];
+    this.mass = 10;
     this.is_ship = true;
 
     // current state of action:
@@ -28,8 +27,15 @@ Ship.prototype.initialize = function(game, startX, startY) {
 
     // for calculating impact:
     this.radius = 7;
-    this.radiusSquared = Math.pow(7,2);
+    this.radiusSquared = Math.pow(this.radius,2);
     this.damage = 2;
+
+    // for moving about:
+    this.thrust = 0;
+    this.thrustIncrement = 0.01;
+    this.spin = 0;
+    this.spinIncrement = deg_to_rad[0.5];
+    this.maxSpin = deg_to_rad[6];
 
     return this;
 }
@@ -100,7 +106,7 @@ Ship.prototype.startAccelerate = function() {
 };
 
 Ship.prototype.increaseThrust = function() {
-    if (this.thrust < this.maxThrust) this.thrust += 0.01;
+    if (this.thrust < this.maxThrust) this.thrust += this.thrustIncrement;
     this.accelerateAlong(this.facing, this.thrust);
 }
 
@@ -131,7 +137,7 @@ Ship.prototype.startDecelerate = function() {
 };
   
 Ship.prototype.decreaseThrust = function() {
-    if (this.thrust > -this.maxThrust) this.thrust -= 0.01;
+    if (this.thrust > -this.maxThrust) this.thrust -= this.thrustIncrement;
     this.accelerateAlong(this.facing, this.thrust);
 }
 
@@ -166,19 +172,20 @@ Ship.prototype.stopSlowingDown = function() {
 }
 
 Ship.prototype.slowDown = function() {
+    var vDrag = 0.01;
     if (this.vX > 0) {
-	this.vX -= 0.01; // drag
+	this.vX -= vDrag;
     } else if (this.vX < 0) {
-	this.vX += 0.01; // drag
+	this.vX += vDrag;
     }
     if (this.vY > 0) {
-	this.vY -= 0.01; // drag
+	this.vY -= vDrag;
     } else if (this.vY < 0) {
-	this.vY += 0.01; // drag
+	this.vY += vDrag;
     }
 
-    if (Math.abs(this.vX) <= 0.01) this.vX = 0;
-    if (Math.abs(this.vY) <= 0.01) this.vY = 0;
+    if (Math.abs(this.vX) <= vDrag) this.vX = 0;
+    if (Math.abs(this.vY) <= vDrag) this.vY = 0;
 
     if (this.vX == 0 && this.vY == 0) {
 	console.log('done slowing down');
@@ -199,9 +206,10 @@ Ship.prototype.startIncreaseSpin = function() {
 	this.stopSpinIntervalId = null;
     }
 
+    this.incSpin( this.spinIncrement );
     var self = this;
     this.incSpinIntervalId = setInterval(function(){
-	self.incSpin( deg_to_rad[1] );
+	self.incSpin( self.spinIncrement );
     }, 50);
     
 };
@@ -228,9 +236,10 @@ Ship.prototype.startDecreaseSpin = function() {
 	this.stopSpinIntervalId = null;
     }
 
+    this.incSpin( -this.spinIncrement );
     var self = this;
     this.decSpinIntervalId = setInterval(function(){
-	self.incSpin( -deg_to_rad[1] );
+	self.incSpin( -self.spinIncrement );
     }, 50);
 };
 
@@ -243,17 +252,6 @@ Ship.prototype.stopDecreaseSpin = function() {
 
     this.startSlowDownSpin();
     this.decreaseSpin = false;
-}
-
-Ship.prototype.incSpin = function(delta) {
-    if (delta != 0) {
-	this.spin += delta;
-	if (this.spin > this.maxSpin) {
-	    this.spin = this.maxSpin;
-	} else if (this.spin < -this.maxSpin) {
-	    this.spin = -this.maxSpin;
-	}
-    }
 }
 
 Ship.prototype.startSlowDownSpin = function() {

@@ -30,14 +30,15 @@ SpaceObject.prototype.initialize = function(game, startX, startY) {
 
     this.vX = 0;  // speed along X axis in pixels/sec
     this.vY = 0;  // speed along Y axis in pixels/sec
-    this.maxVelocityX = 2;
-    this.maxVelocityY = 2;
+    this.maxV = 2; // max velocity
+    this.maxVSquared = this.maxV*this.maxV; // cached
 
-    this.thrust = 0;
+    this.mass = 0;
+    this.thrust = 0; // thrust along current facing
     this.maxThrust = 0.5;
+
     this.facing = 0;  // angle in Rad, not heading!
     this.spin = 0;    // spin in Rad/sec
-    this.mass = 0;
     this.maxSpin = deg_to_rad[10];
 
     this.attached = [];
@@ -84,7 +85,7 @@ SpaceObject.prototype.updatePositions = function(objects) {
 		} else {
 		    // F2 = G*m1*m2/r^2
 		    // a2 = F/m2 = G*m1/r^2
-		    var accel = object.mass / dist_squared;
+		    var accel = 0.1*object.mass / dist_squared;
 		    if (accel > this.game.maxAccel) accel = this.game.maxAccel;
 		    //var accel = F/this.mass;
 		    var angle = Math.atan2(dX, dY);
@@ -130,28 +131,37 @@ SpaceObject.prototype.incY = function(dY) {
 }
 
 SpaceObject.prototype.incVelocity = function(dX, dY) {
-    if (dX != 0) {
-	this.vX += dX;
-	if (this.vX > this.maxVelocityX) {
-	    this.vX = this.maxVelocityX;
-	} else if (this.vX < -this.maxVelocityX) {
-	    this.vX = -this.maxVelocityX;
-	}
+    var newVx = this.vX + dX;
+    var newVy = this.vY + dY;
+    
+    var magnitude_squared = newVx*newVx + newVy*newVy; // avoid sqrt
+    if (magnitude_squared > this.maxVSquared) {
+	// scale back newV along same vector
+	var angle  = Math.atan2(newVx, newVy);
+	newVx = Math.sin(angle) * this.maxV;
+	newVy = Math.cos(angle) * this.maxV;
     }
-    if (dY != 0) {
-	this.vY += dY;
-	if (this.vY > this.maxVelocityY) {
-	    this.vY = this.maxVelocityY;
-	} else if (this.vY < -this.maxVelocityY) {
-	    this.vY = -this.maxVelocityY;
-	}
-    }
+
+    this.vX = newVx;
+    this.vY = newVy;
 }
 
 SpaceObject.prototype.accelerateAlong = function(angle, thrust) {
-    var scaleX = Math.sin(angle) * thrust;
-    var scaleY = -Math.cos(angle) * thrust;
+    var accel = thrust/this.mass;
+    var scaleX = Math.sin(angle) * accel;
+    var scaleY = -Math.cos(angle) * accel;
     this.incVelocity(scaleX, scaleY);
+}
+
+SpaceObject.prototype.incSpin = function(delta) {
+    if (delta != 0) {
+	this.spin += delta;
+	if (this.spin > this.maxSpin) {
+	    this.spin = this.maxSpin;
+	} else if (this.spin < -this.maxSpin) {
+	    this.spin = -this.maxSpin;
+	}
+    }
 }
 
 SpaceObject.prototype.impacted = function(object, collision_state) {
