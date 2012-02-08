@@ -44,7 +44,7 @@ Planetoid.prototype.draw = function() {
     ctx.lineTo(this.vX*100,this.vY*100);
     ctx.closePath();
     ctx.stroke();
-*/
+    */
     ctx.restore();
 }
 

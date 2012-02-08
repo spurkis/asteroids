@@ -31,13 +31,13 @@ function AsteroidsGame(ctx) {
 
     this.planets.push(
 //	new Planet(this, {x: 3/4*this.maxX, y: 1/4*this.maxY, mass: 195, radius: 45, vX: -0.5, vY: 0}) ,
-//	new Planet(this, {x: 1/5*this.maxX, y: 2/5*this.maxY, mass: 15, radius: 15}),
+//	new Planet(this, {x: 1/5*this.maxX, y: 2/5*this.maxY, mass: 15, radius: 15, vX: -0.5, vY: 0.5}) ,
 //	new Planet(this, {x: 5/7*this.maxX, y: 4/5*this.maxY, mass: 30, radius: 20}),
-	new Planet(this, {x: 1/2*this.maxX, y: 2/3*this.maxY, mass: 120, radius: 30, stationary: true})
+//	new Planet(this, {x: 1/2*this.maxX-60, y: 1/2*this.maxY, mass: 15, radius: 15, vY: 0.5}),
+//	new Planet(this, {x: 1/2*this.maxX, y: 1/2*this.maxY, mass: 120, radius: 30, stationary: true})
     );
-/*
-    for (var i=0; i<this.maxX; i+= 100) {
-	for (var j=0; j<this.maxY; j+= 100) {
+    for (var i=0; i<this.maxX; i+= 95) {
+	for (var j=0; j<this.maxY; j+= 95) {
 	    var a = new Asteroid(this, {
 		x: i,
 		y: j,
@@ -52,7 +52,7 @@ function AsteroidsGame(ctx) {
 	    this.asteroids.push(a);
 	}
     }
-*/
+
 /*
     this.asteroids.push(
 //	new Asteroid(this, {x: 1/10*this.maxX, y: 1/10*this.maxY, mass: 0.5, radius: 4, vX: 0, vY: 0 }),
@@ -175,7 +175,8 @@ AsteroidsGame.prototype.updatePositions = function() {
 	    // var dist = sqrt(pow(x2-x1, 2) + pow(y2-y1, 2)); // slow
 
 	    // now check if they're touching:
-	    var total_radius_squared = Math.pow(object1.radius + object2.radius, 2);
+	    var total_radius = object1.radius + object2.radius;
+	    var total_radius_squared = Math.pow(total_radius, 2);
 	    if (dist_squared > total_radius_squared) {
 		if (object1.collidingWith(object2)) {
 		    object1.stopCollidingWith(object2);
@@ -189,6 +190,7 @@ AsteroidsGame.prototype.updatePositions = function() {
 			dX: dX,
 			dY: dY,
 			dist_squared: dist_squared,
+			total_radius: total_radius,
 			total_radius_squared: total_radius_squared
 		    };
 		    if (this.maybeDetachObjects(object1, object2, physics)) {
@@ -231,12 +233,34 @@ AsteroidsGame.prototype.updatePositions = function() {
 		    object1.delayUpdateVelocity(dX_1, dY_1);
 		    object2.delayUpdateVelocity(dX_2, dY_2);
 		} else if (object1.attachedTo(object2)) {
-		    // appy some negative acceleration to keep them from overlapping
+		    // push away objects to keep them from overlapping
+		    // make how much they get pushed relative to their mass
+		    var dist = Math.sqrt(dist_squared);
+		    var delta = Math.abs(dist - total_radius);
+
+		    // don't bother if it's small
+		    if (delta > 1) {
+			var accel_1 = delta / object1.mass;
+			if (accel_1 > this.maxAccel) accel_1 = this.maxAccel;
+			var angle_1 = Math.atan2(dY, dX);
+			var dX_1 = Math.cos(angle_1) * accel_1;
+			var dY_1 = Math.sin(angle_1) * accel_1;
+
+			var accel_2 = delta / object2.mass;
+			if (accel_2 > this.maxAccel) accel_2 = this.maxAccel;
+			var angle_2 = Math.atan2(-dY, -dX);
+			var dX_2 = Math.cos(angle_2) * accel_2;
+			var dY_2 = Math.sin(angle_2) * accel_2;
+		    
+			object1.delayUpdateVelocity(dX_1, dY_1);
+			object2.delayUpdateVelocity(dX_2, dY_2);
+		    }
 		} else {
 		    var physics = {
 			dX: dX,
 			dY: dY,
 			dist_squared: dist_squared,
+			total_radius: total_radius,
 			total_radius_squared: total_radius_squared
 		    };
 		    // so close they've collided:
@@ -277,7 +301,7 @@ AsteroidsGame.prototype.collision = function(object1, object2, collision) {
 	collision.impactSpeed = Math.abs(new_vX_2 - new_vX_1);
 
 	if (collision.impactSpeed < this.attachThreshold) {
-	    console.log('linking '+ object1 + ' <-> '+ object2);
+	    // console.log('linking '+ object1 + ' <-> '+ object2);
 	    object1.attach(object2);
 	    object2.attach(object1);
 
@@ -335,9 +359,9 @@ AsteroidsGame.prototype.collision = function(object1, object2, collision) {
 AsteroidsGame.prototype.maybeDetachObjects = function(object1, object2, physics) {
     // we got here because dist_squared > total_radius_squared
     // figure out how much, & if it's > detach threshold
-    var dist = Math.sqrt(physics.dist_squared) - Math.sqrt(physics.total_radius_squared);
+    var dist = Math.sqrt(physics.dist_squared) - physics.total_radius;
     if (dist > this.detachThreshold) {
-	console.log('unlinking '+ object1 + ' <-> '+ object2);
+	// console.log('unlinking '+ object1 + ' <-> '+ object2);
 	object1.detach(object2);
 	object2.detach(object1);
 	return true;
