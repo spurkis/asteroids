@@ -60,6 +60,12 @@ SpaceObject.prototype.initialize = function(game, spatial) {
 
     this.update = true;
 
+    // Cache of commonly used calculations for performance
+    this.cache = {
+	G_x_mass: this.game.G * this.mass,
+	mass_x_2: 2 * this.mass
+    };
+
     return this;
 }
 
@@ -67,7 +73,6 @@ SpaceObject.prototype.createObjectId = function() {
     var prefix = this.oid_prefix || 'obj'
     return prefix + _spaceObjectId++;
 }
-
 
 SpaceObject.prototype.updatePositions = function(objects) {
     if (! this.update) return;
