@@ -30,18 +30,21 @@ Planetoid.prototype.draw = function() {
     var ctx = this.ctx;
     ctx.save();
     ctx.translate( this.x, this.y );
+    ctx.beginPath();
     ctx.arc(0, 0, this.radius, 0, deg_to_rad[360], false);
     ctx.fillStyle = this.fillStyle;
     ctx.fill();
+    ctx.closePath();
 
     // draw trajectory:
+    /*
     ctx.beginPath();
     ctx.moveTo(0,0);
     ctx.strokeStyle = 'black';
     ctx.lineTo(this.vX*100,this.vY*100);
     ctx.closePath();
     ctx.stroke();
-
+*/
     ctx.restore();
 }
 
@@ -121,7 +124,7 @@ Asteroid.inheritsFrom( Planetoid );
 Asteroid.prototype.initialize = function(game, spatial) {
     this.oid_prefix = 'ast';
 
-    spatial.health = 130;
+    spatial.health = 30;
     if (spatial.damage == null) spatial.damage = spatial.mass*10;
     Asteroid.prototype.parent.initialize.call(this, game, spatial);
 
