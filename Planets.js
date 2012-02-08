@@ -74,7 +74,8 @@ Planet.prototype.initialize = function(game, spatial) {
 
     this.fillStyle = "rgba(100,0,0,0.75)";
     this.is_planet = true;
-    this.landingThreshold = 0.2;
+    this.landingThresholdSpeed = 0.4;
+    this.landingThresholdAngle = deg_to_rad[5];
 
     return this;
 }
@@ -83,10 +84,15 @@ Planet.prototype.collided = function(object, collision) {
     if (object.is_ship) {
 	// if the magnitude of the delta-V is small & the ship is
 	// facing away from this, then let them land without damage
-	if (collision.impactSpeed < this.landingThreshold) {
-	    console.log(object.id + " landed on " + this.id);
-	    this.attach(object);
-	    object.attach(this);
+	if (collision.impactSpeed < this.landingThresholdSpeed) {
+	    var this_collision = collision[this.id];
+	    var planet_to_ship_angle = Math.atan2(-this_collision.dY, -this_collision.dX);
+	    var delta_angle = Math.abs(object.facing - planet_to_ship_angle);
+	    if (delta_angle <= this.landingThresholdAngle) {
+		console.log(object.id + " landed on " + this.id);
+		this.attach(object);
+		object.attach(this);
+	    }
 	    return;
 	}
     }

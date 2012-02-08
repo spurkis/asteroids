@@ -143,9 +143,9 @@ SpaceObject.prototype.updateVelocity = function(dX, dY) {
     var magnitude_squared = newVx*newVx + newVy*newVy; // avoid sqrt
     if (magnitude_squared > this.maxVSquared) {
 	// scale back newV along same vector
-	var angle  = Math.atan2(newVx, newVy);
-	newVx = Math.sin(angle) * this.maxV;
-	newVy = Math.cos(angle) * this.maxV;
+	var angle  = Math.atan2(newVy, newVx);
+	newVx = Math.cos(angle) * this.maxV;
+	newVy = Math.sin(angle) * this.maxV;
     }
 
     this.vX = newVx;
@@ -159,9 +159,9 @@ SpaceObject.prototype.setVelocity = function(vX, vY) {
 
 SpaceObject.prototype.accelerateAlong = function(angle, thrust) {
     var accel = thrust/this.mass;
-    var scaleX = Math.sin(angle) * accel;
-    var scaleY = -Math.cos(angle) * accel;
-    this.updateVelocity(scaleX, scaleY);
+    var dX = Math.cos(angle) * accel;
+    var dY = Math.sin(angle) * accel;
+    this.updateVelocity(dX, dY);
 }
 
 SpaceObject.prototype.incSpin = function(delta) {

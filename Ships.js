@@ -57,6 +57,23 @@ Ship.prototype.draw = function() {
     ctx.translate( this.x, this.y );
     if (this.facing > 0) ctx.rotate( this.facing );
 
+    /*
+    // draw facing angle
+    ctx.strokeStyle = "yellow";
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.lineTo(0,50);
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.strokeStyle = "orange";
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.lineTo(50,0);
+    ctx.closePath();
+    ctx.stroke();
+    */
+
     // TODO: replace these with .png's?
 
     if (this.healthChanged || this.healthRedVal == null) {
@@ -65,39 +82,39 @@ Ship.prototype.draw = function() {
 
     ctx.strokeStyle = 'rgb('+ this.healthRedVal +',0,0)';
     ctx.beginPath();
-    ctx.moveTo(-7,7);
-    ctx.lineTo(0,-7);
-    ctx.lineTo(7,7);
-    ctx.quadraticCurveTo(0,0, -7,7);
+    ctx.moveTo(-7,-7);
+    ctx.lineTo(7,0);
+    ctx.lineTo(-7,7);
+    ctx.quadraticCurveTo(0,0, -7,-7);
 
     if (this.accelerate) {
-	ctx.moveTo(-3,4);
-	ctx.lineTo(-3,12);
-	ctx.moveTo(0,4);
-	ctx.lineTo(0,9);
-	ctx.moveTo(3,4);
-	ctx.lineTo(3,12);
+	ctx.moveTo(-4,-3);
+	ctx.lineTo(-12,-3);
+	ctx.moveTo(-4,0);
+	ctx.lineTo(-9,0);
+	ctx.moveTo(-4,3);
+	ctx.lineTo(-12,3);
     }
 
     if (this.decelerate) {
-	ctx.moveTo(-3,-6);
-	ctx.lineTo(-3,-10);
-	ctx.moveTo(-6,0);
-	ctx.lineTo(-6,-8);
-	ctx.moveTo(3,-6);
-	ctx.lineTo(3,-10);
-	ctx.moveTo(6,0);
-	ctx.lineTo(6,-8);
+	ctx.moveTo(6,-3);
+	ctx.lineTo(10,-3);
+	ctx.moveTo(0,-6);
+	ctx.lineTo(8,-6);
+	ctx.moveTo(6,3);
+	ctx.lineTo(10,3);
+	ctx.moveTo(0,6);
+	ctx.lineTo(8,6);
     }
 
     if (this.increaseSpin) {
-	ctx.moveTo(-3,-5);
-	ctx.lineTo(-6,-5);
+	ctx.moveTo(5,-3);
+	ctx.lineTo(5,-6);
     }
 
     if (this.decreaseSpin) {
-	ctx.moveTo(3,-5);
-	ctx.lineTo(6,-5);
+	ctx.moveTo(5,3);
+	ctx.lineTo(5,6);
     }
 
     ctx.closePath();
@@ -394,8 +411,8 @@ Ship.prototype.stopFireWeapon = function() {
 Ship.prototype.fireWeapon = function() {
     // TODO: don't hard-code weapon
     var fireThrust = 1.5;
-    var scaleX = Math.sin(this.facing) * fireThrust;
-    var scaleY = -Math.cos(this.facing) * fireThrust;
+    var scaleX = Math.cos(this.facing) * fireThrust;
+    var scaleY = Math.sin(this.facing) * fireThrust;
     var vX = this.vX + scaleX;
     var vY = this.vY + scaleY;
     var bullet = new Bullet(this, {

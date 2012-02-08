@@ -21,6 +21,7 @@ Bullet.prototype.initialize = function(ship, spatial) {
     Bullet.prototype.parent.initialize.call(this, ship.game, spatial);
 
     this.ship = ship;
+    this.fireThrust = 1.5;
     this.ttl = 2500;
     this.exploding = false;
     this.fading = -1;
@@ -54,6 +55,7 @@ Bullet.prototype.draw = function() {
     ctx.translate( this.x, this.y );
     if (this.facing > 0) ctx.rotate( this.facing );
 
+    // TODO: fancy graphics
     if (this.exploding) {
 	ctx.strokeStyle = "#f22";
 	ctx.beginPath();
@@ -69,7 +71,7 @@ Bullet.prototype.draw = function() {
 	    ctx.strokeStyle = "rgb(200,50,50)";
 	}
 	ctx.beginPath();
-	ctx.moveTo(0,5);
+	ctx.moveTo(-5,0);
 	ctx.lineTo(0,0);
 	ctx.closePath();
     }

@@ -35,7 +35,7 @@ function AsteroidsGame(ctx) {
 //	new Planet(this, {x: 5/7*this.maxX, y: 4/5*this.maxY, mass: 30, radius: 20}),
 	new Planet(this, {x: 1/2*this.maxX, y: 2/3*this.maxY, mass: 120, radius: 30, stationary: true})
     );
-
+/*
     for (var i=0; i<this.maxX; i+= 100) {
 	for (var j=0; j<this.maxY; j+= 100) {
 	    var a = new Asteroid(this, {
@@ -52,7 +52,7 @@ function AsteroidsGame(ctx) {
 	    this.asteroids.push(a);
 	}
     }
-
+*/
 /*
     this.asteroids.push(
 //	new Asteroid(this, {x: 1/10*this.maxX, y: 1/10*this.maxY, mass: 0.5, radius: 4, vX: 0, vY: 0 }),
@@ -104,7 +104,7 @@ AsteroidsGame.prototype.startGameLoop = function() {
     this.drawIntervalId = setInterval(function(){
 	self.draw();
     }, this.refreshRate);
-};  
+}
 
 AsteroidsGame.prototype.stop = function() {
     if (this.updateIntervalId) {
@@ -191,8 +191,11 @@ AsteroidsGame.prototype.updatePositions = function() {
 			dist_squared: dist_squared,
 			total_radius_squared: total_radius_squared
 		    };
-		    this.maybeDetachObjects(object1, object2, physics);
-		} else {
+		    if (this.maybeDetachObjects(object1, object2, physics)) {
+			continue;
+		    }
+		}
+		{
 		    // F1 = G*m1*m2/r^2
 		    // a1 = F/m1 = G*m2/r^2
 		    var accel_1 = this.G * object2.mass / dist_squared;
@@ -211,7 +214,7 @@ AsteroidsGame.prototype.updatePositions = function() {
 		    object2.delayUpdateVelocity(dX_2, dY_2);
 		}
 	    } else {
-		if (object1.attachedTo(object2) || object1.collidingWith(object2)) {
+		if (object1.collidingWith(object2)) {
 		    // appy some negative acceleration from attached / colliding objects
 		    var accel_1 = this.G * object2.mass / dist_squared;
 		    if (accel_1 > this.maxAccel) accel_1 = this.maxAccel;
@@ -227,6 +230,8 @@ AsteroidsGame.prototype.updatePositions = function() {
 
 		    object1.delayUpdateVelocity(dX_1, dY_1);
 		    object2.delayUpdateVelocity(dX_2, dY_2);
+		} else if (object1.attachedTo(object2)) {
+		    // appy some negative acceleration to keep them from overlapping
 		} else {
 		    var physics = {
 			dX: dX,
@@ -309,10 +314,14 @@ AsteroidsGame.prototype.collision = function(object1, object2, collision) {
 
 	collision[object1.id] = {
 	    cplane: {vX: new_vX_1, vY: new_vY_1}, // relative to collision plane
+	    dX: collision.dX,
+	    dY: collision.dY,
 	    magnitude: magnitude_1
 	}
 	collision[object2.id] = {
 	    cplane: {vX: new_vX_2, vY: new_vY_2}, // relative to collision plane
+	    dX: -collision.dX, // flip signs: from obj2's perspective
+	    dY: -collision.dY,
 	    magnitude: magnitude_2
 	}
 
@@ -324,11 +333,6 @@ AsteroidsGame.prototype.collision = function(object1, object2, collision) {
 }
 
 AsteroidsGame.prototype.maybeDetachObjects = function(object1, object2, physics) {
-/*
-    var dVx = object1.vX - object2.vX;
-    var dVy = object1.vY - object2.vY;
-    var magnitude_squared = dVx*dVx + dVy*dVy; // avoid sqrt - don't need magnitude
-*/
     // we got here because dist_squared > total_radius_squared
     // figure out how much, & if it's > detach threshold
     var dist = Math.sqrt(physics.dist_squared) - Math.sqrt(physics.total_radius_squared);
@@ -336,7 +340,9 @@ AsteroidsGame.prototype.maybeDetachObjects = function(object1, object2, physics)
 	console.log('unlinking '+ object1 + ' <-> '+ object2);
 	object1.detach(object2);
 	object2.detach(object1);
+	return true;
     }
+    return false;
 }
 
 AsteroidsGame.prototype.objectDied = function(object) {
