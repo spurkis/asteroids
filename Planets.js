@@ -30,15 +30,23 @@ Planetoid.prototype.draw = function() {
     var ctx = this.ctx;
     ctx.save();
     ctx.translate( this.x, this.y );
-    ctx.beginPath();
     ctx.arc(0, 0, this.radius, 0, deg_to_rad[360], false);
     ctx.fillStyle = this.fillStyle;
     ctx.fill();
+
+    // draw trajectory:
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.strokeStyle = 'black';
+    ctx.lineTo(this.vX*100,this.vY*100);
+    ctx.closePath();
+    ctx.stroke();
+
     ctx.restore();
 }
 
 /*
-Planetoid.prototype.impacted = function(object) {
+Planetoid.prototype.collided = function(object) {
     if (this.damage && !object.is_planetoid) {
 	object.decHealth( this.damage );
     }
@@ -68,7 +76,7 @@ Planet.prototype.initialize = function(game, spatial) {
     return this;
 }
 
-Planet.prototype.impacted = function(object, collision) {
+Planet.prototype.collided = function(object, collision) {
     if (object.is_ship) {
 	// if the magnitude of the delta-V is small & the ship is
 	// facing away from this, then let them land without damage
@@ -79,7 +87,7 @@ Planet.prototype.impacted = function(object, collision) {
 	    return;
 	}
     }
-    this.parent.impacted.call( this, object, collision );
+    this.parent.collided.call( this, object, collision );
 }
 
 Planet.prototype.updateVelocity = function(dX, dY) {
@@ -113,7 +121,7 @@ Asteroid.inheritsFrom( Planetoid );
 Asteroid.prototype.initialize = function(game, spatial) {
     this.oid_prefix = 'ast';
 
-    spatial.health = 30;
+    spatial.health = 130;
     if (spatial.damage == null) spatial.damage = spatial.mass*10;
     Asteroid.prototype.parent.initialize.call(this, game, spatial);
 
@@ -123,8 +131,10 @@ Asteroid.prototype.initialize = function(game, spatial) {
     return this;
 }
 
-Asteroid.prototype.impacted = function(object, collision) {
+Asteroid.prototype.collided = function(object, collision) {
     if (! object.is_asteroid) {
-	this.parent.impacted.call( this, object, collision );
+	this.parent.collided.call( this, object, collision );
+    } else {
+	this.colliding[object.id] = object;
     }
 }

@@ -16,7 +16,7 @@ Bullet.prototype.initialize = function(ship, spatial) {
     this.oid_prefix = "blt";
 
     spatial.radius = 1;
-    spatial.mass = 0.01;
+    spatial.mass = 0.05;
     spatial.damage = 5;
     Bullet.prototype.parent.initialize.call(this, ship.game, spatial);
 
@@ -83,9 +83,9 @@ Bullet.prototype.decHealth = function(delta) {
     // do nothing - bullets are indescructable
 }
 
-Bullet.prototype.impacted = function(object) {
+Bullet.prototype.collided = function(object) {
     if (object.ship == this.ship) {
-	// don't damage our own stuff
+	// don't damage our ship's other weapons
     }
     object.decHealth( this.damage );
     this.explode();

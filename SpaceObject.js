@@ -54,7 +54,8 @@ SpaceObject.prototype.initialize = function(game, spatial) {
     this.spin = spatial.spin || 0;            // spin in Rad/sec
     this.maxSpin = deg_to_rad[10];            // max spin
 
-    this.attached = [];                       // object this is attached to
+    this.attached = [];                       // objects this is attached to
+    this.colliding = [];                      // objects this is colliding with
 
     this.update = true;
 
@@ -174,7 +175,9 @@ SpaceObject.prototype.incSpin = function(delta) {
     }
 }
 
-SpaceObject.prototype.impacted = function(object, collision) {
+SpaceObject.prototype.collided = function(object, collision) {
+    this.colliding[object.id] = object;
+
     if (this.damage) {
 	var damageDone = this.damage;
 	if (collision.impactSpeed != null) {
@@ -184,6 +187,16 @@ SpaceObject.prototype.impacted = function(object, collision) {
 	// console.log( this.id + " -->X " + object.id + " damage: " + damageDone );
     }
 }
+
+SpaceObject.prototype.collidingWith = function(object) {
+    if (this.colliding[object.id]) return true;
+    return false;
+}
+
+SpaceObject.prototype.stopCollidingWith = function(object) {
+    delete this.colliding[object.id];
+}
+
 
 SpaceObject.prototype.decHealth = function(delta) {
     this.healthChanged = true;
@@ -217,3 +230,10 @@ SpaceObject.prototype.detach = function(object) {
     delete this.attached[object.id];
 }
 
+SpaceObject.prototype.toString = function() {
+    return this.id + '=('+
+	'x:' + this.x.toFixed(1) + ', y:' + this.y.toFixed(1) +
+	', vX:' + this.vX.toFixed(5) + ', vY:' + this.vY.toFixed(5) +
+	')';
+	
+}
