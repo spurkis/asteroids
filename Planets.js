@@ -82,15 +82,16 @@ Planet.prototype.impacted = function(object, collision) {
     this.parent.impacted.call( this, object, collision );
 }
 
-/*
 Planet.prototype.updateVelocity = function(dX, dY) {
-    // unmovable
+    if (this.stationary) return;
+    this.parent.updateVelocity.call(this, dX, dY);
 }
 
 Planet.prototype.setVelocity = function(vX, vY) {
-    // unmovable
+    if (this.stationary) return;
+    this.parent.setVelocity.call(this, vX, vY);
 }
-*/
+
 Planet.prototype.decHealth = function(delta) {
     // indestructable
 }

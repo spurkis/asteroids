@@ -34,6 +34,9 @@ SpaceObject.prototype.initialize = function(game, spatial) {
     this.maxX = this.ctx.canvas.width;
     this.maxY = this.ctx.canvas.height;
 
+    this.stationary = spatial.stationary == null // should this object move?
+	? false
+	: spatial.stationary;
     this.vX = spatial.vX || 0;                // speed along X axis
     this.vY = spatial.vY || 0;                // speed along Y axis
     this.maxV = spatial.maxV || 2;            // max velocity
@@ -66,6 +69,7 @@ SpaceObject.prototype.createObjectId = function() {
 
 SpaceObject.prototype.updatePositions = function(objects) {
     if (! this.update) return;
+    this.applyDelayedUpdates();
 
     this.facing += this.spin;
     if (this.facing >= deg_to_rad[360] || this.facing <= deg_to_rad[360]) {
@@ -90,6 +94,45 @@ SpaceObject.prototype.incY = function(dY) {
     this.y += dY;
     if (this.y < 0) this.y = this.maxY + this.y;
     if (this.y > this.maxY) this.y = this.y - this.maxY;
+}
+
+// called before we update velocity
+SpaceObject.prototype.delayUpdateVelocity = function(dvX, dvY) {
+    if (this._updates == null) this.init_updates();
+    this._updates.dvX += dvX;
+    this._updates.dvY += dvY;
+}
+
+SpaceObject.prototype.delaySetVelocity = function(vX, vY) {
+    if (this._updates == null) this.init_updates();
+    this._updates.set.push({vX: vX, vY: vY});
+}
+
+SpaceObject.prototype.init_updates = function() {
+    this._updates = {dvX: 0, dvY: 0, set: []};
+}
+
+SpaceObject.prototype.applyDelayedUpdates = function() {
+    if (! this._updates) return;
+    var u = this._updates;
+    delete this._updates;
+
+    // apply sets first: these are likely collisions, and acceleration due to
+    // gravity should still apply after a collision
+    if (u.set.length > 0) {
+	var new_vX = null;
+	var new_vY = null;
+	for (var i=0; i < u.set.length; i++) {
+	    if (i==0) { new_vX = 0; new_vY = 0; }
+	    new_vX += u.set[i].vX;
+	    new_vY += u.set[i].vY;
+	}
+	new_vX += u.dvX;
+	new_vY += u.dvY;
+	this.setVelocity( new_vX, new_vY );
+    } else {
+	this.updateVelocity( u.dvX, u.dvY );
+    }
 }
 
 SpaceObject.prototype.updateVelocity = function(dX, dY) {
