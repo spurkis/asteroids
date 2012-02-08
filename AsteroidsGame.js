@@ -40,8 +40,8 @@ function AsteroidsGame(ctx) {
     for (var i=0; i<this.maxX; i+= 95) {
 	for (var j=0; j<this.maxY; j+= 95) {
 	    var a = new Asteroid(this, {
-		x: i,
-		y: j,
+		x: i + getRandomInt(0, 10),
+		y: j + getRandomInt(0, 10),
 		mass: getRandomInt(1, 3),
 		radius: getRandomInt(3, 10),
 		vX: Math.random(),
@@ -156,7 +156,6 @@ AsteroidsGame.prototype.updatePositions = function() {
 			     this.weaponsFired,
 			     [this.ship]);
 
-    // apply gravity & detect collisions
     // note that we don't apply any updates until we've processed all objects
     for (var i=0; i < objects.length; i++) {
 	var object1 = objects[i];
@@ -164,116 +163,123 @@ AsteroidsGame.prototype.updatePositions = function() {
 	// we start j at the next position:
 	for (var j=i+1; j < objects.length; j++) {
 	    var object2 = objects[j];
-
-	    if (object2 == object1) continue;
+	    if (object2 == object1) continue; // paranoia
 	    if (object2.ship == object1 || object1.ship == object2) continue;
-	    if (object2.mass <= 0) continue;
 	    if (! object1.update || ! object2.update) continue;
-
-	    var dX = object1.x - object2.x;
-	    var dY = object1.y - object2.y;
-	    var dist_squared = dX*dX + dY*dY; // avoid sqrt, we don't need magnitude
-	    // var dist = sqrt(pow(x2-x1, 2) + pow(y2-y1, 2)); // slow
-
-	    // now check if they're touching:
-	    var total_radius = object1.radius + object2.radius;
-	    var total_radius_squared = Math.pow(total_radius, 2);
-	    if (dist_squared > total_radius_squared) {
-		if (object1.collidingWith(object2)) {
-		    object1.stopCollidingWith(object2);
-		    object2.stopCollidingWith(object1);
-		}
-
-		if (object1.attachedTo(object2)) {
-		    // don't appy any acceleration from attached objects
-		    // that may be detaching...
-		    var physics = {
-			dX: dX,
-			dY: dY,
-			dist_squared: dist_squared,
-			total_radius: total_radius,
-			total_radius_squared: total_radius_squared
-		    };
-		    if (this.maybeDetachObjects(object1, object2, physics)) {
-			continue;
-		    }
-		}
-		{
-		    // F1 = G*m1*m2/r^2
-		    // a1 = F/m1 = G*m2/r^2
-		    var accel_1 = this.G * object2.mass / dist_squared;
-		    if (accel_1 > this.maxAccel) accel_1 = this.maxAccel;
-		    var angle_1 = Math.atan2(dX, dY);
-		    var dX_1 = -Math.sin(angle_1) * accel_1;
-		    var dY_1 = -Math.cos(angle_1) * accel_1;
-
-		    var accel_2 = this.G * object1.mass / dist_squared;
-		    if (accel_2 > this.maxAccel) accel_2 = this.maxAccel;
-		    var angle_2 = Math.atan2(-dX, -dY); // note the - signs
-		    var dX_2 = -Math.sin(angle_2) * accel_2;
-		    var dY_2 = -Math.cos(angle_2) * accel_2;
-
-		    object1.delayUpdateVelocity(dX_1, dY_1);
-		    object2.delayUpdateVelocity(dX_2, dY_2);
-		}
-	    } else {
-		if (object1.collidingWith(object2)) {
-		    // appy some negative acceleration from attached / colliding objects
-		    var accel_1 = this.G * object2.mass / dist_squared;
-		    if (accel_1 > this.maxAccel) accel_1 = this.maxAccel;
-		    var angle_1 = Math.atan2(dX, dY);
-		    var dX_1 = Math.sin(angle_1) * accel_1;
-		    var dY_1 = Math.cos(angle_1) * accel_1;
-
-		    var accel_2 = this.G * object1.mass / dist_squared;
-		    if (accel_2 > this.maxAccel) accel_2 = this.maxAccel;
-		    var angle_2 = Math.atan2(-dX, -dY); // note the - signs
-		    var dX_2 = Math.sin(angle_2) * accel_2;
-		    var dY_2 = Math.cos(angle_2) * accel_2;
-
-		    object1.delayUpdateVelocity(dX_1, dY_1);
-		    object2.delayUpdateVelocity(dX_2, dY_2);
-		} else if (object1.attachedTo(object2)) {
-		    // push away objects to keep them from overlapping
-		    // make how much they get pushed relative to their mass
-		    var dist = Math.sqrt(dist_squared);
-		    var delta = Math.abs(dist - total_radius);
-
-		    // don't bother if it's small
-		    if (delta > 1) {
-			var accel_1 = delta / object1.mass;
-			if (accel_1 > this.maxAccel) accel_1 = this.maxAccel;
-			var angle_1 = Math.atan2(dY, dX);
-			var dX_1 = Math.cos(angle_1) * accel_1;
-			var dY_1 = Math.sin(angle_1) * accel_1;
-
-			var accel_2 = delta / object2.mass;
-			if (accel_2 > this.maxAccel) accel_2 = this.maxAccel;
-			var angle_2 = Math.atan2(-dY, -dX);
-			var dX_2 = Math.cos(angle_2) * accel_2;
-			var dY_2 = Math.sin(angle_2) * accel_2;
-		    
-			object1.delayUpdateVelocity(dX_1, dY_1);
-			object2.delayUpdateVelocity(dX_2, dY_2);
-		    }
-		} else {
-		    var physics = {
-			dX: dX,
-			dY: dY,
-			dist_squared: dist_squared,
-			total_radius: total_radius,
-			total_radius_squared: total_radius_squared
-		    };
-		    // so close they've collided:
-		    this.collision( object1, object2, physics );
-		}
-	    }
-	} // for obj2
+	    this.applyGamePhysicsTo( object1, object2 );
+	}
 
 	object1.updatePositions();
     } // for obj1
 };
 
+/***
+ * applies game physics to *both* objects, ie:
+ *     gravity
+ *     collision detection & handling - see also collision()
+ *     object attachment
+ */
+AsteroidsGame.prototype.applyGamePhysicsTo = function(object1, object2) {
+    if (object2.mass <= 0) return;
+
+    var dX = object1.x - object2.x;
+    var dY = object1.y - object2.y;
+    var dist_squared = dX*dX + dY*dY; // avoid sqrt, we don't need magnitude
+    // var dist = sqrt(pow(x2-x1, 2) + pow(y2-y1, 2)); // slow
+
+    // now check if they're touching:
+    var total_radius = object1.radius + object2.radius;
+    var total_radius_squared = Math.pow(total_radius, 2);
+    if (dist_squared > total_radius_squared) {
+	if (object1.collidingWith(object2)) {
+	    object1.stopCollidingWith(object2);
+	    object2.stopCollidingWith(object1);
+	}
+
+	if (object1.attachedTo(object2)) {
+	    // don't appy any acceleration from attached objects
+	    // that may be detaching...
+	    var physics = {
+		dX: dX,
+		dY: dY,
+		dist_squared: dist_squared,
+		total_radius: total_radius,
+		total_radius_squared: total_radius_squared
+	    };
+	    if (this.maybeDetachObjects(object1, object2, physics)) {
+		return;
+	    }
+	}
+
+	// F1 = G*m1*m2/r^2
+	// a1 = F/m1 = G*m2/r^2
+	var accel_1 = this.G * object2.mass / dist_squared;
+	if (accel_1 > this.maxAccel) accel_1 = this.maxAccel;
+	var angle_1 = Math.atan2(dX, dY);
+	var dX_1 = -Math.sin(angle_1) * accel_1;
+	var dY_1 = -Math.cos(angle_1) * accel_1;
+
+	var accel_2 = this.G * object1.mass / dist_squared;
+	if (accel_2 > this.maxAccel) accel_2 = this.maxAccel;
+	var angle_2 = Math.atan2(-dX, -dY); // note the - signs
+	var dX_2 = -Math.sin(angle_2) * accel_2;
+	var dY_2 = -Math.cos(angle_2) * accel_2;
+
+	object1.delayUpdateVelocity(dX_1, dY_1);
+	object2.delayUpdateVelocity(dX_2, dY_2);
+    } else {
+	if (object1.collidingWith(object2)) {
+	    // appy some negative acceleration from attached / colliding objects
+	    var accel_1 = this.G * object2.mass / dist_squared;
+	    if (accel_1 > this.maxAccel) accel_1 = this.maxAccel;
+	    var angle_1 = Math.atan2(dX, dY);
+	    var dX_1 = Math.sin(angle_1) * accel_1;
+	    var dY_1 = Math.cos(angle_1) * accel_1;
+
+	    var accel_2 = this.G * object1.mass / dist_squared;
+	    if (accel_2 > this.maxAccel) accel_2 = this.maxAccel;
+	    var angle_2 = Math.atan2(-dX, -dY); // note the - signs
+	    var dX_2 = Math.sin(angle_2) * accel_2;
+	    var dY_2 = Math.cos(angle_2) * accel_2;
+
+	    object1.delayUpdateVelocity(dX_1, dY_1);
+	    object2.delayUpdateVelocity(dX_2, dY_2);
+	} else if (object1.attachedTo(object2)) {
+	    // push away objects to keep them from overlapping
+	    // make how much they get pushed relative to their mass
+	    var dist = Math.sqrt(dist_squared);
+	    var delta = Math.abs(dist - total_radius);
+
+	    // don't bother if it's small
+	    if (delta > 1) {
+		var accel_1 = delta / object1.mass;
+		if (accel_1 > this.maxAccel) accel_1 = this.maxAccel;
+		var angle_1 = Math.atan2(dY, dX);
+		var dX_1 = Math.cos(angle_1) * accel_1;
+		var dY_1 = Math.sin(angle_1) * accel_1;
+
+		var accel_2 = delta / object2.mass;
+		if (accel_2 > this.maxAccel) accel_2 = this.maxAccel;
+		var angle_2 = Math.atan2(-dY, -dX);
+		var dX_2 = Math.cos(angle_2) * accel_2;
+		var dY_2 = Math.sin(angle_2) * accel_2;
+		
+		object1.delayUpdateVelocity(dX_1, dY_1);
+		object2.delayUpdateVelocity(dX_2, dY_2);
+	    }
+	} else {
+	    var physics = {
+		dX: dX,
+		dY: dY,
+		dist_squared: dist_squared,
+		total_radius: total_radius,
+		total_radius_squared: total_radius_squared
+	    };
+	    // so close they've collided:
+	    this.collision( object1, object2, physics );
+	}
+    }
+}
 
 AsteroidsGame.prototype.collision = function(object1, object2, collision) {
     // ignore attached object collisions
