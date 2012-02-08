@@ -49,6 +49,7 @@ SpaceObject.prototype.initialize = function(game, spatial) {
 
     this.thrust = spatial.initialThrust || 0; // thrust along facing
     this.maxThrust = spatial.maxThrust || 0.5;
+    this.thrustChanged = false;
 
     this.facing = spatial.facing || 0;        // currently facing angle (rad)
     this.spin = spatial.spin || 0;            // spin in Rad/sec
@@ -228,6 +229,23 @@ SpaceObject.prototype.attachedTo = function(object) {
 
 SpaceObject.prototype.detach = function(object) {
     delete this.attached[object.id];
+}
+
+SpaceObject.prototype.incThrust = function(delta) {
+    this.thrustChanged = true;
+    this.thrust += delta;
+    if (this.thrust > this.maxThrust) this.thrust = this.maxThrust;
+}
+
+SpaceObject.prototype.decThrust = function(delta) {
+    this.thrustChanged = true;
+    this.thrust -= delta;
+    if (this.thrust < -this.maxThrust) this.thrust = -this.maxThrust;
+}
+
+SpaceObject.prototype.resetThrust = function(delta) {
+    this.thrustChanged = true;
+    this.thrust=0;
 }
 
 SpaceObject.prototype.toString = function() {

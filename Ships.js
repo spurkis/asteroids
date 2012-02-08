@@ -19,8 +19,6 @@ Ship.prototype.initialize = function(game, spatial) {
     spatial.mass = 10;
     spatial.radius = 7;
     spatial.damage = 2;
-    spatial.thrust = 0;
-    spatial.spin = 0;
     spatial.maxSpin = deg_to_rad[6];
 
     Ship.prototype.parent.initialize.call(this, game, spatial);
@@ -42,11 +40,16 @@ Ship.prototype.initialize = function(game, spatial) {
     this.shield = 100;
     this.shieldActive = true;
 
-    // health
+    // for displaying health, shield & thrust
     this.healthWidth = 100;
     this.healthHeight = 10;
     this.healthX = this.maxX - this.healthWidth - 10;
     this.healthY = 10;
+
+    this.thrustWidth = 100;
+    this.thrustHeight = 10;
+    this.thrustX = this.healthX;
+    this.thrustY = this.healthY + this.healthHeight + 5;
 
     return this;
 }
@@ -123,6 +126,8 @@ Ship.prototype.draw = function() {
 
     this.drawHealth();
     this.drawShield();
+    this.drawThrust();
+    this.drawWeaponSelection();
 }
 
 Ship.prototype.drawHealth = function() {
@@ -136,13 +141,13 @@ Ship.prototype.drawHealth = function() {
     }
 
     var ctx = this.ctx;
-    var hc = this.healthCache;
+    var cache = this.healthCache;
     ctx.save();
     ctx.translate( this.healthX, this.healthY );
 
     ctx.beginPath();
-    ctx.fillStyle = 'rgba('+ hc.r +','+ hc.g +','+ hc.b +',0.5)';
-    ctx.fillRect(0,0,hc.fillWidth, this.healthHeight);
+    ctx.fillStyle = 'rgba('+ cache.r +','+ cache.g +','+ cache.b +',0.5)';
+    ctx.fillRect(0,0,cache.fillWidth, this.healthHeight);
     ctx.strokeStyle = 'rgba(5,5,5,0.75)';
     ctx.strokeRect(0,0,this.healthWidth,this.healthHeight);
     ctx.closePath();
@@ -166,16 +171,17 @@ Ship.prototype.drawShield = function() {
 		height: Math.floor(this.healthHeight/3),
 	    }
 	};
+	this.shieldCache.strokeStyle
     }
 
     var ctx = this.ctx;
-    var sc = this.shieldCache;
+    var cache = this.shieldCache;
 
     // draw shield as a circle around ship
     ctx.save();
     ctx.translate( this.x, this.y );
     ctx.beginPath();
-    ctx.strokeStyle = 'rgba('+ sc.r +','+ sc.g +','+ sc.b +','+ sc.a +')';
+    ctx.strokeStyle = 'rgba('+ cache.r +','+ cache.g +','+ cache.b +','+ cache.a +')';
     ctx.arc(0, 0, this.radius+2, 0, deg_to_rad[360], false);
     ctx.closePath();
     ctx.stroke();
@@ -186,13 +192,46 @@ Ship.prototype.drawShield = function() {
     ctx.translate( this.healthX, this.healthY );
     ctx.beginPath();
     ctx.fillStyle = 'rgba(100,100,225,0.8)';
-    ctx.fillRect(0,sc.bar.startY, sc.bar.fillWidth, sc.bar.height);
+    ctx.fillRect(0,cache.bar.startY, cache.bar.fillWidth, cache.bar.height);
     ctx.closePath();
     ctx.stroke();
 
     ctx.restore();
 }
 
+Ship.prototype.drawThrust = function() {
+    if (this.thrustChanged || this.thrustCache == null) {
+	var thrustPercent = Math.floor(this.thrust/this.maxThrust * 100);
+	var startX = Math.floor( this.thrustWidth / 2 );
+	var fillWidth = Math.floor(thrustPercent * this.thrustWidth / 100 / 2);
+	this.thrustCache = {
+	    r: 100,
+	    b: 200 + Math.floor(thrustPercent/2),
+	    g: 100,
+	    startX: startX,
+	    fillWidth: fillWidth,
+	    thrustPercent: thrustPercent
+	};
+    }
+
+    var ctx = this.ctx;
+    var cache = this.thrustCache;
+    ctx.save();
+    ctx.translate( this.thrustX, this.thrustY );
+
+    ctx.beginPath();
+    ctx.fillStyle = 'rgba('+ cache.r +','+ cache.g +','+ cache.b +',0.5)';
+    ctx.fillRect(startX,0, cache.fillWidth, this.thrustHeight);
+    ctx.strokeStyle = 'rgba(5,5,5,0.75)';
+    ctx.strokeRect(0,0, this.thrustWidth,this.thrustHeight);
+    ctx.closePath();
+
+    ctx.restore();
+}
+
+Ship.prototype.drawWeaponSelection = function() {
+    // TODO
+}
 
 
 /*********************************************************************
@@ -212,7 +251,7 @@ Ship.prototype.startAccelerate = function() {
 };
 
 Ship.prototype.increaseThrust = function() {
-    if (this.thrust < this.maxThrust) this.thrust += this.thrustIncrement;
+    this.incThrust(this.thrustIncrement);
     this.accelerateAlong(this.facing, this.thrust);
 }
 
@@ -222,7 +261,7 @@ Ship.prototype.stopAccelerate = function() {
     if (this.incThrustIntervalId) {
 	clearInterval(this.incThrustIntervalId);
 	this.incThrustIntervalId = null;
-	this.thrust=0;
+	this.resetThrust();
     }
 
     this.startSlowingDown();
@@ -243,7 +282,7 @@ Ship.prototype.startDecelerate = function() {
 };
   
 Ship.prototype.decreaseThrust = function() {
-    if (this.thrust > -this.maxThrust) this.thrust -= this.thrustIncrement;
+    this.decThrust(this.thrustIncrement);
     this.accelerateAlong(this.facing, this.thrust);
 }
 
@@ -252,7 +291,7 @@ Ship.prototype.stopDecelerate = function() {
     if (this.decThrustIntervalId) {
 	clearInterval(this.decThrustIntervalId);
 	this.decThrustIntervalId = null;
-	this.thrust=0;
+	this.resetThrust();
     }
 
     this.startSlowingDown();

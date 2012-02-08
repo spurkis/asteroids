@@ -11,7 +11,8 @@ require('Planets.js');
 
 function AsteroidsGame(ctx) {
     this.ctx = ctx;
-    this.refreshRate = 10; // ms
+    this.updateRate = 10; // ms
+    this.refreshRate = 20; // ms
     this.maxX = ctx.canvas.width;
     this.maxY = ctx.canvas.height;
     this.maxAccel = 1;
@@ -99,7 +100,7 @@ AsteroidsGame.prototype.startGameLoop = function() {
 	    console.log("updatePositions: caught exception " + e);
 	    self.stop();
 	}
-    }, this.refreshRate);
+    }, this.updateRate);
 
     this.drawIntervalId = setInterval(function(){
 	self.draw();
