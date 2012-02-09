@@ -9,6 +9,8 @@ require('Ships.js');
 require('Weapons.js');
 require('Planets.js');
 
+var animationFunc;
+
 function AsteroidsGame(ctx, img) {
     this.ctx = ctx;
 
@@ -109,7 +111,8 @@ AsteroidsGame.prototype.startGameLoop = function() {
             window.setTimeout(callback, self.updateRate);
         };
 
-    var animationFunc = function(lastCalled){
+    // set this global for debugging
+    animationFunc = function(lastCalled){
 	if (self.stopping) return;
 	self.animationTimeoutId = requestAnimationFrame(animationFunc);
 	self.updateAndDraw();
@@ -183,16 +186,17 @@ AsteroidsGame.prototype.updatePositions = function() {
 	var object1 = objects[i];
 
 	// may have changed below
-	if (object1.died) break;
+	if (object1.update == false) break;
 
 	// we update both i & j below, so to avoid repeating calcs
 	// we start j at the next position:
 	for (var j=i+1; j < objects.length; j++) {
 	    var object2 = objects[j];
-	    if (object1.died || object2.died) break;
-	    if (object2 == object1) continue; // paranoia
+	    if (object1.update == false) break; // may have changed below
+	    if (object2.update == false) continue;
+
+	    // don't apply physics to weapons of the same ship:
 	    if (object2.ship == object1 || object1.ship == object2) continue;
-	    if (! object1.update || ! object2.update) continue;
 
 	    this.applyGamePhysicsTo( object1, object2 );
 	}
@@ -265,6 +269,23 @@ AsteroidsGame.prototype.applyGravity = function(object1, object2, physics) {
      *   F1 = G*m1*m2/r^2
      *   a1 = F/m1 = G*m2/r^2
      */
+
+    // see if we can use cached values first:
+    var g_cache1 = physics.cache1.last_G;
+    var g_cache2 = physics.cache2.last_G;
+
+    if (g_cache1) {
+	var delta_dist_sq = Math.abs( physics.dist_squared - g_cache1.last_dist_squared);
+	var percent_diff = delta_dist_sq / physics.dist_squared;
+	// set threshold @ 5%
+	if (percent_diff < 0.05) {
+	    // we haven't moved much, use last G values
+	    //console.log("using G cache");
+	    object1.delayUpdateVelocity(g_cache1.dvX, g_cache1.dvY);
+	    object2.delayUpdateVelocity(g_cache2.dvX, g_cache2.dvY);
+	}
+    }
+
     var accel_1 = object2.cache.G_x_mass / physics.dist_squared;
     if (accel_1 > 1e-5) { // skip if it's too small to notice
 	if (accel_1 > this.maxAccel) accel_1 = this.maxAccel;
@@ -272,16 +293,38 @@ AsteroidsGame.prototype.applyGravity = function(object1, object2, physics) {
 	var dvX_1 = -Math.sin(angle_1) * accel_1;
 	var dvY_1 = -Math.cos(angle_1) * accel_1;
 	object1.delayUpdateVelocity(dvX_1, dvY_1);
+	physics.cache1.last_G = {
+	    dvX: dvX_1,
+	    dvY: dvY_1,
+	    last_dist_squared: physics.dist_squared
+	}
+    } else {
+	physics.cache1.last_G = {
+	    dvX: 0,
+	    dvY: 0,
+	    last_dist_squared: physics.dist_squared
+	}
     }
 
     var accel_2 = object1.cache.G_x_mass / physics.dist_squared;
-    if (accel_2 > 1e-9) { // skip if it's too small to notice
+    if (accel_2 > 1e-5) { // skip if it's too small to notice
 	if (accel_2 > this.maxAccel) accel_2 = this.maxAccel;
 	// TODO: angle_2 = angle_1 - PI?
 	var angle_2 = Math.atan2(-physics.dX, -physics.dY); // note the - signs
 	var dvX_2 = -Math.sin(angle_2) * accel_2;
 	var dvY_2 = -Math.cos(angle_2) * accel_2;
 	object2.delayUpdateVelocity(dvX_2, dvY_2);
+	physics.cache2.last_G = {
+	    dvX: dvX_2,
+	    dvY: dvY_2,
+	    last_dist_squared: physics.dist_squared
+	}
+    } else {
+	physics.cache2.last_G = {
+	    dvX: 0,
+	    dvY: 0,
+	    last_dist_squared: physics.dist_squared
+	}
     }
 }
 

@@ -91,17 +91,7 @@ SpaceObject.prototype.updatePositions = function(objects) {
     var changed = false;
     this.applyDelayedUpdates();
 
-    if (this.spin) {
-	this.facing += this.spin;
-	if (this.facing >= deg_to_rad[360] || this.facing <= deg_to_rad[360]) {
-	    this.facing = this.facing % deg_to_rad[360];
-	}
-	if (this.facing < 0) {
-	    this.facing = deg_to_rad[360] + this.facing;
-	}
-	changed = true;
-    }
-
+    if (this.updateFacing(this.spin)) changed = true;
     if (this.updateX(this.vX)) changed = true;
     if (this.updateY(this.vY)) changed = true;
 
@@ -115,22 +105,44 @@ SpaceObject.prototype.updatePositions = function(objects) {
  *    false if they're the same
  */
 SpaceObject.prototype.updateX = function(dX) {
+    if (dX == 0) return false;
+
     this.x += dX;
     if (this.x < 0) this.x = this.maxX + this.x;
     if (this.x > this.maxX) this.x = this.x - this.maxX;
 
-    // would this movement be visible?
+    // TODO: incremental draws
+    //would this movement be visible?
     if (Math.abs(this.x_last - this.x) < 0.1) return false;
     return true;
 }
 
 SpaceObject.prototype.updateY = function(dY) {
+    if (dY == 0) return false;
+
     this.y += dY;
     if (this.y < 0) this.y = this.maxY + this.y;
     if (this.y > this.maxY) this.y = this.y - this.maxY;
 
+    // TODO: incremental draws
     // would this movement be visible?
-    if (Math.abs(this.y_last - this.y) < 0.1) return false;
+    //if (Math.abs(this.y_last - this.y) < 0.1) return false;
+    return true;
+}
+
+SpaceObject.prototype.updateFacing = function(delta) {
+    if (delta == 0) return false;
+
+    this.facing += delta;
+
+    if (this.facing >= deg_to_rad[360] || this.facing <= deg_to_rad[360]) {
+	this.facing = this.facing % deg_to_rad[360];
+    }
+
+    if (this.facing < 0) {
+	this.facing = deg_to_rad[360] + this.facing;
+    }
+
     return true;
 }
 
@@ -252,6 +264,7 @@ SpaceObject.prototype.incHealth = function(delta) {
 
 SpaceObject.prototype.die = function() {
     this.died = true;
+    this.update = false;
     this.game.objectDied( this );
 }
 
