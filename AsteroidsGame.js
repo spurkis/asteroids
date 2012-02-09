@@ -59,7 +59,7 @@ function AsteroidsGame(ctx, img) {
     }
 */
     this.addObjects([
-	new Asteroid(this, {x: 1/10*this.maxX, y: 6/10*this.maxY, mass: 0.5, radius: 4, vX: 0, vY: 0, spawn: 3, health: 1 }) //,
+	new Asteroid(this, {x: 1/10*this.maxX, y: 6/10*this.maxY, mass: 0.5, radius: 14, vX: 0, vY: 0, spawn: 3, health: 1 }) //,
 //        new Asteroid(this, {x: 1/10*this.maxX, y: 2/10*this.maxY, mass: 1, radius: 5, vX: 0, vY: -0.1 }),
 /*        new Asteroid(this, {x: 5/10*this.maxX, y: 1/10*this.maxY, mass: 2, radius: 6, vX: -0.2, vY: 0.25 }),
         new Asteroid(this, {x: 5/10*this.maxX, y: 2/10*this.maxY, mass: 3, radius: 8, vX: -0.22, vY: 0.2 }),
@@ -197,6 +197,10 @@ AsteroidsGame.prototype.applyGamePhysicsTo = function(object1, object2) {
     var cache1 = object1.cache[object2.id];
     var cache2 = object2.cache[object1.id];
 
+    if (cache1 == null || cache2 == null) {
+	throw "object cache missing!?";
+    }
+
     var dX = object1.x - object2.x;
     var dY = object1.y - object2.y;
     var dist_squared = dX*dX + dY*dY; // avoid sqrt, we don't need magnitude
@@ -308,6 +312,13 @@ AsteroidsGame.prototype.collision = function(object1, object2, collision) {
     var cache1 = object1.cache[object2.id];
     var cache2 = object2.cache[object1.id];
 
+    if (cache1 == null || cache2 == null) {
+	throw "object cache missing!?";
+    }
+
+    if (object1.is_asteroid && object2.is_asteroid) {
+	console;
+    }
     // console.log(object1.id + ' <=> ' + object2.id + ' collided');
 
     if (object1.mass && object2.mass) {
@@ -426,9 +437,7 @@ AsteroidsGame.prototype.addObjects = function(objects) {
 }
 
 AsteroidsGame.prototype.addObject = function(object) {
-    if (object.is_asteroid) {
-	console;
-    }
+    console.log('adding ' + object);
     this.objects.push( object );
     this.cachePhysicsFor(object);
 }

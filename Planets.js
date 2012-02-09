@@ -169,17 +169,18 @@ Asteroid.prototype.die = function() {
     this.parent.die.call( this );
     if (this.spawn > 0) {
 	for (var i=0; i < this.spawn; i++) {
-	    var mass = this.mass / this.spawn;
+	    var mass = Math.floor(this.mass / this.spawn * 1000)/1000;
+	    var radius = getRandomInt(2, this.radius);
 	    var asteroid = new Asteroid(this.game, {
-		mass: mass.toFixed(3),
-		x: this.x+i,
-		y: this.y,
-		radius: Math.floor(this.radius/this.spawn) || 1,
+		mass: mass,
+		x: this.x + i/10, // don't overlap
+		y: this.y + i/10,
+		radius:  radius,
 		spawn: getRandomInt(0, this.spawn-1)
 		// let physics engine handle movement
 	    });
 	    // TODO: debug the weirdness this causes
-	    // this.game.addObject( asteroid );
+	    this.game.addObject( asteroid );
 	}
     }
 }
