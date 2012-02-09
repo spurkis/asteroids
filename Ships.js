@@ -79,11 +79,12 @@ Ship.prototype.draw = function() {
 
     // TODO: replace these with .png's?
 
-    if (this.healthChanged || this.healthRedVal == null) {
-	this.healthRedVal = 200 - this.health*2;
+    if (this.healthChanged || this.shipStrokeStyle == null) {
+	var r = 200 - this.health*2;
+	this.shipStrokeStyle = 'rgb('+ r +',0,0)';
     }
 
-    ctx.strokeStyle = 'rgb('+ this.healthRedVal +',0,0)';
+    ctx.strokeStyle = this.shipStrokeStyle;
     ctx.beginPath();
     ctx.moveTo(-7,-7);
     ctx.lineTo(7,0);
@@ -132,10 +133,11 @@ Ship.prototype.draw = function() {
 
 Ship.prototype.drawHealth = function() {
     if (this.healthChanged || this.healthCache == null) {
+	var r = 200 - this.health*2;
+	var g = this.health*2 + 50;
+	var b = this.health*2;
 	this.healthCache = {
-	    r: 200 - this.health*2,
-	    g: this.health*2 + 50,
-	    b: this.health,
+	    fillStyle: 'rgba('+ r +','+ g +','+ b +',0.5)',
 	    fillWidth: Math.floor(this.health/100 * this.healthWidth)
 	};
     }
@@ -146,7 +148,7 @@ Ship.prototype.drawHealth = function() {
     ctx.translate( this.healthX, this.healthY );
 
     ctx.beginPath();
-    ctx.fillStyle = 'rgba('+ cache.r +','+ cache.g +','+ cache.b +',0.5)';
+    ctx.fillStyle = cache.fillStyle;
     ctx.fillRect(0,0,cache.fillWidth, this.healthHeight);
     ctx.strokeStyle = 'rgba(5,5,5,0.75)';
     ctx.strokeRect(0,0,this.healthWidth,this.healthHeight);
@@ -159,12 +161,12 @@ Ship.prototype.drawShield = function() {
     if (! this.shieldActive) return;
 
     if (this.shieldChanged || this.shieldCache == null) {
+	var r = this.shield;
+	var g = this.shield*2;
+	var b = this.shield*2 + 55;
 	this.shieldCache = {
 	    // shield colour displayed around ship
-	    r: this.shield,
-	    g: this.shield*2,
-	    b: this.shield*2+55,
-	    a: 0.5,
+	    strokeStyle: 'rgba('+ r +','+ g +','+ b +',0.5)',
 	    bar: {
 		fillWidth: Math.floor(this.shield/100 * this.healthWidth),
 		startY: Math.floor(this.healthHeight/3),
@@ -181,7 +183,7 @@ Ship.prototype.drawShield = function() {
     ctx.save();
     ctx.translate( this.x, this.y );
     ctx.beginPath();
-    ctx.strokeStyle = 'rgba('+ cache.r +','+ cache.g +','+ cache.b +','+ cache.a +')';
+    ctx.strokeStyle = cache.strokeStyle;
     ctx.arc(0, 0, this.radius+2, 0, deg_to_rad[360], false);
     ctx.closePath();
     ctx.stroke();
@@ -204,12 +206,13 @@ Ship.prototype.drawThrust = function() {
 	var thrustPercent = Math.floor(this.thrust/this.maxThrust * 100);
 	var startX = Math.floor( this.thrustWidth / 2 );
 	var fillWidth = Math.floor(thrustPercent * this.thrustWidth / 100 / 2);
+	var r = 100;
+	var b = 200 + Math.floor(thrustPercent/2);
+	var g = 100;
 	this.thrustCache = {
-	    r: 100,
-	    b: 200 + Math.floor(thrustPercent/2),
-	    g: 100,
 	    startX: startX,
 	    fillWidth: fillWidth,
+	    fillStyle: 'rgba('+ r +','+ g +','+ b +',0.5)',
 	    thrustPercent: thrustPercent
 	};
     }
@@ -220,7 +223,7 @@ Ship.prototype.drawThrust = function() {
     ctx.translate( this.thrustX, this.thrustY );
 
     ctx.beginPath();
-    ctx.fillStyle = 'rgba('+ cache.r +','+ cache.g +','+ cache.b +',0.5)';
+    ctx.fillStyle = cache.fillStyle;
     ctx.fillRect(startX,0, cache.fillWidth, this.thrustHeight);
     ctx.strokeStyle = 'rgba(5,5,5,0.75)';
     ctx.strokeRect(0,0, this.thrustWidth,this.thrustHeight);

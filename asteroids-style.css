@@ -37,6 +37,7 @@ canvas#game {
     clear: left;
     margin-top: 10px;
     border: solid 1px #a0a;
+    background-color: #fff;
 }
 
 

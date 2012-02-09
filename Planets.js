@@ -21,26 +21,38 @@ Planetoid.prototype.initialize = function(game, spatial) {
     Planetoid.prototype.parent.initialize.call(this, game, spatial);
 
     this.is_planetoid = true;
-    this.fillStyle = "rgb(0,0,0)"; // override me!
+    this.fillStyle = null; // override...
+    this.strokeStyle = null; // one of these!
 
     return this;
 }
 
 Planetoid.prototype.draw = function() {
     var ctx = this.ctx;
+
     ctx.save();
     ctx.translate( this.x, this.y );
-    ctx.beginPath();
-    ctx.arc(0, 0, this.radius, 0, deg_to_rad[360], false);
-    ctx.fillStyle = this.fillStyle;
-    ctx.fill();
-    ctx.closePath();
+
+    if (this.image != null) {
+	ctx.drawImage(this.image, -this.radius, -this.radius, this.radius*2, this.radius*2);
+    } else {
+	ctx.beginPath();
+	ctx.arc(0, 0, this.radius, 0, deg_to_rad[360], false);
+	ctx.closePath()
+	if (this.fillStyle) {
+	    ctx.fillStyle = this.fillStyle;
+	    ctx.fill();
+	} else {
+	    ctx.strokeStyle = this.strokeStyle;
+	    ctx.stroke();
+	}
+    }
 
     // draw trajectory:
     /*
     ctx.beginPath();
     ctx.moveTo(0,0);
-    ctx.strokeStyle = 'black';
+    ctx.strokeStyle = 'orange';
     ctx.lineTo(this.vX*100,this.vY*100);
     ctx.closePath();
     ctx.stroke();
@@ -76,6 +88,10 @@ Planet.prototype.initialize = function(game, spatial) {
     this.is_planet = true;
     this.landingThresholdSpeed = 0.4;
     this.landingThresholdAngle = deg_to_rad[5];
+
+    if (this.game.asteroidImg != null) {
+	this.image = this.game.asteroidImg;
+    }
 
     return this;
 }
@@ -134,7 +150,7 @@ Asteroid.prototype.initialize = function(game, spatial) {
     if (spatial.damage == null) spatial.damage = spatial.mass*10;
     Asteroid.prototype.parent.initialize.call(this, game, spatial);
 
-    this.fillStyle = "rgba(0,100,100,1)";
+    this.fillStyle = "rgb(0,100,100)";
     this.is_asteroid = true;
 
     return this;

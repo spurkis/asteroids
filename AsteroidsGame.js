@@ -9,8 +9,10 @@ require('Ships.js');
 require('Weapons.js');
 require('Planets.js');
 
-function AsteroidsGame(ctx) {
+function AsteroidsGame(ctx, img) {
     this.ctx = ctx;
+
+    this.asteroidImg = img;
     this.updateRate = 10; // ms
     this.refreshRate = 20; // ms
     this.maxX = ctx.canvas.width;
@@ -77,7 +79,8 @@ function AsteroidsGame(ctx) {
 AsteroidsGame.prototype.setDefaultCanvasState = function() {
     var ctx = this.ctx;
     // set & save default canvas state
-    ctx.globalCompositeOperation = 'destination-over';  
+    //ctx.globalCompositeOperation = 'source-over';
+    ctx.globalCompositeOperation = 'destination-over';
     ctx.fillStyle = "black";
     ctx.strokeStyle = "black";
     ctx.globalAlpha = 1;
@@ -103,9 +106,13 @@ AsteroidsGame.prototype.startGameLoop = function() {
 	}
     }, this.updateRate);
 
-    this.drawIntervalId = setInterval(function(){
-	self.draw();
-    }, this.refreshRate);
+    if (window.requestAnimationFrame) {
+	this.drawAnimationFrameId = requestAnimationFrame(function(){ self.draw() });
+    } else {
+	this.drawIntervalId = setInterval(function(){
+	    self.draw();
+	}, this.refreshRate);
+    }
 }
 
 AsteroidsGame.prototype.stop = function() {
@@ -114,17 +121,25 @@ AsteroidsGame.prototype.stop = function() {
 	delete this.updateIntervalId;
 	console.log( "stopped update loop" );
     }
+
     if (this.drawIntervalId) {
 	clearInterval(this.drawIntervalId);
 	delete this.drawIntervalId;
 	console.log( "stopped draw loop" );
     }
 
+    if (this.drawAnimationFrameId) {
+	cancelRequestAnimationFrame(this.drawAnimationFrameId);
+	delete this.drawAnimationFrameId;
+	console.log( "stopped draw animation frame" );
+    }
+
     this.drawGameOver();
 }
 
 AsteroidsGame.prototype.draw = function() {
-    this.ctx.clearRect(0,0, this.maxX,this.maxY); // clear canvas
+    // clear entire canvas: not good for performance, but good enough for now
+    this.ctx.clearRect(0,0, this.maxX,this.maxY);
     for (var i=0; i < this.objects.length; i++) {
 	this.objects[i].draw();
     }
