@@ -55,6 +55,10 @@ Ship.prototype.initialize = function(game, spatial) {
 }
 
 Ship.prototype.draw = function() {
+    // all objects should set:
+    this.x_last = this.x;
+    this.y_last = this.y;
+
     var ctx = this.ctx;
     ctx.save();
     ctx.translate( this.x, this.y );
@@ -236,6 +240,17 @@ Ship.prototype.drawWeaponSelection = function() {
     // TODO
 }
 
+
+Ship.prototype.redraw = function() {
+    // TODO: this is experimental & not working...
+    var ctx = this.ctx;
+    ctx.save();
+    ctx.translate( this.x_last, this.y_last );
+    ctx.clearRect(-13,-13, 26, 26);
+    ctx.restore();
+
+    this.draw();
+}
 
 /*********************************************************************
  * Acceleration
@@ -452,7 +467,7 @@ Ship.prototype.stopFireWeapon = function() {
 
 Ship.prototype.fireWeapon = function() {
     // TODO: don't hard-code weapon
-    var fireThrust = 1.5;
+    var fireThrust = 2.5;
     var scaleX = Math.cos(this.facing) * fireThrust;
     var scaleY = Math.sin(this.facing) * fireThrust;
     var vX = this.vX + scaleX;
@@ -462,7 +477,7 @@ Ship.prototype.fireWeapon = function() {
 	y: this.y,
 	facing: this.facing,
 	vX: vX,
-	vY: vY
+	vY: vY,
     });
     this.game.fireWeapon(bullet);
 }

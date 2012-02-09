@@ -28,6 +28,10 @@ Planetoid.prototype.initialize = function(game, spatial) {
 }
 
 Planetoid.prototype.draw = function() {
+    // all objects should set:
+    this.x_last = this.x;
+    this.y_last = this.y;
+
     var ctx = this.ctx;
 
     ctx.save();
@@ -59,6 +63,20 @@ Planetoid.prototype.draw = function() {
     */
     ctx.restore();
 }
+
+Planetoid.prototype.redraw = function() {
+    var ctx = this.ctx;
+
+    ctx.save();
+    ctx.translate( this.x_last, this.y_last );
+    var corner = -(this.radius+1);
+    var width  = this.radius*2 + 2;
+    ctx.clearRect(corner, corner, width, width);
+    ctx.restore();
+
+    this.draw();
+}
+
 
 /*
 Planetoid.prototype.collided = function(object) {

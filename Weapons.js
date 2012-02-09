@@ -18,6 +18,7 @@ Bullet.prototype.initialize = function(ship, spatial) {
     spatial.radius = 1;
     spatial.mass = 0.05;
     spatial.damage = 5;
+    spatial.maxV = 4;
     Bullet.prototype.parent.initialize.call(this, ship.game, spatial);
 
     this.ship = ship;
@@ -50,6 +51,10 @@ Bullet.prototype.fadeOut = function() {
 }
 
 Bullet.prototype.draw = function() {
+    // all objects should set:
+    this.x_last = this.x;
+    this.y_last = this.y;
+
     var ctx = this.ctx;
     ctx.save();
     ctx.translate( this.x, this.y );
@@ -80,6 +85,16 @@ Bullet.prototype.draw = function() {
     ctx.restore();
 }
 
+Bullet.prototype.redraw = function() {
+    // TODO: this is experimental & not working...
+    var ctx = this.ctx;
+    ctx.save();
+    ctx.translate( this.x_last, this.y_last );
+    ctx.clearRect(-4,-4, 8, 8);
+    ctx.restore();
+
+    this.draw();
+}
 
 Bullet.prototype.decHealth = function(delta) {
     // do nothing - bullets are indescructable

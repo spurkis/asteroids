@@ -15,7 +15,14 @@ function SpaceObject(game, spatial) {
 }
 
 SpaceObject.prototype.draw = function() {
-    throw this + ".draw not overriden";
+    throw this.constructor.toString() + ".draw not overriden";
+    // all objects should set:
+    this.x_last = this.x;
+    this.y_last = this.y;
+};
+
+SpaceObject.prototype.redraw = function() {
+    throw this.constructor.toString() + ".redraw not overriden";
 };
 
 SpaceObject.prototype.initialize = function(game, spatial) {
@@ -29,8 +36,9 @@ SpaceObject.prototype.initialize = function(game, spatial) {
     this.healthChanged = false;
     this.damage = spatial.damage || 0;        // damage on impact
 
-    this.x = spatial.x;                       // starting position on x axis
-    this.y = spatial.y;                       // starting position on y axis
+    // call updateX/Y to set on-screen coords
+    this.x = 0; this.updateX(spatial.x);      // starting position on x axis
+    this.y = 0; this.updateY(spatial.y);      // starting position on y axis
     this.maxX = this.ctx.canvas.width;
     this.maxY = this.ctx.canvas.height;
 
@@ -70,37 +78,60 @@ SpaceObject.prototype.initialize = function(game, spatial) {
 }
 
 SpaceObject.prototype.createObjectId = function() {
-    var prefix = this.oid_prefix || 'obj'
+    var prefix = this.oid_prefix || 'obj';
     return prefix + _spaceObjectId++;
 }
 
+/**
+ * returns true if this object has changed & needs re-drawing
+ */
 SpaceObject.prototype.updatePositions = function(objects) {
-    if (! this.update) return;
+    if (! this.update) return false;
+
+    var changed = false;
     this.applyDelayedUpdates();
 
-    this.facing += this.spin;
-    if (this.facing >= deg_to_rad[360] || this.facing <= deg_to_rad[360]) {
-	this.facing = this.facing % deg_to_rad[360];
-    }
-    if (this.facing < 0) {
-	this.facing = deg_to_rad[360] + this.facing;
+    if (this.spin) {
+	this.facing += this.spin;
+	if (this.facing >= deg_to_rad[360] || this.facing <= deg_to_rad[360]) {
+	    this.facing = this.facing % deg_to_rad[360];
+	}
+	if (this.facing < 0) {
+	    this.facing = deg_to_rad[360] + this.facing;
+	}
+	changed = true;
     }
 
-    this.incX(this.vX);
-    this.incY(this.vY);
+    if (this.updateX(this.vX)) changed = true;
+    if (this.updateY(this.vY)) changed = true;
+
+    return changed;
 }
 
 
-SpaceObject.prototype.incX = function(dX) {
+/***
+ * updateease x & y coords, and return:
+ *    true if the on-screen coords have changed
+ *    false if they're the same
+ */
+SpaceObject.prototype.updateX = function(dX) {
     this.x += dX;
     if (this.x < 0) this.x = this.maxX + this.x;
     if (this.x > this.maxX) this.x = this.x - this.maxX;
+
+    // would this movement be visible?
+    if (Math.abs(this.x_last - this.x) < 0.1) return false;
+    return true;
 }
 
-SpaceObject.prototype.incY = function(dY) {
+SpaceObject.prototype.updateY = function(dY) {
     this.y += dY;
     if (this.y < 0) this.y = this.maxY + this.y;
     if (this.y > this.maxY) this.y = this.y - this.maxY;
+
+    // would this movement be visible?
+    if (Math.abs(this.y_last - this.y) < 0.1) return false;
+    return true;
 }
 
 // called before we update velocity

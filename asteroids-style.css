@@ -30,7 +30,7 @@ nav.top li {
 
 
 /*********************************************************************
- * Top Nav
+ * Game canvas
  */
 canvas#game {
     position: relative;
@@ -39,7 +39,6 @@ canvas#game {
     border: solid 1px #a0a;
     background-color: #fff;
 }
-
 
 /*********************************************************************
  * Control Box
