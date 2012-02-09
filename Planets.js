@@ -152,6 +152,7 @@ Asteroid.prototype.initialize = function(game, spatial) {
 
     this.fillStyle = "rgb(0,100,100)";
     this.is_asteroid = true;
+    this.spawn = spatial.spawn != null ? spatial.spawn : getRandomInt(0, 3);
 
     return this;
 }
@@ -161,5 +162,24 @@ Asteroid.prototype.collided = function(object, collision) {
 	this.parent.collided.call( this, object, collision );
     } else {
 	this.colliding[object.id] = object;
+    }
+}
+
+Asteroid.prototype.die = function() {
+    this.parent.die.call( this );
+    if (this.spawn > 0) {
+	for (var i=0; i < this.spawn; i++) {
+	    var mass = this.mass / this.spawn;
+	    var asteroid = new Asteroid(this.game, {
+		mass: mass.toFixed(3),
+		x: this.x+i,
+		y: this.y,
+		radius: Math.floor(this.radius/this.spawn) || 1,
+		spawn: getRandomInt(0, this.spawn-1)
+		// let physics engine handle movement
+	    });
+	    // TODO: debug the weirdness this causes
+	    // this.game.addObject( asteroid );
+	}
     }
 }

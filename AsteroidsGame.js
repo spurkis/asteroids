@@ -36,10 +36,11 @@ function AsteroidsGame(ctx, img) {
 //	new Planet(this, {x: 3/4*this.maxX, y: 1/4*this.maxY, mass: 195, radius: 45, vX: -0.5, vY: 0}) ,
 //	new Planet(this, {x: 1/5*this.maxX, y: 2/5*this.maxY, mass: 15, radius: 15, vX: -0.5, vY: 0.5}) ,
 //	new Planet(this, {x: 5/7*this.maxX, y: 4/5*this.maxY, mass: 30, radius: 20}),
-	new Planet(this, {x: 1/2*this.maxX-60, y: 1/2*this.maxY, mass: 15, radius: 15, vY: 0.5}),
-	new Planet(this, {x: 1/2*this.maxX, y: 1/2*this.maxY, mass: 120, radius: 30, stationary: true})
+//	new Planet(this, {x: 1/2*this.maxX-60, y: 1/2*this.maxY, mass: 15, radius: 15, vY: 0.5}),
+//	new Planet(this, {x: 1/2*this.maxX, y: 1/2*this.maxY, mass: 120, radius: 30, stationary: true})
     ]);
 
+/*
     for (var i=0; i<this.maxX; i+= 95) {
 	for (var j=0; j<this.maxY; j+= 95) {
 	    var a = new Asteroid(this, {
@@ -56,12 +57,11 @@ function AsteroidsGame(ctx, img) {
 	    this.addObject(a);
 	}
     }
-
-    /*
+*/
     this.addObjects([
-//	new Asteroid(this, {x: 1/10*this.maxX, y: 1/10*this.maxY, mass: 0.5, radius: 4, vX: 0, vY: 0 }),
+	new Asteroid(this, {x: 1/10*this.maxX, y: 6/10*this.maxY, mass: 0.5, radius: 4, vX: 0, vY: 0, spawn: 3, health: 1 }) //,
 //        new Asteroid(this, {x: 1/10*this.maxX, y: 2/10*this.maxY, mass: 1, radius: 5, vX: 0, vY: -0.1 }),
-        new Asteroid(this, {x: 5/10*this.maxX, y: 1/10*this.maxY, mass: 2, radius: 6, vX: -0.2, vY: 0.25 }),
+/*        new Asteroid(this, {x: 5/10*this.maxX, y: 1/10*this.maxY, mass: 2, radius: 6, vX: -0.2, vY: 0.25 }),
         new Asteroid(this, {x: 5/10*this.maxX, y: 2/10*this.maxY, mass: 3, radius: 8, vX: -0.22, vY: 0.2 }),
         new Asteroid(this, {x: 6/10*this.maxX, y: 8/10*this.maxY, mass: 2, radius: 6, vX: -0.4, vY: 0.1 }),
         new Asteroid(this, {x: 6/10*this.maxX, y: 9/10*this.maxY, mass: 3, radius: 8, vX: 0.5, vY: -0.5 }),
@@ -69,8 +69,9 @@ function AsteroidsGame(ctx, img) {
         new Asteroid(this, {x: 9/10*this.maxX, y: 9/10*this.maxY, mass: 3, radius: 8, vX: 0.7, vY: 0.6 }),
         new Asteroid(this, {x: 3/10*this.maxX, y: 1/10*this.maxY, mass: 2, radius: 6, vX: 0.8, vY: -0.2 }),
         new Asteroid(this, {x: 3/10*this.maxX, y: 2/10*this.maxY, mass: 3, radius: 8, vX: 0.9, vY: -0.1 })
+/**/
     ]);
-*/
+/**/
 
     this.setDefaultCanvasState();
     this.bindDefaultKeys();
@@ -79,8 +80,8 @@ function AsteroidsGame(ctx, img) {
 AsteroidsGame.prototype.setDefaultCanvasState = function() {
     var ctx = this.ctx;
     // set & save default canvas state
-    //ctx.globalCompositeOperation = 'source-over';
-    ctx.globalCompositeOperation = 'destination-over';
+    ctx.globalCompositeOperation = 'source-over';
+    //ctx.globalCompositeOperation = 'destination-over';
     ctx.fillStyle = "black";
     ctx.strokeStyle = "black";
     ctx.globalAlpha = 1;
@@ -95,43 +96,42 @@ AsteroidsGame.prototype.startGameLoop = function() {
 	return;
     }
 
-    // separate computation from re-drawing...
-    var self = this;
-    this.updateIntervalId = setInterval(function(){
-	try {
-	    self.updatePositions();
-	} catch (e) {
-	    console.log("updatePositions: caught exception " + e);
-	    self.stop();
-	}
-    }, this.updateRate);
+    // draw current game state
+    this.draw();
 
-    if (window.requestAnimationFrame) {
-	this.drawAnimationFrameId = requestAnimationFrame(function(){ self.draw() });
-    } else {
-	this.drawIntervalId = setInterval(function(){
+    var self = this;
+    var requestAnimationFrame = window.requestAnimationFrame
+	|| window.mozRequestAnimationFrame
+	|| window.webkitRequestAnimationFrame
+	|| window.msRequestAnimationFrame
+	|| function(callback) {
+            window.setTimeout(callback, self.updateRate);
+        };
+
+    var animationFunc = function(lastCalled){
+	//try {
+	    self.animationTimeoutId = requestAnimationFrame(animationFunc);
+	    self.updatePositions();
 	    self.draw();
-	}, this.refreshRate);
-    }
+/*	} catch (e) {
+	    console.log("Animation Loop: caught exception " + e);
+	    self.stop();
+	} */
+    };
+
+    console.log("starting animation loop");
+    self.animationTimeoutId = requestAnimationFrame(animationFunc);
 }
 
 AsteroidsGame.prototype.stop = function() {
-    if (this.updateIntervalId) {
-	clearInterval(this.updateIntervalId);
-	delete this.updateIntervalId;
-	console.log( "stopped update loop" );
-    }
-
-    if (this.drawIntervalId) {
-	clearInterval(this.drawIntervalId);
-	delete this.drawIntervalId;
-	console.log( "stopped draw loop" );
-    }
-
-    if (this.drawAnimationFrameId) {
-	cancelRequestAnimationFrame(this.drawAnimationFrameId);
-	delete this.drawAnimationFrameId;
-	console.log( "stopped draw animation frame" );
+    if (this.animationTimeoutId) {
+	try {
+	    cancelRequestAnimationFrame(this.animationTimeoutId);
+	} catch(e) {
+	    clearTimeout(this.animationTimeoutId);
+	}
+	delete this.animationTimeoutId;
+	console.log( "stopped animation loop" );
     }
 
     this.drawGameOver();
@@ -157,16 +157,20 @@ AsteroidsGame.prototype.drawGameOver = function() {
 }
 
 AsteroidsGame.prototype.updatePositions = function() {
-    var objects = this.objects;
+    var objects = this.objects.slice(); // create a copy, it may change!
 
     // note that we don't apply any updates until we've processed all objects
     for (var i=0; i < objects.length; i++) {
 	var object1 = objects[i];
+
+	// may have changed below
+	if (object1.died) break;
+
 	// we update both i & j below, so to avoid repeating calcs
 	// we start j at the next position:
 	for (var j=i+1; j < objects.length; j++) {
 	    var object2 = objects[j];
-
+	    if (object1.died || object2.died) break;
 	    if (object2 == object1) continue; // paranoia
 	    if (object2.ship == object1 || object1.ship == object2) continue;
 	    if (! object1.update || ! object2.update) continue;
@@ -174,6 +178,7 @@ AsteroidsGame.prototype.updatePositions = function() {
 	    this.applyGamePhysicsTo( object1, object2 );
 	}
 
+	// don't check for object death: may want to undraw itself?
 	object1.updatePositions();
     } // for obj1
 };
@@ -411,7 +416,6 @@ AsteroidsGame.prototype.cachePhysicsFor = function(object1) {
 	    total_mass: total_mass,
 	    delta_mass: object2.mass - object1.mass
 	}
-
     }
 }
 
@@ -422,14 +426,24 @@ AsteroidsGame.prototype.addObjects = function(objects) {
 }
 
 AsteroidsGame.prototype.addObject = function(object) {
+    if (object.is_asteroid) {
+	console;
+    }
     this.objects.push( object );
     this.cachePhysicsFor(object);
 }
 
 AsteroidsGame.prototype.removeObject = function(object) {
-    var i = this.objects.indexOf(object);
-    if (i >= 0) this.objects.splice(i,1);
-    // TODO: setTimeout( rm object from other objects' cache );
+    var objects = this.objects;
+    var i = objects.indexOf(object);
+    if (i >= 0) objects.splice(i,1);
+
+    // avoid memory bloat: remove references to this object
+    // from other objects' caches:
+    var oid = object.id;
+    for (var i=0; i < objects.length; i++) {
+	delete objects[i].cache[oid];
+    }
 }
 
 AsteroidsGame.prototype.objectDied = function(object) {

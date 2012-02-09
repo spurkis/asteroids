@@ -1,5 +1,5 @@
 /*********************************************************************
- * SpaceObject - base class, where a lot of the game physics happens
+ * SpaceObject - base class, where some of the game physics happens
  * Copyright (c) 2012 Steve Purkis
  *
  * var o = new SpaceObject( game, spatial );
@@ -220,6 +220,7 @@ SpaceObject.prototype.incHealth = function(delta) {
 }
 
 SpaceObject.prototype.die = function() {
+    this.died = true;
     this.game.objectDied( this );
 }
 
