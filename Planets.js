@@ -160,7 +160,7 @@ Asteroid.inheritsFrom( Planetoid );
 Asteroid.prototype.initialize = function(game, spatial) {
     this.oid_prefix = 'ast';
 
-    if (! spatial.health) spatial.health = 30;
+    if (! spatial.health) spatial.health = getRandomInt(5, 30);
     if (spatial.damage == null) spatial.damage = spatial.mass*10;
     Asteroid.prototype.parent.initialize.call(this, game, spatial);
 
@@ -191,6 +191,8 @@ Asteroid.prototype.die = function() {
 		mass: mass,
 		x: this.x + i/10, // don't overlap
 		y: this.y + i/10,
+		vX: this.vX * Math.random(),
+		vX: this.vY * Math.random(),
 		radius:  radius,
 		health: getRandomInt(0, this.maxSpawnHealth),
 		spawn: getRandomInt(0, this.spawn-1)

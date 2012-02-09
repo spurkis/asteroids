@@ -9,14 +9,25 @@ require('Ships.js');
 require('Weapons.js');
 require('Planets.js');
 
-var animationFunc;
+var animationFunc;    // set this global for debugging
+var requestAnimationFrame = window.requestAnimationFrame
+    || window.mozRequestAnimationFrame
+    || window.webkitRequestAnimationFrame
+    || window.msRequestAnimationFrame
+    || function(callback) {
+        window.setTimeout(callback, 20); // 50hZ
+    };
+var cancelAnimationFrame = window.cancelAnimationFrame
+    || window.webkitCancelRequestAnimationFrame
+    || window.mozCancelRequestAnimationFrame
+    || window.oCancelRequestAnimationFrame
+    || window.msCancelRequestAnimationFrame
+    || clearTimeout;
 
 function AsteroidsGame(ctx, img) {
     this.ctx = ctx;
 
     this.planetImg = img;
-    this.updateRate = 10; // ms
-    this.refreshRate = 20; // ms
     this.maxX = ctx.canvas.width;
     this.maxY = ctx.canvas.height;
     this.maxAccel = 1;
@@ -36,19 +47,19 @@ function AsteroidsGame(ctx, img) {
     this.addObject( this.ship );
 
     this.addObjects([
-//	new Planet(this, {x: 3/4*this.maxX, y: 1/4*this.maxY, mass: 195, radius: 45, vX: -0.5, vY: 0}) ,
+//	new Planet(this, {x: 3/4*this.maxX, y: 1/4*this.maxY, mass: 195, radius: 45, vX: -0.5, vY: 0}),
 //	new Planet(this, {x: 1/5*this.maxX, y: 2/5*this.maxY, mass: 15, radius: 15, vX: -0.5, vY: 0.5, image: this.planetImg }) ,
 //	new Planet(this, {x: 5/7*this.maxX, y: 4/5*this.maxY, mass: 30, radius: 20}),
 //	new Planet(this, {x: 1/2*this.maxX-60, y: 1/2*this.maxY, mass: 15, radius: 15, vY: 0.5}),
-	new Planet(this, {x: 1/2*this.maxX, y: this.maxY+900, mass: 0, radius: 1000, stationary: true})
+	new Planet(this, {x: 1/2*this.maxX, y: this.maxY+900, mass: 100, radius: 1000, stationary: true})
     ]);
 
-/*
-    for (var i=0; i<this.maxX; i+= 95) {
-	for (var j=0; j<this.maxY; j+= 95) {
+
+    for (var i=50; i<this.maxX; i+= getRandomInt(80,120)) {
+	for (var j=50; j<this.maxY; j+= getRandomInt(80,120)) {
 	    var a = new Asteroid(this, {
-		x: i + getRandomInt(0, 10),
-		y: j + getRandomInt(0, 10),
+		x: i + getRandomInt(0, 80),
+		y: j + getRandomInt(0, 80),
 		mass: getRandomInt(1, 3),
 		radius: getRandomInt(3, 10),
 		vX: Math.random(),
@@ -60,6 +71,7 @@ function AsteroidsGame(ctx, img) {
 	    this.addObject(a);
 	}
     }
+
 /*
     this.addObjects([
 	new Asteroid(this, {x: 1/10*this.maxX, y: 6/10*this.maxY, mass: 0.5, radius: 14, vX: 0, vY: 0, spawn: 3, health: 1 }),
@@ -101,39 +113,39 @@ AsteroidsGame.prototype.startGameLoop = function() {
     // draw current game state
     this.redrawCanvas();
 
-    var self = this;
-    var requestAnimationFrame = window.requestAnimationFrame
-	|| window.mozRequestAnimationFrame
-	|| window.webkitRequestAnimationFrame
-	|| window.msRequestAnimationFrame
-	|| function(callback) {
-            window.setTimeout(callback, self.updateRate);
-        };
 
-    // set this global for debugging
-    animationFunc = function(lastCalled){
-	if (self.stopping) return;
+    var self = this;
+    animationFunc = function(lastCalled){    // set this global for debugging
+	if (self.stopping) {
+	    self.drawGameOver();
+	    console.log( "animation loop stopped" );
+	    return;
+	}
 	self.animationTimeoutId = requestAnimationFrame(animationFunc);
-	self.updateAndDraw();
+	try {
+	    self.updateAndDraw();
+	} catch (e) {
+	    console.log("Animation Loop: caught exception " + e);
+            self.stopGame();
+	}
     };
 
     console.log("starting animation loop");
     self.animationTimeoutId = requestAnimationFrame(animationFunc);
 }
 
-AsteroidsGame.prototype.stop = function() {
-    self.stopping = true;
-    if (this.animationTimeoutId) {
-	try {
-	    cancelRequestAnimationFrame(this.animationTimeoutId);
-	} catch(e) {
-	    clearTimeout(this.animationTimeoutId);
-	}
-	delete this.animationTimeoutId;
-	console.log( "stopped animation loop" );
-    }
+AsteroidsGame.prototype.stopGame = function() {
+    this.stopping = true;
+    console.log( "stopping animation loop" );
+}
 
-    this.drawGameOver();
+AsteroidsGame.prototype.killGame = function() {
+    this.stopping = true;
+    console.log( "killing animation loop" );
+    if (this.animationTimeoutId) {
+	cancelAnimationFrame(this.animationTimeoutId);
+	delete this.animationTimeoutId;
+    }
 }
 
 AsteroidsGame.prototype.updateAndDraw = function() {
@@ -166,7 +178,7 @@ AsteroidsGame.prototype.redrawUpdated = function() {
 }
 
 AsteroidsGame.prototype.drawGameOver = function() {
-    this.draw();
+    this.redrawCanvas();
 
     var ctx = this.ctx;
     ctx.save();
@@ -251,7 +263,8 @@ AsteroidsGame.prototype.applyGamePhysicsTo = function(object1, object2) {
 	this.applyGravity(object1, object2, physics);
     } else {
 	if (object1.collidingWith(object2)) {
-	    this.applyNegativeGravity(object1, object2, physics);
+	    //this.applyNegativeGravity(object1, object2, physics);
+	    this.applyPushAway(object1, object2, physics);
 	} else if (object1.attachedTo(object2)) {
 	    // push away objects to keep them from overlapping
 	    this.applyPushAway(object1, object2, physics);
@@ -352,7 +365,8 @@ AsteroidsGame.prototype.applyPushAway = function(object1, object2, physics) {
     var delta = Math.abs(dist - physics.cache1.total_radius);
 
     // don't bother if it's small
-    if (delta > 1) return;
+    if (delta < 1) return;
+
     var accel_1 = delta / object1.mass;
     if (accel_1 > this.maxAccel) accel_1 = this.maxAccel;
     var angle_1 = Math.atan2(physics.dY, physics.dX);
@@ -412,7 +426,7 @@ AsteroidsGame.prototype.collision = function(object1, object2, collision) {
 	// bounce the objects:
 	var final_vX_1 = ( (cache1.delta_mass * new_vX_1 + object2.cache.mass_x_2 * new_vX_2)
 			   / cache1.total_mass * this.elasticity );
-	var final_vX_2 = ( (object2.cache.mass_x_2 * new_vX_1 + cache2.delta_mass * new_vX_2)
+	var final_vX_2 = ( (object1.cache.mass_x_2 * new_vX_1 + cache2.delta_mass * new_vX_2)
 			   / cache2.total_mass * this.elasticity );
 	var final_vY_1 = new_vY_1 * this.elasticity;
 	var final_vY_2 = new_vY_2 * this.elasticity;
@@ -528,7 +542,8 @@ AsteroidsGame.prototype.objectDied = function(object) {
     if (object.is_planet) {
 	throw "planet died!?"; // not allowed
     } else if (object.is_ship) {
-	throw "Game Over!";
+	// TODO: check how many lives they've got
+	this.stopGame();
     }
 
     this.removeObject(object);
