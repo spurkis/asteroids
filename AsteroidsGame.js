@@ -196,10 +196,8 @@ AsteroidsGame.prototype.applyGamePhysicsTo = function(object1, object2) {
 
     var cache1 = object1.cache[object2.id];
     var cache2 = object2.cache[object1.id];
-
-    if (cache1 == null || cache2 == null) {
-	throw "object cache missing!?";
-    }
+    if (cache1 == null) throw "missing cache for " + object1;
+    if (cache2 == null) throw "missing cache for " + object2;
 
     var dX = object1.x - object2.x;
     var dY = object1.y - object2.y;
@@ -311,10 +309,8 @@ AsteroidsGame.prototype.collision = function(object1, object2, collision) {
 
     var cache1 = object1.cache[object2.id];
     var cache2 = object2.cache[object1.id];
-
-    if (cache1 == null || cache2 == null) {
-	throw "object cache missing!?";
-    }
+    if (cache1 == null) throw "missing cache for " + object1;
+    if (cache2 == null) throw "missing cache for " + object2;
 
     if (object1.is_asteroid && object2.is_asteroid) {
 	console;
