@@ -22,7 +22,6 @@ Bullet.prototype.initialize = function(ship, spatial) {
     Bullet.prototype.parent.initialize.call(this, ship.game, spatial);
 
     this.ship = ship;
-    this.fireThrust = 1.5;
     this.ttl = 2500;
     this.exploding = false;
     this.fading = -1;

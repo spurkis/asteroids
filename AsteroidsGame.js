@@ -14,7 +14,7 @@ var animationFunc;
 function AsteroidsGame(ctx, img) {
     this.ctx = ctx;
 
-    this.asteroidImg = img;
+    this.planetImg = img;
     this.updateRate = 10; // ms
     this.refreshRate = 20; // ms
     this.maxX = ctx.canvas.width;
@@ -37,13 +37,13 @@ function AsteroidsGame(ctx, img) {
 
     this.addObjects([
 //	new Planet(this, {x: 3/4*this.maxX, y: 1/4*this.maxY, mass: 195, radius: 45, vX: -0.5, vY: 0}) ,
-//	new Planet(this, {x: 1/5*this.maxX, y: 2/5*this.maxY, mass: 15, radius: 15, vX: -0.5, vY: 0.5}) ,
+//	new Planet(this, {x: 1/5*this.maxX, y: 2/5*this.maxY, mass: 15, radius: 15, vX: -0.5, vY: 0.5, image: this.planetImg }) ,
 //	new Planet(this, {x: 5/7*this.maxX, y: 4/5*this.maxY, mass: 30, radius: 20}),
-	new Planet(this, {x: 1/2*this.maxX-60, y: 1/2*this.maxY, mass: 15, radius: 15, vY: 0.5}),
-	new Planet(this, {x: 1/2*this.maxX, y: 1/2*this.maxY, mass: 120, radius: 30, stationary: true})
+//	new Planet(this, {x: 1/2*this.maxX-60, y: 1/2*this.maxY, mass: 15, radius: 15, vY: 0.5}),
+	new Planet(this, {x: 1/2*this.maxX, y: this.maxY+900, mass: 0, radius: 1000, stationary: true})
     ]);
 
-/**/
+/*
     for (var i=0; i<this.maxX; i+= 95) {
 	for (var j=0; j<this.maxY; j+= 95) {
 	    var a = new Asteroid(this, {
@@ -60,11 +60,11 @@ function AsteroidsGame(ctx, img) {
 	    this.addObject(a);
 	}
     }
-/**/
+/*
     this.addObjects([
-	new Asteroid(this, {x: 1/10*this.maxX, y: 6/10*this.maxY, mass: 0.5, radius: 14, vX: 0, vY: 0, spawn: 3, health: 1 }) //,
-//        new Asteroid(this, {x: 1/10*this.maxX, y: 2/10*this.maxY, mass: 1, radius: 5, vX: 0, vY: -0.1 }),
-/*        new Asteroid(this, {x: 5/10*this.maxX, y: 1/10*this.maxY, mass: 2, radius: 6, vX: -0.2, vY: 0.25 }),
+	new Asteroid(this, {x: 1/10*this.maxX, y: 6/10*this.maxY, mass: 0.5, radius: 14, vX: 0, vY: 0, spawn: 3, health: 1 }),
+        new Asteroid(this, {x: 1/10*this.maxX, y: 2/10*this.maxY, mass: 1, radius: 5, vX: 0, vY: -0.1 }),
+        new Asteroid(this, {x: 5/10*this.maxX, y: 1/10*this.maxY, mass: 2, radius: 6, vX: -0.2, vY: 0.25 }),
         new Asteroid(this, {x: 5/10*this.maxX, y: 2/10*this.maxY, mass: 3, radius: 8, vX: -0.22, vY: 0.2 }),
         new Asteroid(this, {x: 6/10*this.maxX, y: 8/10*this.maxY, mass: 2, radius: 6, vX: -0.4, vY: 0.1 }),
         new Asteroid(this, {x: 6/10*this.maxX, y: 9/10*this.maxY, mass: 3, radius: 8, vX: 0.5, vY: -0.5 }),
@@ -72,7 +72,6 @@ function AsteroidsGame(ctx, img) {
         new Asteroid(this, {x: 9/10*this.maxX, y: 9/10*this.maxY, mass: 3, radius: 8, vX: 0.7, vY: 0.6 }),
         new Asteroid(this, {x: 3/10*this.maxX, y: 1/10*this.maxY, mass: 2, radius: 6, vX: 0.8, vY: -0.2 }),
         new Asteroid(this, {x: 3/10*this.maxX, y: 2/10*this.maxY, mass: 3, radius: 8, vX: 0.9, vY: -0.1 })
-/**/
     ]);
 /**/
 
@@ -186,7 +185,7 @@ AsteroidsGame.prototype.updatePositions = function() {
 	var object1 = objects[i];
 
 	// may have changed below
-	if (object1.update == false) break;
+	if (object1.update == false) continue;
 
 	// we update both i & j below, so to avoid repeating calcs
 	// we start j at the next position:
@@ -205,7 +204,7 @@ AsteroidsGame.prototype.updatePositions = function() {
 	if (object1.updatePositions()) {
 	    this.objectUpdated( object1 );
 	}
-    } // for obj1
+    }
 };
 
 
@@ -524,11 +523,10 @@ AsteroidsGame.prototype.removeObject = function(object) {
 }
 
 AsteroidsGame.prototype.objectDied = function(object) {
-    if (object.is_asteroid) {
-	// TODO: spawn new asteroids?
-    } else if (object.is_planet) {
-	// not allowed?
-	throw "planet died!?";
+    // if (object.is_weapon) {
+    //} else if (object.is_asteroid) {
+    if (object.is_planet) {
+	throw "planet died!?"; // not allowed
     } else if (object.is_ship) {
 	throw "Game Over!";
     }

@@ -42,6 +42,8 @@ SpaceObject.prototype.initialize = function(game, spatial) {
     this.maxX = this.ctx.canvas.width;
     this.maxY = this.ctx.canvas.height;
 
+    this.image = spatial.image;		      // image used to draw object
+
     this.stationary = spatial.stationary == null // should this object move?
 	? false
 	: spatial.stationary;

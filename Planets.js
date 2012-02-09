@@ -107,10 +107,6 @@ Planet.prototype.initialize = function(game, spatial) {
     this.landingThresholdSpeed = 0.4;
     this.landingThresholdAngle = deg_to_rad[5];
 
-    if (this.game.asteroidImg != null) {
-	this.image = this.game.asteroidImg;
-    }
-
     return this;
 }
 
@@ -164,9 +160,11 @@ Asteroid.inheritsFrom( Planetoid );
 Asteroid.prototype.initialize = function(game, spatial) {
     this.oid_prefix = 'ast';
 
-    spatial.health = 30;
+    if (! spatial.health) spatial.health = 30;
     if (spatial.damage == null) spatial.damage = spatial.mass*10;
     Asteroid.prototype.parent.initialize.call(this, game, spatial);
+
+    this.maxSpawnHealth = Math.ceil(this.health/2) || 1;
 
     this.fillStyle = "rgb(0,100,100)";
     this.is_asteroid = true;
@@ -194,6 +192,7 @@ Asteroid.prototype.die = function() {
 		x: this.x + i/10, // don't overlap
 		y: this.y + i/10,
 		radius:  radius,
+		health: getRandomInt(0, this.maxSpawnHealth),
 		spawn: getRandomInt(0, this.spawn-1)
 		// let physics engine handle movement
 	    });
