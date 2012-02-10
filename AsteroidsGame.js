@@ -594,6 +594,7 @@ AsteroidsGame.prototype.bindDefaultKeys = function() {
 AsteroidsGame.prototype.handleKeyEvent = function(event) {
     // TODO: send events, get rid of ifs.
     switch (event.which) {
+    case 73: // i = up
     case 38: // up = accel
 	if (event.type == 'keydown') {
 	    this.ship.startAccelerate();
@@ -602,6 +603,7 @@ AsteroidsGame.prototype.handleKeyEvent = function(event) {
 	}
 	event.preventDefault();
 	break;
+    case 75: // k = down
     case 40: // down = decel
 	if (event.type == 'keydown') {
 	    this.ship.startDecelerate();
@@ -610,6 +612,7 @@ AsteroidsGame.prototype.handleKeyEvent = function(event) {
 	}
 	event.preventDefault();
 	break;
+    case 74: // j = left
     case 37: // left = accel ccw
 	if (event.type == 'keydown') {
 	    this.ship.startDecreaseSpin();
@@ -618,6 +621,7 @@ AsteroidsGame.prototype.handleKeyEvent = function(event) {
 	}
 	event.preventDefault();
 	break;
+    case 76: // l = right
     case 39: // right = accel cw
 	if (event.type == 'keydown') {
 	    this.ship.startIncreaseSpin();
@@ -635,14 +639,14 @@ AsteroidsGame.prototype.handleKeyEvent = function(event) {
 	event.preventDefault();
 	break;
 
-	// alternate
-    case 101: // e = up
-	break;
-    case 100: // d = down
-	break;
-    case 115: // s = accel ccw
-	break;
-    case 102: // f = accel cw
+
+    case 87: // w = change weapon
+	if (event.type == 'keydown') {
+	    this.ship.startCycleWeapon();
+	} else { // assume keyup
+	    this.ship.stopCycleWeapon();
+	}
+	event.preventDefault();
 	break;
 
     case 13:  // <enter>

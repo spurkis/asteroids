@@ -44,7 +44,11 @@ Ship.prototype.initialize = function(game, spatial) {
     this.shieldActive = true;
 
     // ammo & weapons
-    this.weapons = [ new SprayGun({ ship: this }), new Cannon({ ship: this }), new Gun({ ship: this }) ];
+    this.weapons = [
+	new Gun({ ship: this }),
+	new Cannon({ ship: this }),
+	new SprayGun({ ship: this }),
+    ];
     this.currentWeapon = this.weapons[0];
 
     // for displaying ship info: health, shield, thrust, ammo
@@ -532,6 +536,23 @@ Ship.prototype.fireWeapon = function() {
     });
     this.game.fireWeapon(bullet);
 }
+
+/*********************************************************************
+ * Weapon Selection
+ */
+Ship.prototype.startCycleWeapon = function() {
+    if (this.cyclingWeapon) return;
+    this.cyclingWeapon = true;
+    console.log("cycling weapon");
+    var idx = this.weapons.indexOf(this.currentWeapon) + 1;
+    if (idx > this.weapons.length-1) idx = 0;
+    this.currentWeapon = this.weapons[idx];
+};
+
+Ship.prototype.stopCycleWeapon = function() {
+    this.cyclingWeapon = false;
+}
+
 
 /*********************************************************************
  * Health & Shield
