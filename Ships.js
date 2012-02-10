@@ -26,6 +26,7 @@ Ship.prototype.initialize = function(game, spatial) {
     this.is_ship = true;
 
     this.lives = spatial.lives || 3;
+    this.color = spatial.color || "black";
 
     // current state of user action:
     this.increaseSpin = false;
@@ -104,7 +105,7 @@ Ship.prototype.draw = function() {
     // TODO: replace these with .png's?
 
     if (this.healthChanged || this.shipStrokeStyle == null) {
-	var r = 200 - this.health*2;
+	var r = 225 - this.health*2;
 	this.shipStrokeStyle = 'rgb('+ r +',0,0)';
     }
 

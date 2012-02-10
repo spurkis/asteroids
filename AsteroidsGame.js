@@ -46,6 +46,11 @@ function AsteroidsGame(ctx, img) {
 
     this.addObject( this.ship );
 
+    // enemy ships
+    this.addObjects([
+	new Ship(this, {x: 4/5*this.maxX, y: 2/3*this.maxY, color: 'red'}),
+    ]);
+
     this.addObjects([
 //	new Planet(this, {x: 3/4*this.maxX, y: 1/4*this.maxY, mass: 195, radius: 45, vX: -0.5, vY: 0}),
 	new Planet(this, {x: 1/5*this.maxX, y: 2/5*this.maxY, mass: 15, radius: 15, vX: -0.5, vY: 0.5, image: this.planetImg }) ,
@@ -547,7 +552,9 @@ AsteroidsGame.prototype.objectDied = function(object) {
 	throw "planet died!?"; // not allowed
     } else if (object.is_ship) {
 	// TODO: check how many lives they've got
-	this.stopGame();
+	if (object == this.ship) {
+	    this.stopGame();
+	}
     }
 
     this.removeObject(object);
