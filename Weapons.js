@@ -1,11 +1,97 @@
 /*********************************************************************
- * Bullet class
+ * Weapons
  * Copyright (c) 2012 Steve Purkis
  */
 
 require('asteroidUtils.js');
 require('SpaceObject.js');
 
+
+/*********************************************************************
+ * Gun - default weapon. fires Bullets.
+ */
+function Gun(context) {
+    this.ship = context.ship;
+    this.game = this.ship.game;
+
+    this.maxAmmo = context.ammo || 50;
+    this.ammo = this.maxAmmo;
+    this.ammoChanged = false;
+
+    this.fireInterval = context.fireInterval || 100; // ms
+    this.fireThrust = context.fireThrust || 2.5;
+
+    this.rechargeInterval = context.rechargeInterval || 300; // ms
+}
+
+// get ammo level as a number between 0 & 100
+Gun.prototype.ammoLevel = function() {
+    return Math.floor(this.ammo/this.maxAmmo * 100);
+}
+
+Gun.prototype.drawWeaponIcon = function(ctx) {
+    // TODO
+}
+
+// Fire this weapon, add bullets to the game
+Gun.prototype.fire = function() {
+    var ship = this.ship;
+
+    // out of ammo?
+    if (this.ammo <= 0) return false;
+
+    this.decAmmo();
+
+    var scaleX = Math.cos(ship.facing) * this.fireThrust;
+    var scaleY = Math.sin(ship.facing) * this.fireThrust;
+    var vX = ship.vX + scaleX;
+    var vY = ship.vY + scaleY;
+    var bullet = new Bullet(ship, {
+	x: ship.x,
+	y: ship.y,
+	facing: ship.facing,
+	vX: vX,
+	vY: vY,
+    });
+
+    this.game.fireWeapon(bullet);
+}
+
+Gun.prototype.decAmmo = function() {
+    if (this.ammo <= 0) return false;
+    this.ammo--;
+    this.ship.ammoChanged = true;
+    this.startAutoRecharge();
+    return true;
+}
+
+Gun.prototype.incAmmo = function() {
+    if (this.ammo >= this.maxAmmo) return false;
+    this.ammo++;
+    this.ship.ammoChanged = true;
+    return true;
+}
+
+Gun.prototype.startAutoRecharge = function() {
+    if (this.rechargeIntervalId != null) return;
+
+    var self = this;
+    this.rechargeIntervalId = setInterval(function() {
+	if (! self.incAmmo()) {
+	    self.stopAutoRecharge();
+	}
+    }, self.rechargeInterval);
+}
+
+Gun.prototype.stopAutoRecharge = function() {
+    if (this.rechargeIntervalId == null) return;
+    clearInterval(this.rechargeIntervalId);
+    delete this.rechargeIntervalId;
+}
+
+/*********************************************************************
+ * Bullet Class
+ */
 function Bullet(ship, spatial) {
     if (ship) return this.initialize(ship, spatial);
     return this;

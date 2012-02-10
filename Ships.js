@@ -25,6 +25,8 @@ Ship.prototype.initialize = function(game, spatial) {
 
     this.is_ship = true;
 
+    this.lives = spatial.lives || 3;
+
     // current state of user action:
     this.increaseSpin = false;
     this.decreaseSpin = false;
@@ -40,7 +42,11 @@ Ship.prototype.initialize = function(game, spatial) {
     this.shield = 100;
     this.shieldActive = true;
 
-    // for displaying health, shield & thrust
+    // ammo & weapons
+    this.weapons = [ new Gun({ ship: this }) ];
+    this.currentWeapon = this.weapons[0];
+
+    // for displaying ship info: health, shield, thrust, ammo
     this.healthWidth = 100;
     this.healthHeight = 10;
     this.healthX = this.maxX - this.healthWidth - 10;
@@ -50,8 +56,22 @@ Ship.prototype.initialize = function(game, spatial) {
     this.thrustHeight = 10;
     this.thrustX = this.healthX;
     this.thrustY = this.healthY + this.healthHeight + 5;
+    this.thrustStartX = Math.floor( this.thrustWidth / 2 );
+
+    this.ammoWidth = 100;
+    this.ammoHeight = 10;
+    this.ammoX = this.healthX;
+    this.ammoY = this.thrustY + this.thrustHeight + 5;
+
 
     return this;
+}
+
+Ship.prototype.resetBeforeUpdate = function() {
+    // reset changes from last update:
+    this.shieldChanged = false;
+    this.ammoChanged = false;
+    this.parent.resetBeforeUpdate.call(this);
 }
 
 Ship.prototype.draw = function() {
@@ -132,6 +152,7 @@ Ship.prototype.draw = function() {
     this.drawHealth();
     this.drawShield();
     this.drawThrust();
+    this.drawAmmo();
     this.drawWeaponSelection();
 }
 
@@ -208,13 +229,11 @@ Ship.prototype.drawShield = function() {
 Ship.prototype.drawThrust = function() {
     if (this.thrustChanged || this.thrustCache == null) {
 	var thrustPercent = Math.floor(this.thrust/this.maxThrust * 100);
-	var startX = Math.floor( this.thrustWidth / 2 );
 	var fillWidth = Math.floor(thrustPercent * this.thrustWidth / 100 / 2);
 	var r = 100;
 	var b = 200 + Math.floor(thrustPercent/2);
 	var g = 100;
 	this.thrustCache = {
-	    startX: startX,
 	    fillWidth: fillWidth,
 	    fillStyle: 'rgba('+ r +','+ g +','+ b +',0.5)',
 	    thrustPercent: thrustPercent
@@ -228,9 +247,36 @@ Ship.prototype.drawThrust = function() {
 
     ctx.beginPath();
     ctx.fillStyle = cache.fillStyle;
-    ctx.fillRect(startX,0, cache.fillWidth, this.thrustHeight);
+    ctx.fillRect(this.thrustStartX, 0, cache.fillWidth, this.thrustHeight);
     ctx.strokeStyle = 'rgba(5,5,5,0.75)';
     ctx.strokeRect(0,0, this.thrustWidth,this.thrustHeight);
+    ctx.closePath();
+
+    ctx.restore();
+}
+
+Ship.prototype.drawAmmo = function() {
+    if (this.ammoChanged || this.ammoCache == null) {
+	var ammoLevel = this.currentWeapon.ammoLevel();
+	var r = 250 - Math.floor(ammoLevel/2);
+	var g = 155;
+	var b = 155 + ammoLevel;
+	this.ammoCache = {
+	    fillStyle: 'rgba('+ r +','+ g +','+ b +',0.5)',
+	    fillWidth: Math.floor(ammoLevel/100 * this.healthWidth)
+	};
+    }
+
+    var ctx = this.ctx;
+    var cache = this.ammoCache;
+    ctx.save();
+    ctx.translate( this.ammoX, this.ammoY );
+
+    ctx.beginPath();
+    ctx.fillStyle = cache.fillStyle;
+    ctx.fillRect(0,0,cache.fillWidth, this.ammoHeight);
+    ctx.strokeStyle = 'rgba(5,5,5,0.75)';
+    ctx.strokeRect(0,0,this.ammoWidth,this.ammoHeight);
     ctx.closePath();
 
     ctx.restore();
@@ -443,17 +489,21 @@ Ship.prototype.slowDownSpin = function() {
     }
 }
 
+/*********************************************************************
+ * Firing weapons
+ */
 Ship.prototype.startFireWeapon = function() {
     if (this.firing) return;
+    this.firing = true;
     // console.log("firing");
 
-    var self = this;
-    this.fireWeapon();
+    var weapon = this.currentWeapon;
+    weapon.fire(); // fire one, then wait
     this.firingIntervalId = setInterval(function(){
-	self.fireWeapon();
-    }, 150);
+	weapon.fire();
+    }, weapon.fireInterval);
 
-    this.firing = true;
+    // TODO: weapon change should reset interval
 };
 
 Ship.prototype.stopFireWeapon = function() {

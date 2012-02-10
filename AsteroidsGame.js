@@ -122,12 +122,12 @@ AsteroidsGame.prototype.startGameLoop = function() {
 	    return;
 	}
 	self.animationTimeoutId = requestAnimationFrame(animationFunc);
-	try {
+//	try {
 	    self.updateAndDraw();
-	} catch (e) {
-	    console.log("Animation Loop: caught exception " + e);
-            self.stopGame();
-	}
+//	} catch (e) {
+//	    console.log("Animation Loop: caught exception " + e);
+//            self.stopGame();
+//	}
     };
 
     console.log("starting animation loop");
@@ -167,13 +167,17 @@ AsteroidsGame.prototype.redrawCanvas = function() {
     // clear entire canvas: not good for performance, but good enough for now
     this.ctx.clearRect(0,0, this.maxX,this.maxY);
     for (var i=0; i < this.objects.length; i++) {
-	this.objects[i].draw(false);
+	var object = this.objects[i];
+	object.draw();
+	object.resetBeforeUpdate();
     }
 };
 
 AsteroidsGame.prototype.redrawUpdated = function() {
     for (var i=0; i < this.updated.length; i++) {
-	this.updated[i].redraw();
+	var object = this.updated[i];
+	object.draw();
+	object.resetBeforeUpdate();
     }
 }
 

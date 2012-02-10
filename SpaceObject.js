@@ -101,6 +101,15 @@ SpaceObject.prototype.updatePositions = function(objects) {
 }
 
 
+/**
+ * hook to reset or save any state before update is called
+ */
+SpaceObject.prototype.resetBeforeUpdate = function() {
+    // reset changes from last update:
+    this.healthChanged = false;
+    this.thrustChanged = false;
+}
+
 /***
  * updateease x & y coords, and return:
  *    true if the on-screen coords have changed
