@@ -11,11 +11,16 @@ require('SpaceObject.js');
  * Gun - default weapon. fires Bullets.
  */
 function Gun(context) {
+    if (context) return this.initialize(context);
+    return this;
+}
+
+Gun.prototype.initialize = function(context) {
     this.ship = context.ship;
     this.game = this.ship.game;
 
-    this.maxAmmo = context.ammo || 50;
-    this.ammo = this.maxAmmo;
+    this.maxAmmo = context.maxAmmo || 50;
+    this.ammo = context.ammo || this.maxAmmo;
     this.ammoChanged = false;
 
     this.fireInterval = context.fireInterval || 100; // ms
@@ -46,7 +51,7 @@ Gun.prototype.fire = function() {
     var scaleY = Math.sin(ship.facing) * this.fireThrust;
     var vX = ship.vX + scaleX;
     var vY = ship.vY + scaleY;
-    var bullet = new Bullet(ship, {
+    var bullet = this.createBullet(ship, {
 	x: ship.x,
 	y: ship.y,
 	facing: ship.facing,
@@ -55,6 +60,11 @@ Gun.prototype.fire = function() {
     });
 
     this.game.fireWeapon(bullet);
+}
+
+Gun.prototype.createBullet = function(ship, params) {
+    // make it easy to override...
+    return new Bullet(ship, params);
 }
 
 Gun.prototype.decAmmo = function() {
@@ -90,6 +100,73 @@ Gun.prototype.stopAutoRecharge = function() {
 }
 
 /*********************************************************************
+ * Cannon - Big Gun. Fires Big Bullets at High Speeds.  Oooh...
+ */
+function Cannon(context) {
+    if (context) return this.initialize(context);
+    return this;
+}
+
+Cannon.inheritsFrom( Gun );
+
+Cannon.prototype.initialize = function(context) {
+    if (!context.maxAmmo) context.maxAmmo = 10;
+    if (!context.fireInterval) context.fireInterval = 500; // ms
+    if (!context.fireThrust) context.fireThrust = 5;
+    if (!context.rechargeInterval) context.rechargeInterval = 1500; // ms
+    this.parent.initialize.call(this, context);
+}
+
+Cannon.prototype.createBullet = function(ship, params) {
+    params.color = "#039";
+    params.mass = 5;
+    params.damage = 30;
+    params.maxV = 6;
+    return new Bullet(ship, params);
+}
+
+/*********************************************************************
+ * SprayGun - Sprays bullets...
+ */
+function SprayGun(context) {
+    if (context) return this.initialize(context);
+    return this;
+}
+
+SprayGun.inheritsFrom( Gun );
+
+SprayGun.prototype.initialize = function(context) {
+    this.parent.initialize.call(this, context);
+}
+
+SprayGun.prototype.fire = function() {
+    var ship = this.ship;
+
+    // out of ammo?
+    if (! this.decAmmo()) return false;
+
+    for (var delta=-20; delta < 20; delta += 10) {
+	
+	var sprayAngle = ship.facing + deg_to_rad[delta];
+	var scaleX = Math.cos(sprayAngle) * this.fireThrust;
+	var scaleY = Math.sin(sprayAngle) * this.fireThrust;
+	var vX = ship.vX + scaleX;
+	var vY = ship.vY + scaleY;
+	var bullet = this.createBullet(ship, {
+	    x: ship.x + 5*vX,
+	    y: ship.y + 5*vY,
+	    facing: sprayAngle,
+	    vX: vX,
+	    vY: vY,
+	    color: "#F90",
+	});
+
+	this.game.fireWeapon(bullet);
+    }
+}
+
+
+/*********************************************************************
  * Bullet Class
  */
 function Bullet(ship, spatial) {
@@ -100,18 +177,19 @@ Bullet.inheritsFrom( SpaceObject );
 
 Bullet.prototype.initialize = function(ship, spatial) {
     this.oid_prefix = "blt";
+    this.is_weapon = true;
 
-    spatial.radius = 1;
-    spatial.mass = 0.05;
-    spatial.damage = 5;
-    spatial.maxV = 4;
+    if (!spatial.radius) spatial.radius = 1;
+    if (!spatial.mass) spatial.mass = 0.05;
+    if (!spatial.damage) spatial.damage = 5;
+    if (!spatial.maxV) spatial.maxV = 4;
     Bullet.prototype.parent.initialize.call(this, ship.game, spatial);
 
     this.ship = ship;
     this.ttl = 2500;
     this.exploding = false;
     this.fading = -1;
-    this.is_weapon = true;
+    this.color = spatial.color || "#f22";
 
     return this;
 }
@@ -147,7 +225,7 @@ Bullet.prototype.draw = function() {
 
     // TODO: fancy graphics
     if (this.exploding) {
-	ctx.strokeStyle = "#f22";
+	ctx.strokeStyle = this.color;
 	ctx.beginPath();
 	ctx.moveTo(0,3);
 	ctx.lineTo(0,-3);
@@ -158,7 +236,7 @@ Bullet.prototype.draw = function() {
 	if (this.fading >= 0) {
 	    ctx.strokeStyle = "rgba(150,150,100,"+ this.fading / 10 +")";
 	} else {
-	    ctx.strokeStyle = "rgb(200,50,50)";
+	    ctx.strokeStyle = this.color;
 	}
 	ctx.beginPath();
 	ctx.moveTo(-5,0);
@@ -186,8 +264,9 @@ Bullet.prototype.decHealth = function(delta) {
 }
 
 Bullet.prototype.collided = function(object) {
-    if (object.ship == this.ship) {
-	// don't damage our ship's other weapons
+    // don't damage our ship or it's other weapons?
+    if (object.ship == this.ship || object == this.s) {
+    	return;
     }
     object.decHealth( this.damage );
     this.explode();

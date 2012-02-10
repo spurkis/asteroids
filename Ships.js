@@ -21,7 +21,7 @@ Ship.prototype.initialize = function(game, spatial) {
     spatial.damage = 2;
     spatial.maxSpin = deg_to_rad[6];
 
-    Ship.prototype.parent.initialize.call(this, game, spatial);
+    this.parent.initialize.call(this, game, spatial);
 
     this.is_ship = true;
 
@@ -43,7 +43,7 @@ Ship.prototype.initialize = function(game, spatial) {
     this.shieldActive = true;
 
     // ammo & weapons
-    this.weapons = [ new Gun({ ship: this }) ];
+    this.weapons = [ new SprayGun({ ship: this }), new Cannon({ ship: this }), new Gun({ ship: this }) ];
     this.currentWeapon = this.weapons[0];
 
     // for displaying ship info: health, shield, thrust, ammo

@@ -7,7 +7,7 @@
 var PI = Math.PI;
 var halfPI = PI/2;
 var deg_to_rad = [];
-for (var i=0; i<=360; i++) {
+for (var i=-360; i<=360; i++) {
     deg_to_rad[i] = i*PI/180;
 }
 deg_to_rad[0.75] = 0.75*PI/180;
