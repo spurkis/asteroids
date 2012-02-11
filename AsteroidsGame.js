@@ -42,13 +42,14 @@ function AsteroidsGame(ctx, img) {
     this.updated = [];
 
     // hard-code 1 player for now & start co-ords
-    this.ship = new Ship(this, {x: 1/5*this.maxX, y: 2/3*this.maxY});
+    this.ship = new Ship(this, {x: 4/5*this.maxX, y: 2/3*this.maxY});
 
     this.addObject( this.ship );
 
     // enemy ships
     this.addObjects([
-	new ComputerShip(this, {x: 4/5*this.maxX, y: 2/3*this.maxY, color: 'red'}),
+	new ComputerShip(this, {x: 1/5*this.maxX, y: 2/3*this.maxY, color: {r: 0,g:100,b:100}, healthX: 10}),
+//	new ComputerShip(this, {x: 4/5*this.maxX, y: 2/3*this.maxY, color: {}}),
     ]);
 
     this.addObjects([
@@ -59,7 +60,7 @@ function AsteroidsGame(ctx, img) {
 //	new Planet(this, {x: 1/2*this.maxX, y: this.maxY+900, mass: 100, radius: 1000, stationary: true})
     ]);
 
-    for (var i=50; i<this.maxX; i+= getRandomInt(80,120)) {
+/*    for (var i=50; i<this.maxX; i+= getRandomInt(80,120)) {
 	for (var j=50; j<this.maxY; j+= getRandomInt(80,120)) {
 	    var a = new Asteroid(this, {
 		x: i + getRandomInt(0, 80),
@@ -75,7 +76,7 @@ function AsteroidsGame(ctx, img) {
 	    this.addObject(a);
 	}
     }
-
+*/
 /*
     this.addObjects([
 	new Asteroid(this, {x: 1/10*this.maxX, y: 6/10*this.maxY, mass: 0.5, radius: 14, vX: 0, vY: 0, spawn: 3, health: 1 }),

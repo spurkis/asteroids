@@ -26,7 +26,7 @@ Ship.prototype.initialize = function(game, spatial) {
     this.is_ship = true;
 
     this.lives = spatial.lives || 3;
-    this.color = spatial.color || "black";
+    this.color = spatial.color || {r: 0, g: 0, b: 0};
 
     // current state of user action:
     this.increaseSpin = false;
@@ -54,7 +54,7 @@ Ship.prototype.initialize = function(game, spatial) {
     // for displaying ship info: health, shield, thrust, ammo
     this.healthWidth = 100;
     this.healthHeight = 10;
-    this.healthX = this.maxX - this.healthWidth - 10;
+    this.healthX = spatial.healthX || this.maxX - this.healthWidth - 10;
     this.healthY = 10;
 
     this.thrustWidth = 100;
@@ -109,8 +109,9 @@ Ship.prototype.draw = function() {
     // TODO: replace these with .png's?
 
     if (this.healthChanged || this.shipStrokeStyle == null) {
-	var r = 225 - this.health*2;
-	this.shipStrokeStyle = 'rgb('+ r +',0,0)';
+	var color = this.color;
+	color.newR = (color.r +(100 - this.health)*2) % 255;
+	this.shipStrokeStyle = 'rgb('+ color.newR +',' + color.g +','+ color.b +')';
     }
 
     ctx.strokeStyle = this.shipStrokeStyle;
