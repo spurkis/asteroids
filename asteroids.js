@@ -17,14 +17,14 @@ function setupCanvas() {
 	
 	var img = new Image();
 	img.onload = function(){
-	    try {
+//	    try {
 		asteroids = new AsteroidsGame(ctx, img);
 		asteroids.startGameLoop();
-	    } catch (e) {
+/*	    } catch (e) {
 		console.log("caught exception: " + e);
 		asteroids.stop();
 	    }
-	}
+*/	}
 	//img.src = "twitter-logo.png";
 	img.src = "moon.png";
     } else {

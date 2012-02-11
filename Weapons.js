@@ -16,6 +16,9 @@ function Gun(context) {
 }
 
 Gun.prototype.initialize = function(context) {
+    this.is_gun = true;
+    this.is_basic_gun = getObjectClass(this) == 'Gun';
+
     this.ship = context.ship;
     this.game = this.ship.game;
 
@@ -99,6 +102,10 @@ Gun.prototype.stopAutoRecharge = function() {
     delete this.rechargeIntervalId;
 }
 
+Gun.prototype.toString = function() {
+    return getObjectClass(this);
+}
+
 /*********************************************************************
  * Cannon - Big Gun. Fires Big Bullets at High Speeds.  Oooh...
  */
@@ -110,6 +117,8 @@ function Cannon(context) {
 Cannon.inheritsFrom( Gun );
 
 Cannon.prototype.initialize = function(context) {
+    this.is_cannon = true;
+
     if (!context.maxAmmo) context.maxAmmo = 10;
     if (!context.fireInterval) context.fireInterval = 500; // ms
     if (!context.fireThrust) context.fireThrust = 5;
@@ -136,6 +145,9 @@ function SprayGun(context) {
 SprayGun.inheritsFrom( Gun );
 
 SprayGun.prototype.initialize = function(context) {
+    this.is_spray_gun = true;
+
+    if (!context.maxAmmo) context.maxAmmo = 20;
     this.parent.initialize.call(this, context);
 }
 

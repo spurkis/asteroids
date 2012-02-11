@@ -37,3 +37,22 @@ Function.prototype.inheritsFrom = function( parentClassOrObject ) {
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;  
 }
+
+
+/**
+ * Returns the class name of the argument or undefined if
+ * it's not a valid JavaScript object.
+ * http://blog.magnetiq.com/post/514962277/finding-out-class-names-of-javascript-objects
+ */
+function getObjectClass(obj) {
+    if (obj && obj.constructor && obj.constructor.toString) {
+        var arr = obj.constructor.toString().match(
+            /function\s*(\w+)/);
+
+        if (arr && arr.length == 2) {
+            return arr[1];
+        }
+    }
+
+    return undefined;
+}

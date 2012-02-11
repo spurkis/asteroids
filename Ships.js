@@ -21,7 +21,7 @@ Ship.prototype.initialize = function(game, spatial) {
     spatial.damage = 2;
     spatial.maxSpin = deg_to_rad[6];
 
-    this.parent.initialize.call(this, game, spatial);
+    Ship.prototype.parent.initialize.call(this, game, spatial);
 
     this.is_ship = true;
 
@@ -76,7 +76,7 @@ Ship.prototype.resetBeforeUpdate = function() {
     // reset changes from last update:
     this.shieldChanged = false;
     this.ammoChanged = false;
-    this.parent.resetBeforeUpdate.call(this);
+    Ship.prototype.parent.resetBeforeUpdate.call(this);
 }
 
 Ship.prototype.draw = function() {
@@ -303,6 +303,20 @@ Ship.prototype.redraw = function() {
     this.draw();
 }
 
+Ship.prototype.die = function() {
+    this.clearIncThrustInterval();
+    this.clearDecThrustInterval();
+    this.clearSlowDownInterval();
+
+    this.clearIncSpinInterval();
+    this.clearDecSpinInterval();
+    this.clearStopSpinInterval();
+
+    this.stopFireWeapon();
+
+    Ship.prototype.parent.die.call(this);
+}
+
 /*********************************************************************
  * Acceleration
  */
@@ -311,7 +325,7 @@ Ship.prototype.startAccelerate = function() {
     this.accelerate = true;
     //console.log("thrust++");
 
-    this.stopSlowingDown();
+    this.clearSlowDownInterval();
 
     var self = this;
     this.incThrustIntervalId = setInterval(function(){
@@ -327,22 +341,25 @@ Ship.prototype.increaseThrust = function() {
 
 Ship.prototype.stopAccelerate = function() {
     //console.log("stop thrust++");
-    if (this.incThrustIntervalId) {
-	clearInterval(this.incThrustIntervalId);
-	this.incThrustIntervalId = null;
-	this.resetThrust();
-    }
-
+    if (this.clearIncThrustInterval()) this.resetThrust();
     this.startSlowingDown();
     this.accelerate = false;
 };
+
+Ship.prototype.clearIncThrustInterval = function() {
+    if (! this.incThrustIntervalId) return false;
+    clearInterval(this.incThrustIntervalId);
+    this.incThrustIntervalId = null;
+    return true;
+}
+
 
 Ship.prototype.startDecelerate = function() {
     if (this.decelerate) return;
     this.decelerate = true;
     //console.log("thrust--");
 
-    this.stopSlowingDown();
+    this.clearSlowDownInterval();
 
     var self = this;
     this.decThrustIntervalId = setInterval(function(){
@@ -357,15 +374,17 @@ Ship.prototype.decreaseThrust = function() {
 
 Ship.prototype.stopDecelerate = function() {
     // console.log("stop thrust--");
-    if (this.decThrustIntervalId) {
-	clearInterval(this.decThrustIntervalId);
-	this.decThrustIntervalId = null;
-	this.resetThrust();
-    }
-
+    if (this.clearDecThrustInterval()) this.resetThrust();
     this.startSlowingDown();
     this.decelerate = false;
 };
+
+Ship.prototype.clearDecThrustInterval = function() {
+    if (! this.decThrustIntervalId) return false;
+    clearInterval(this.decThrustIntervalId);
+    this.decThrustIntervalId = null;
+    return true;
+}
 
 
 Ship.prototype.startSlowingDown = function() {
@@ -378,11 +397,11 @@ Ship.prototype.startSlowingDown = function() {
     }, 100);
 }
 
-Ship.prototype.stopSlowingDown = function() {
-    if (this.slowDownIntervalId) {
-	clearInterval(this.slowDownIntervalId);
-	this.slowDownIntervalId = null;
-    }
+Ship.prototype.clearSlowDownInterval = function() {
+    if (! this.slowDownIntervalId) return false;
+    clearInterval(this.slowDownIntervalId);
+    this.slowDownIntervalId = null;
+    return true;
 }
 
 Ship.prototype.slowDown = function() {
@@ -403,7 +422,7 @@ Ship.prototype.slowDown = function() {
 
     if (this.vX == 0 && this.vY == 0) {
 	// console.log('done slowing down');
-	this.stopSlowingDown();
+	this.clearSlowDownInterval();
     }
 }
   
@@ -415,10 +434,7 @@ Ship.prototype.startIncreaseSpin = function() {
     this.increaseSpin = true;
     // console.log("spin++");
 
-    if (this.stopSpinIntervalId) {
-	clearInterval(this.stopSpinIntervalId);
-	this.stopSpinIntervalId = null;
-    }
+    this.clearStopSpinInterval();
 
     this.incSpin( this.spinIncrement );
     var self = this;
@@ -430,25 +446,24 @@ Ship.prototype.startIncreaseSpin = function() {
   
 Ship.prototype.stopIncreaseSpin = function() {
     // console.log("stop spin++");
-    if (this.incSpinIntervalId) {
-	clearInterval(this.incSpinIntervalId);
-	this.incSpinIntervalId = null;
-    }
-
+    this.clearIncSpinInterval();
     this.startSlowDownSpin();
-    
     this.increaseSpin = false;
 };
+
+Ship.prototype.clearIncSpinInterval = function() {
+    if (! this.incSpinIntervalId) return false;
+    clearInterval(this.incSpinIntervalId);
+    this.incSpinIntervalId = null;
+    return true;
+}
 
 Ship.prototype.startDecreaseSpin = function() {
     if (this.decreaseSpin) return;
     this.decreaseSpin = true;
     // console.log("spin--");
 
-    if (this.stopSpinIntervalId) {
-	clearInterval(this.stopSpinIntervalId);
-	this.stopSpinIntervalId = null;
-    }
+    this.clearStopSpinInterval();
 
     this.incSpin( -this.spinIncrement );
     var self = this;
@@ -459,18 +474,20 @@ Ship.prototype.startDecreaseSpin = function() {
 
 Ship.prototype.stopDecreaseSpin = function() {
     // console.log("stop spin--");
-    if (this.decSpinIntervalId) {
-	clearInterval(this.decSpinIntervalId);
-	this.decSpinIntervalId = null;
-    }
-
+    this.clearDecSpinInterval();
     this.startSlowDownSpin();
     this.decreaseSpin = false;
 }
 
+Ship.prototype.clearDecSpinInterval = function() {
+    if (! this.decSpinIntervalId) return false;
+    clearInterval(this.decSpinIntervalId);
+    this.decSpinIntervalId = null;
+    return true;
+}
+
 Ship.prototype.startSlowDownSpin = function() {
     // console.log("stopping spin...");
-
     if (this.stopSpinIntervalId) return;
 
     var self = this;
@@ -478,6 +495,14 @@ Ship.prototype.startSlowDownSpin = function() {
 	self.slowDownSpin()
     }, 20);
 }
+
+Ship.prototype.clearStopSpinInterval = function() {
+    if (! this.stopSpinIntervalId) return false;
+    clearInterval(this.stopSpinIntervalId);
+    this.stopSpinIntervalId = null;
+    return true;
+}
+
 
 Ship.prototype.slowDownSpin = function() {
     if (this.spin > deg_to_rad[1]) {
@@ -487,10 +512,7 @@ Ship.prototype.slowDownSpin = function() {
     } else {
 	this.spin = 0;
 	// console.log("spin stopped.");
-	if (this.stopSpinIntervalId) {
-	    clearInterval(this.stopSpinIntervalId);
-	    this.stopSpinIntervalId = null;
-	}
+	this.clearStopSpinInterval();
     }
 }
 
@@ -543,14 +565,18 @@ Ship.prototype.fireWeapon = function() {
 Ship.prototype.startCycleWeapon = function() {
     if (this.cyclingWeapon) return;
     this.cyclingWeapon = true;
-    console.log("cycling weapon");
-    var idx = this.weapons.indexOf(this.currentWeapon) + 1;
-    if (idx > this.weapons.length-1) idx = 0;
-    this.currentWeapon = this.weapons[idx];
+    this.cycleWeapon();
 };
 
 Ship.prototype.stopCycleWeapon = function() {
     this.cyclingWeapon = false;
+}
+
+Ship.prototype.cycleWeapon = function() {
+    var idx = this.weapons.indexOf(this.currentWeapon) + 1;
+    if (idx > this.weapons.length-1) idx = 0;
+    this.currentWeapon = this.weapons[idx];
+    console.log(this + " cycled weapon to " + this.currentWeapon);
 }
 
 
@@ -561,7 +587,7 @@ Ship.prototype.decHealth = function(delta) {
     if (this.shieldActive) {
 	delta = this.decShield(delta);
     }
-    if (delta) this.parent.decHealth.call(this, delta);
+    if (delta) Ship.prototype.parent.decHealth.call(this, delta);
 }
 
 Ship.prototype.decShield = function(delta) {
@@ -575,8 +601,223 @@ Ship.prototype.decShield = function(delta) {
     }
 }
 
-SpaceObject.prototype.incShield = function(delta) {
+Ship.prototype.incShield = function(delta) {
     this.shieldChanged = true;
     this.shield += delta;
     if (this.shield > 100) this.shield = 100;
+}
+
+
+/*********************************************************************
+ * ComputerShip - basic computer controlled ship
+ * Copyright (c) 2012 Steve Purkis
+ */
+
+function ComputerShip(game, spatial) {
+    if (game) return this.initialize(game, spatial);
+    return this;
+}
+
+ComputerShip.inheritsFrom( Ship );
+
+ComputerShip.prototype.initialize = function(game, spatial) {
+    this.oid_prefix = "cshp";
+    ComputerShip.prototype.parent.initialize.call(this, game, spatial);
+}
+
+ComputerShip.prototype.updatePositions = function() {
+    if (this.died) return;
+    this.findAndDestroyClosestEnemy();
+    ComputerShip.prototype.parent.updatePositions.call(this);
+}
+
+ComputerShip.prototype.findAndDestroyClosestEnemy = function() {
+    var enemy = this.findClosestEnemy();
+    if (enemy == null) return;
+
+    // Note: this is a basic algorith, it doesn't take a lot of things
+    // into account (enemy trajectory & facing, other objects, etc)
+
+    // navigate towards enemy
+    if (enemy.dFacing > 0) {
+	if (enemy.dFacing < deg_to_rad[45]) {
+	    if (this.spin <= 0) {
+		// if we're not spinning towards them, start:
+		if (this.decreaseSpin) this.stopDecreaseSpin();
+		this.startIncreaseSpin();
+	    } else if (this.spin > deg_to_rad[1]) {
+		// high -'ve spin
+		// stop increasing spin so we don't overshoot
+		if (this.increaseSpin) this.stopIncreaseSpin();
+		// it may make sense to decrease spin so we don't overshoot:
+		if (enemy.dFacing < deg_to_rad[10]) this.startDecreaseSpin();
+	    } else if (this.spin > deg_to_rad[0.25]) {
+		// stop increasing spin so we don't overshoot
+		if (this.increaseSpin) this.stopIncreaseSpin();
+	    } else {
+		// if we're not spinning towards them, start:
+		if (this.decreaseSpin) this.stopDecreaseSpin();
+		if (enemy.dFacing > deg_to_rad[0.25]) this.startIncreaseSpin();
+	    }
+	} else {
+	    // if we're not spinning towards them, start:
+	    if (this.decreaseSpin) this.stopDecreaseSpin();
+	    this.startIncreaseSpin();
+	}
+    } else if (enemy.dFacing < 0) {
+	if (enemy.dFacing > -deg_to_rad[45]) {
+	    if (this.spin >= 0) {
+		// if we're not spinning towards them, start:
+		if (this.increaseSpin) this.stopIncreaseSpin();
+		this.startDecreaseSpin();
+	    } else if (this.spin < -deg_to_rad[1]) {
+		// high -'ve spin
+		// stop decreasing spin so we don't overshoot
+		if (this.decreaseSpin) this.stopDecreaseSpin();
+		// it may make sense to increase spin so we don't overshoot:
+		if (enemy.dFacing > -deg_to_rad[10]) this.startIncreaseSpin();
+	    } else if (this.spin < -deg_to_rad[0.25]) {
+		// stop decreasing spin so we don't overshoot
+		if (this.decreaseSpin) this.stopDecreaseSpin();
+	    } else {
+		// if we're not spinning towards them, start:
+		if (this.increaseSpin) this.stopIncreaseSpin();
+		if (enemy.dFacing < -deg_to_rad[0.25]) this.startDecreaseSpin();
+	    }
+	} else {
+	    // if we're not spinning towards them, start:
+	    if (this.increaseSpin) this.stopIncreaseSpin();
+	    this.startDecreaseSpin();
+	}
+    } else {
+	// if we're not spinning towards them, start:
+	if (this.spin > 0) {
+	    if (this.increaseSpin) this.stopIncreaseSpin();
+	    if (this.spin > deg_to_rad[0.25]) this.startDecreaseSpin();
+	} else if (this.spin < 0) {
+	    if (this.decreaseSpin) this.stopDecreaseSpin();
+	    if (this.spin < -deg_to_rad[0.25]) this.startIncreaseSpin();
+	} else {
+	    // enemy.dFacing == 0, on target!
+	}
+    }
+
+    // move towards / away?
+/*    if (enemy.dist_squared > 40000) {
+	if (this.decelerate) this.stopDecelerate();
+	if (enemy.dFacingAbs <= deg_to_rad[10]) {
+	    if (this.thrust > this.maxThrust/3) {
+		if (this.accelerate) this.stopAccelerate();
+	    } else {
+		this.startAccelerate();
+	    }
+	} else {
+	    if (this.accelerate) this.stopAccelerate();
+	}
+    } else
+*/
+    var speed_squared = this.vX*this.vX + this.vY + this.vY;
+    if (enemy.dist_squared > 10000) {
+	if (this.decelerate) this.stopDecelerate();
+	if (speed_squared > 1 || this.thrust > this.maxThrust/4) {
+	    if (this.accelerate) this.stopAccelerate();
+	} else {
+	    this.startAccelerate();
+	}
+    } else if (enemy.dist_squared > 20) {
+	if (this.decelerate) this.stopDecelerate();
+	if (speed_squared > 1 || this.thrust > this.maxThrust/10) {
+	    if (this.accelerate) this.stopAccelerate();
+	} else {
+	    this.startAccelerate();
+	}
+    } else {
+	if (this.accelerate) this.stopAccelerate();
+	if (this.decelerate) this.stopDecelerate();
+    }
+
+    // shoot at the enemy
+    var abs_spin = Math.abs(this.spin);
+    if (abs_spin <= deg_to_rad[0.5]) {
+	if (enemy.dist_squared > 40000) { // 200*200 = 40,000
+	    if (enemy.dFacingAbs <= deg_to_rad[0.5]) {
+		// use the cannon at this angle
+		if (this.currentWeapon.is_cannon) {
+		    this.startFireWeapon();
+		} else {
+		    if (this.firing) this.stopFireWeapon();
+		    this.cycleWeapon(); // be fair, only cycle once
+		}
+	    }
+	    // otherwise don't bother shooting from this far away
+	} else if (enemy.dFacingAbs <= deg_to_rad[10]) {
+	    // use the normal gun at this angle
+	    if (this.currentWeapon.is_basic_gun) {
+		this.startFireWeapon();
+	    } else {
+		if (this.firing) this.stopFireWeapon();
+		this.cycleWeapon(); // be fair, only cycle once
+	    }
+	} else if (enemy.dFacingAbs <= deg_to_rad[20]) {
+	    // use the spray gun at this angle
+	    if (this.currentWeapon.is_spray_gun) {
+		this.startFireWeapon();
+	    } else {
+		if (this.firing) this.stopFireWeapon();
+		this.cycleWeapon(); // be fair, only cycle once
+	    }
+	} else {
+	    if (this.firing) this.stopFireWeapon();
+	}
+    } else {
+	if (this.firing) this.stopFireWeapon();
+    }
+
+    ComputerShip.prototype.parent.updatePositions.call(this);
+}
+
+ComputerShip.prototype.findClosestEnemy = function() {
+    if (this.ships == null) {
+	this.ships = this.game.objects.filter(function(object) {
+	    if (object.is_ship && object != this) return true;
+	    return false;
+	});
+    }
+
+    var highest_dist_squared = 0;
+    var enemy = null;
+    for (var i=0; i < this.ships.length; i++) {
+	var ship2 = this.ships[i];
+	var dX = ship2.x - this.x;
+	var dY = ship2.y - this.y;
+	var dist_squared = dX*dX + dY*dY;
+	if (dist_squared > highest_dist_squared) {
+	    enemy = {
+		ship: ship2,
+		dX: dX,
+		dY: dY,
+		dist_squared: dist_squared,
+	    };
+	}
+    }
+
+    if (enemy) {
+	enemy.angle = Math.atan2(enemy.dY, enemy.dX);
+
+	// get delta between our facing angle as: -180º <= a <= 180º ...
+	enemy.angle_positive = (deg_to_rad[360] + enemy.angle) % deg_to_rad[360];
+	enemy.dFacing = (enemy.angle_positive - this.facing) % deg_to_rad[360];
+	// there must be a better way :-/
+	if (enemy.dFacing > deg_to_rad[180]) {
+	    enemy.dFacing -= deg_to_rad[360];
+	} else if (enemy.dFacing < -deg_to_rad[180]) {
+	    enemy.dFacing += deg_to_rad[360];
+	}
+
+	enemy.dFacingAbs = Math.abs(enemy.dFacing);
+
+	// if (enemy.dFacing < 0) enemy.dFacing = deg_to_rad[360];
+    }
+
+    return enemy;
 }

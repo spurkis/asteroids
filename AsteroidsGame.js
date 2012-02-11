@@ -48,18 +48,18 @@ function AsteroidsGame(ctx, img) {
 
     // enemy ships
     this.addObjects([
-	new Ship(this, {x: 4/5*this.maxX, y: 2/3*this.maxY, color: 'red'}),
+	new ComputerShip(this, {x: 4/5*this.maxX, y: 2/3*this.maxY, color: 'red'}),
     ]);
 
     this.addObjects([
-//	new Planet(this, {x: 3/4*this.maxX, y: 1/4*this.maxY, mass: 195, radius: 45, vX: -0.5, vY: 0}),
-	new Planet(this, {x: 1/5*this.maxX, y: 2/5*this.maxY, mass: 15, radius: 15, vX: -0.5, vY: 0.5, image: this.planetImg }) ,
+	new Planet(this, {x: 3/4*this.maxX, y: 1/4*this.maxY, mass: 195, radius: 45, vX: -0.5, vY: 0}),
+//	new Planet(this, {x: 1/5*this.maxX, y: 2/5*this.maxY, mass: 15, radius: 15, vX: -0.5, vY: 0.5, image: this.planetImg }) ,
 //	new Planet(this, {x: 5/7*this.maxX, y: 4/5*this.maxY, mass: 30, radius: 20}),
 //	new Planet(this, {x: 1/2*this.maxX-60, y: 1/2*this.maxY, mass: 15, radius: 15, vY: 0.5}),
-	new Planet(this, {x: 1/2*this.maxX, y: this.maxY+900, mass: 100, radius: 1000, stationary: true})
+//	new Planet(this, {x: 1/2*this.maxX, y: this.maxY+900, mass: 100, radius: 1000, stationary: true})
     ]);
 
-
+/*
     for (var i=50; i<this.maxX; i+= getRandomInt(80,120)) {
 	for (var j=50; j<this.maxY; j+= getRandomInt(80,120)) {
 	    var a = new Asteroid(this, {
@@ -76,7 +76,7 @@ function AsteroidsGame(ctx, img) {
 	    this.addObject(a);
 	}
     }
-
+*/
 /*
     this.addObjects([
 	new Asteroid(this, {x: 1/10*this.maxX, y: 6/10*this.maxY, mass: 0.5, radius: 14, vX: 0, vY: 0, spawn: 3, health: 1 }),
