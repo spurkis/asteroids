@@ -123,7 +123,7 @@ Cannon.prototype.initialize = function(context) {
     if (!context.fireInterval) context.fireInterval = 500; // ms
     if (!context.fireThrust) context.fireThrust = 5;
     if (!context.rechargeInterval) context.rechargeInterval = 1500; // ms
-    this.parent.initialize.call(this, context);
+    Cannon.prototype.parent.initialize.call(this, context);
 }
 
 Cannon.prototype.createBullet = function(ship, params) {
@@ -148,7 +148,7 @@ SprayGun.prototype.initialize = function(context) {
     this.is_spray_gun = true;
 
     if (!context.maxAmmo) context.maxAmmo = 20;
-    this.parent.initialize.call(this, context);
+    SprayGun.prototype.parent.initialize.call(this, context);
 }
 
 SprayGun.prototype.fire = function() {
@@ -175,6 +175,25 @@ SprayGun.prototype.fire = function() {
 
 	this.game.fireWeapon(bullet);
     }
+}
+
+
+/*********************************************************************
+ * GrenadeCannon - Launches Grenades @ high speed.
+ */
+function GrenadeCannon(context) {
+    if (context) return this.initialize(context);
+    return this;
+}
+
+GrenadeCannon.inheritsFrom( Cannon );
+
+GrenadeCannon.prototype.createBullet = function(ship, params) {
+    params.color = "#a9f";
+    params.mass = 1;
+    params.damage = 30;
+    params.maxV = 6;
+    return new Grenade(ship, params);
 }
 
 
@@ -294,4 +313,66 @@ Bullet.prototype.explode = function() {
     setTimeout(function(){
 	self.die()
     }, 250);
+}
+
+
+/*********************************************************************
+ * Grenade Class
+ */
+function Grenade(ship, spatial) {
+    if (ship) return this.initialize(ship, spatial);
+    return this;
+}
+Grenade.inheritsFrom( Bullet );
+
+Grenade.prototype.initialize = function(ship, spatial) {
+    this.oid_prefix = "blt";
+    this.is_weapon = true;
+
+    if (!spatial.radius) spatial.radius = 3;
+    if (!spatial.mass) spatial.mass = 0.5;
+    if (!spatial.damage) spatial.damage = 30;
+    if (!spatial.maxV) spatial.maxV = 6;
+    Grenade.prototype.parent.initialize.call(this, ship, spatial);
+
+    return this;
+}
+
+Grenade.prototype.draw = function() {
+    // all objects should set:
+    this.x_last = this.x;
+    this.y_last = this.y;
+
+    var ctx = this.ctx;
+    ctx.save();
+    ctx.translate( this.x, this.y );
+    if (this.facing > 0) ctx.rotate( this.facing );
+
+    // TODO: fancy graphics
+    if (this.exploding) {
+	this.radius += 2;
+    }
+
+    if (this.fading >= 0) {
+	ctx.strokeStyle = "rgba(150,150,100,"+ this.fading / 10 +")";
+    } else {
+	ctx.strokeStyle = this.color;
+    }
+
+    ctx.strokeStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(0, 0, this.radius, 0, deg_to_rad[360], false);
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.restore();
+}
+
+Grenade.prototype.collided = function(object) {
+    // don't damage our ship or it's other weapons?
+    if (object.ship == this.ship || object == this.s) {
+    	return;
+    }
+    object.decHealth( this.damage );
+    this.explode();
 }

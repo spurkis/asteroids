@@ -48,6 +48,7 @@ Ship.prototype.initialize = function(game, spatial) {
 	new Gun({ ship: this }),
 	new Cannon({ ship: this }),
 	new SprayGun({ ship: this }),
+	new GrenadeCannon({ ship: this }),
     ];
     this.currentWeapon = this.weapons[0];
 
@@ -740,7 +741,10 @@ ComputerShip.prototype.findAndDestroyClosestEnemy = function() {
     // shoot at the enemy
     var abs_spin = Math.abs(this.spin);
     if (abs_spin <= deg_to_rad[0.5]) {
-	if (enemy.dist_squared > 40000) { // 200*200 = 40,000
+	if (enemy.dist_squared > 90000) { // 300*300 = 90,000
+	    // don't waste ammo
+	    if (this.firing) this.stopFireWeapon();
+	} else if (enemy.dist_squared > 40000) { // 200*200 = 40,000
 	    if (enemy.dFacingAbs <= deg_to_rad[0.5]) {
 		// use the cannon at this angle
 		if (this.currentWeapon.is_cannon) {
