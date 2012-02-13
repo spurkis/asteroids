@@ -28,23 +28,45 @@ Planetoid.prototype.initialize = function(game, spatial) {
 }
 
 // TODO: one cache for each radius...
+var _planetoidRenderCache = {};
 Planetoid.prototype.preRender = function() {
-    this.render = this.createPreRenderCanvas(this.radius*2,this.radius*2);
-    var ctx = this.render.ctx;
+    // TODO: handle images!
     if (this.image != null) {
-	ctx.drawImage(this.image, this.radius, this.radius, this.radius*2, this.radius*2);
-    } else {
-	ctx.beginPath();
-	ctx.arc(this.radius, this.radius, this.radius, 0, deg_to_rad[360], false);
-	ctx.closePath()
-	if (this.fillStyle) {
-	    ctx.fillStyle = this.fillStyle;
-	    ctx.fill();
-	} else {
-	    ctx.strokeStyle = this.strokeStyle;
-	    ctx.stroke();
-	}
+	//ctx.drawImage(this.image, this.radius, this.radius, this.radius*2, this.radius*2);
+	throw "TODO: can't pre-render images yet";
     }
+    var key = this.strokeStyle + ":" + this.fillStyle + ":" + this.radius;
+    var render = _planetoidRenderCache[key];
+    if (render) {
+	// already exists in cache:
+	this.render = render;
+	return; // already exists
+    }
+
+    // doesn't exist, so create:
+    render = this.createPreRenderCanvas(this.radius*2, this.radius*2);
+
+    // corner of image: offset from bullet strike point
+    render.x = -this.radius;
+    render.y = -this.radius;
+
+    var ctx = render.ctx;
+    ctx.globalCompositeOperation = 'source-over';
+
+    ctx.beginPath();
+    ctx.arc(this.radius, this.radius, this.radius, 0, deg_to_rad[360], false);
+    ctx.closePath()
+    if (this.fillStyle) {
+	ctx.fillStyle = this.fillStyle;
+	ctx.fill();
+    } else {
+	ctx.strokeStyle = this.strokeStyle;
+	ctx.stroke();
+    }
+
+    // cache it
+    _planetoidRenderCache[this.color] = render;
+    this.render = render;
 }
 
 Planetoid.prototype.draw = function() {
