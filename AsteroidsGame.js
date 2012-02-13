@@ -41,7 +41,9 @@ function AsteroidsGame(ctx, img) {
 
     this.frames = 0;
     this.frameRate = 0;
+    this.slowFrameRate = 0;
     this.timeLastFrameRateMeasured = 0;
+    this.useSimpleCalcs = false;
 
     this.objects = [];
     this.updated = [];
@@ -162,6 +164,13 @@ AsteroidsGame.prototype.measureFrameRate = function() {
 	this.frameRate = 1000 * this.frames / dt;
 	this.frames = 0;
 	//console.log( "frame rate: " + this.frameRate.toFixed(3) );
+	if (this.frameRate < 45 && ! this.useSimpleCalcs) {
+	    this.slowFrameRate++;
+	    if (this.slowFrameRate > 5) {
+		this.useSimpleCalcs = true;
+		console.log("switching on simple calculations: slow Frame Rate");
+	    }
+	}
     }
     this.timeLastFrameRateMeasured = now;
 }
@@ -316,6 +325,12 @@ AsteroidsGame.prototype.applyGamePhysicsTo = function(object1, object2) {
 
     var dX = object1.x - object2.x;
     var dY = object1.y - object2.y;
+    if (this.useSimpleCalcs) {
+	// Hack & round for performance:
+	dX = (0.5 + dX) | 0;
+	dY = (0.5 + dY) | 0;
+    }
+
     // find dist between center of mass:
     var dist_squared = dX*dX + dY*dY; // avoid sqrt, we don't need dist yet
 
@@ -473,8 +488,9 @@ AsteroidsGame.prototype.collision = function(object1, object2, collision) {
 	// before we continue: should we attach the objects?
 	collision.impactSpeed = Math.abs(new_vX_2 - new_vX_1);
 
-	if (collision.impactSpeed < this.attachThreshold) {
-	    console.log('linking '+ object1 + ' <-> '+ object2);
+	if (collision.impactSpeed < this.attachThreshold
+	    && object1.is_planetoid && object2.is_planetoid) {
+	    //console.log('linking '+ object1 + ' <-> '+ object2);
 	    object1.attach(object2);
 	    object2.attach(object1);
 	    return;

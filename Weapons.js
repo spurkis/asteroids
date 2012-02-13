@@ -157,7 +157,7 @@ SprayGun.prototype.fire = function() {
     // out of ammo?
     if (! this.decAmmo()) return false;
 
-    for (var delta=-20; delta < 20; delta += 10) {
+    for (var delta=-10; delta <= 10; delta += 10) {
 	
 	var sprayAngle = ship.facing + deg_to_rad[delta];
 	var scaleX = Math.cos(sprayAngle) * this.fireThrust;
