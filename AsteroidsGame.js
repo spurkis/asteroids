@@ -52,7 +52,7 @@ function AsteroidsGame(ctx, img) {
 
     // enemy ships
     this.addObjects([
-//	new ComputerShip(this, {x: 1/5*this.maxX, y: 2/3*this.maxY, color: {r: 0,g:100,b:100}, healthX: 10}),
+	new ComputerShip(this, {x: 1/5*this.maxX, y: 2/3*this.maxY, color: {r: 0,g:100,b:100}, healthX: 10}),
 //	new ComputerShip(this, {x: 4/5*this.maxX, y: 2/3*this.maxY, healthX: Math.floor(this.maxX/2)}),
     ]);
 

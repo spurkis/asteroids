@@ -53,11 +53,19 @@ Ship.prototype.initialize = function(game, spatial) {
     ];
     this.currentWeapon = this.weapons[0];
 
+    // Status Bars
     // for displaying ship info: health, shield, thrust, ammo
+    // TODO: move these into their own objects
     this.healthWidth = 100;
     this.healthHeight = 10;
     this.healthX = spatial.healthX || this.maxX - this.healthWidth - 10;
     this.healthY = 10;
+
+    // draw shield status on top of health bar:
+    this.shieldWidth = this.healthWidth;
+    this.shieldHeight = Math.floor(this.healthHeight/3);
+    this.shieldX = this.healthX;
+    this.shieldY = this.healthY + Math.floor(this.healthHeight/3);
 
     this.thrustWidth = 100;
     this.thrustHeight = 10;
@@ -77,6 +85,7 @@ Ship.prototype.resetBeforeUpdate = function() {
     // reset changes from last update:
     this.shieldChanged = false;
     this.ammoChanged = false;
+    this.weaponChanged = false;
     Ship.prototype.parent.resetBeforeUpdate.call(this);
 }
 
@@ -174,8 +183,8 @@ Ship.prototype.renderThrustBackward = function() {
     ctx.lineTo(8,0);
     ctx.moveTo(6,3);
     ctx.lineTo(10,3);
-    ctx.moveTo(6,6);
-    ctx.lineTo(10,6);
+    ctx.moveTo(6,8);
+    ctx.lineTo(10,8);
     ctx.moveTo(0,12);
     ctx.lineTo(8,12);
     ctx.closePath();
@@ -222,8 +231,41 @@ Ship.prototype.renderSpinCCW = function() {
     this.render.spinCCW = render;
 }
 
+Ship.prototype.renderShieldedShip = function() {
+    var render = this.createPreRenderCanvas(18,18);
+    var ctx = render.ctx;
+
+    var radius = this.radius + 2; // should be 9
+
+    // corner of image: offset from center of ship
+    render.x = -radius;
+    render.y = -radius;
+
+    // shield colour displayed around ship
+    var r = this.shield;
+    var g = this.shield*2;
+    var b = this.shield*2 + 55;
+    var strokeStyle = 'rgba('+ r +','+ g +','+ b +',0.5)';
+
+    var renderShip = this.render.ship;
+    ctx.drawImage(renderShip.canvas, 2, 2);
+
+    ctx.beginPath();
+    ctx.strokeStyle = strokeStyle;
+    ctx.arc(radius, radius, radius, 0, deg_to_rad[360], false);
+    ctx.closePath();
+    ctx.stroke();
+
+    this.render.shieldedShip = render;
+}
+
+
+/******************************************************************************
+ * Render Status Bars
+ * TODO: sub-class, there's a lot of boilerplate here...
+ */
 Ship.prototype.renderHealthBar = function() {
-    var render = this.getClearHealthRenderCanvas();
+    var render = this.getClearHealthBarCanvas();
     var ctx = render.ctx;
 
     var r = 200 - this.health*2;
@@ -232,25 +274,114 @@ Ship.prototype.renderHealthBar = function() {
     var fillStyle = 'rgba('+ r +','+ g +','+ b +',0.5)';
     var fillWidth = Math.floor(this.health/100 * this.healthWidth);
 
-    ctx.beginPath();
     ctx.fillStyle = fillStyle;
     ctx.fillRect(0, 0, fillWidth, this.healthHeight);
+
     ctx.strokeStyle = 'rgba(5,5,5,0.75)';
     ctx.strokeRect(0, 0, this.healthWidth, this.healthHeight);
-    ctx.closePath();
 
     this.render.healthBar = render;
 }
 
-Ship.prototype.getClearHealthRenderCanvas = function() {
-    if (this.render.health) {
-	this.render.health.ctx.clearRect(0, 0, this.healthWidth, this.healthHeight);
-	return this.render.healthBar;
+Ship.prototype.getClearHealthBarCanvas = function() {
+    var render = this.render.healthBar;
+    if (render) {
+	render.ctx.clearRect(0, 0, this.healthWidth, this.healthHeight);
+	return render;
     }
-    var render = this.createPreRenderCanvas(this.healthWidth, this.healthHeight);
+    render = this.createPreRenderCanvas(this.healthWidth, this.healthHeight);
     render.ctx.globalCompositeOperation = 'source-over';
     return render;
 }
+
+Ship.prototype.renderShieldBar = function() {
+    var render = this.getClearShieldBarCanvas();
+    var ctx = render.ctx;
+
+    var fillWidth = Math.floor(this.shield/100 * this.healthWidth);
+    var startY = Math.floor(this.healthHeight/3);
+    var height = Math.floor(this.healthHeight/3);
+
+    ctx.fillStyle = 'rgba(100,100,225,0.8)';
+    ctx.fillRect(0, 0, fillWidth, this.shieldHeight);
+
+    this.render.shieldBar = render;
+}
+
+Ship.prototype.getClearShieldBarCanvas = function() {
+    var render = this.render.shieldBar;
+    if (render) {
+	render.ctx.clearRect(0, 0, this.shieldWidth, this.shieldHeight);
+	return render;
+    }
+    render = this.createPreRenderCanvas(this.shieldWidth, this.shieldHeight);
+    render.ctx.globalCompositeOperation = 'source-over';
+    return render;
+}
+
+Ship.prototype.renderThrustBar = function() {
+    var render = this.getClearThrustBarCanvas();
+    var ctx = render.ctx;
+
+    var thrustPercent = Math.floor(this.thrust/this.maxThrust * 100);
+    var fillWidth = Math.floor(thrustPercent * this.thrustWidth / 100 / 2);
+    var r = 100;
+    var b = 200 + Math.floor(thrustPercent/2);
+    var g = 100;
+    var fillStyle = 'rgba('+ r +','+ g +','+ b +',0.5)';
+
+    ctx.fillStyle = fillStyle;
+    ctx.fillRect(this.thrustStartX, 0, fillWidth, this.thrustHeight);
+
+    ctx.strokeStyle = 'rgba(5,5,5,0.75)';
+    ctx.strokeRect(0, 0, this.thrustWidth, this.thrustHeight);
+
+    this.render.thrustBar = render;
+}
+
+Ship.prototype.getClearThrustBarCanvas = function() {
+    var render = this.render.thrustBar;
+    if (render) {
+	render.ctx.clearRect(0, 0, this.thrustWidth, this.thrustHeight);
+	return render;
+    }
+    render = this.createPreRenderCanvas(this.thrustWidth, this.thrustHeight);
+    render.ctx.globalCompositeOperation = 'source-over';
+    return render;
+}
+
+
+Ship.prototype.renderAmmoBar = function() {
+    var render = this.getClearAmmoBarCanvas();
+    var ctx = render.ctx;
+
+    var ammoLevel = this.currentWeapon.ammoLevel();
+    var r = 250 - Math.floor(ammoLevel/2);
+    var g = 155;
+    var b = 155 + ammoLevel;
+    var fillStyle = 'rgba('+ r +','+ g +','+ b +',0.5)';
+    var fillWidth = Math.floor(ammoLevel/100 * this.ammoWidth);
+
+    ctx.fillStyle = fillStyle;
+    ctx.fillRect(0, 0, fillWidth, this.ammoHeight);
+
+    ctx.strokeStyle = 'rgba(5,5,5,0.75)';
+    ctx.strokeRect(0, 0, this.ammoWidth, this.ammoHeight);
+
+    this.render.ammoBar = render;
+}
+
+Ship.prototype.getClearAmmoBarCanvas = function() {
+    var render = this.render.ammoBar;
+    if (render) {
+	render.ctx.clearRect(0, 0, this.ammoWidth, this.ammoHeight);
+	return render;
+    }
+    render = this.createPreRenderCanvas(this.ammoWidth, this.ammoHeight);
+    render.ctx.globalCompositeOperation = 'source-over';
+    return render;
+}
+
 
 /******************************************************************************
  * Draw
@@ -274,8 +405,12 @@ Ship.prototype.draw = function() {
     */
 
     // render this ship
-    var rs = this.render.ship;
-    ctx.drawImage(rs.canvas, rs.x, rs.y);
+    if (this.shieldActive) {
+	this.drawShieldedShip();
+    } else {
+	var r = this.render.ship;
+	ctx.drawImage(r.canvas, r.x, r.y);
+    }
 
     if (this.accelerate) {
 	var r = this.render.thrustForward;
@@ -299,11 +434,12 @@ Ship.prototype.draw = function() {
 
     ctx.restore();
 
+    // Status Bars:
     this.drawHealthBar();
-    this.drawShield();
+    this.drawShieldBar();
     this.drawThrustBar();
     this.drawAmmoBar();
-    this.drawWeaponSelection();
+    this.drawWeaponsBar();
 }
 
 Ship.prototype.drawHealthBar = function() {
@@ -315,107 +451,48 @@ Ship.prototype.drawHealthBar = function() {
     this.ctx.drawImage(r.canvas, this.healthX, this.healthY);
 }
 
-Ship.prototype.drawShield = function() {
+Ship.prototype.drawShieldedShip = function() {
     if (! this.shieldActive) return;
 
-    if (this.shieldChanged || this.shieldCache == null) {
-	var r = this.shield;
-	var g = this.shield*2;
-	var b = this.shield*2 + 55;
-	this.shieldCache = {
-	    // shield colour displayed around ship
-	    strokeStyle: 'rgba('+ r +','+ g +','+ b +',0.5)',
-	    bar: {
-		fillWidth: Math.floor(this.shield/100 * this.healthWidth),
-		startY: Math.floor(this.healthHeight/3),
-		height: Math.floor(this.healthHeight/3),
-	    }
-	};
-	this.shieldCache.strokeStyle
+    if (this.shieldChanged || this.render.shieldedShip == null) {
+	this.renderShieldedShip();
     }
 
-    var ctx = this.ctx;
-    var cache = this.shieldCache;
+    var r = this.render.shieldedShip;
+    this.ctx.drawImage(r.canvas, r.x, r.y);
+}
 
-    // draw shield as a circle around ship
-    ctx.save();
-    ctx.translate( this.x, this.y );
-    ctx.beginPath();
-    ctx.strokeStyle = cache.strokeStyle;
-    ctx.arc(0, 0, this.radius+2, 0, deg_to_rad[360], false);
-    ctx.closePath();
-    ctx.stroke();
-    ctx.restore();
+Ship.prototype.drawShieldBar = function() {
+    if (! this.shieldActive) return;
 
-    // draw shield status on top of health bar:
-    ctx.save();
-    ctx.translate( this.healthX, this.healthY );
-    ctx.beginPath();
-    ctx.fillStyle = 'rgba(100,100,225,0.8)';
-    ctx.fillRect(0,cache.bar.startY, cache.bar.fillWidth, cache.bar.height);
-    ctx.closePath();
-    ctx.stroke();
+    if (this.shieldChanged || this.render.shieldBar == null) {
+	this.renderShieldBar();
+    }
 
-    ctx.restore();
+    var r = this.render.shieldBar;
+    this.ctx.drawImage(r.canvas, this.shieldX, this.shieldY);
 }
 
 Ship.prototype.drawThrustBar = function() {
-    if (this.thrustChanged || this.thrustCache == null) {
-	var thrustPercent = Math.floor(this.thrust/this.maxThrust * 100);
-	var fillWidth = Math.floor(thrustPercent * this.thrustWidth / 100 / 2);
-	var r = 100;
-	var b = 200 + Math.floor(thrustPercent/2);
-	var g = 100;
-	this.thrustCache = {
-	    fillWidth: fillWidth,
-	    fillStyle: 'rgba('+ r +','+ g +','+ b +',0.5)',
-	    thrustPercent: thrustPercent
-	};
+    if (this.thrustChanged || this.render.thrustBar == null) {
+	this.renderThrustBar();
     }
 
-    var ctx = this.ctx;
-    var cache = this.thrustCache;
-    ctx.save();
-    ctx.translate( this.thrustX, this.thrustY );
-
-    ctx.beginPath();
-    ctx.fillStyle = cache.fillStyle;
-    ctx.fillRect(this.thrustStartX, 0, cache.fillWidth, this.thrustHeight);
-    ctx.strokeStyle = 'rgba(5,5,5,0.75)';
-    ctx.strokeRect(0,0, this.thrustWidth,this.thrustHeight);
-    ctx.closePath();
-
-    ctx.restore();
+    var r = this.render.thrustBar;
+    this.ctx.drawImage(r.canvas, this.thrustX, this.thrustY );
 }
 
 Ship.prototype.drawAmmoBar = function() {
-    if (this.ammoChanged || this.ammoCache == null) {
-	var ammoLevel = this.currentWeapon.ammoLevel();
-	var r = 250 - Math.floor(ammoLevel/2);
-	var g = 155;
-	var b = 155 + ammoLevel;
-	this.ammoCache = {
-	    fillStyle: 'rgba('+ r +','+ g +','+ b +',0.5)',
-	    fillWidth: Math.floor(ammoLevel/100 * this.healthWidth)
-	};
+    if (this.ammoChanged || this.weaponChanged
+	|| this.render.ammoBar == null) {
+	this.renderAmmoBar();
     }
 
-    var ctx = this.ctx;
-    var cache = this.ammoCache;
-    ctx.save();
-    ctx.translate( this.ammoX, this.ammoY );
-
-    ctx.beginPath();
-    ctx.fillStyle = cache.fillStyle;
-    ctx.fillRect(0,0,cache.fillWidth, this.ammoHeight);
-    ctx.strokeStyle = 'rgba(5,5,5,0.75)';
-    ctx.strokeRect(0,0,this.ammoWidth,this.ammoHeight);
-    ctx.closePath();
-
-    ctx.restore();
+    var r = this.render.ammoBar;
+    this.ctx.drawImage(r.canvas, this.ammoX, this.ammoY );
 }
 
-Ship.prototype.drawWeaponSelection = function() {
+Ship.prototype.drawWeaponsBar = function() {
     // TODO
 }
 
@@ -670,22 +747,6 @@ Ship.prototype.stopFireWeapon = function() {
     this.firing = false;
 };
 
-Ship.prototype.fireWeapon = function() {
-    // TODO: don't hard-code weapon
-    var fireThrust = 2.5;
-    var scaleX = Math.cos(this.facing) * fireThrust;
-    var scaleY = Math.sin(this.facing) * fireThrust;
-    var vX = this.vX + scaleX;
-    var vY = this.vY + scaleY;
-    var bullet = new Bullet(this, {
-	x: this.x,
-	y: this.y,
-	facing: this.facing,
-	vX: vX,
-	vY: vY,
-    });
-    this.game.fireWeapon(bullet);
-}
 
 /*********************************************************************
  * Weapon Selection
@@ -704,7 +765,8 @@ Ship.prototype.cycleWeapon = function() {
     var idx = this.weapons.indexOf(this.currentWeapon) + 1;
     if (idx > this.weapons.length-1) idx = 0;
     this.currentWeapon = this.weapons[idx];
-    console.log(this + " cycled weapon to " + this.currentWeapon);
+    this.weaponChanged = true;
+    // console.log(this + " cycled weapon to " + this.currentWeapon);
 }
 
 
