@@ -49,6 +49,7 @@ Ship.prototype.initialize = function(game, spatial) {
 	new Cannon({ ship: this }),
 	new SprayGun({ ship: this }),
 	new GrenadeCannon({ ship: this }),
+	new GravBender({ ship: this }),
     ];
     this.currentWeapon = this.weapons[0];
 

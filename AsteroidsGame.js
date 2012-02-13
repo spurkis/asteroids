@@ -38,6 +38,10 @@ function AsteroidsGame(ctx, img) {
     this.detachThreshold = 5;    // min distance before attached objects detach
     this.detachThreshold_squared = Math.pow(this.detachThreshold, 2);
 
+    this.frames = 0;
+    this.frameRate = 0;
+    this.timeLastFrameRateMeasured = 0;
+
     this.objects = [];
     this.updated = [];
 
@@ -166,6 +170,21 @@ AsteroidsGame.prototype.updateAndDraw = function() {
     }
     // don't redraw if there were no updates!
     */
+
+    this.frames++;
+    this.measureFrameRate();
+}
+
+AsteroidsGame.prototype.measureFrameRate = function() {
+    var now = Date.now(); // ms
+    if (this.timeLastFrameRateMeasured) {
+	var dt = now - this.timeLastFrameRateMeasured;
+	if (dt < 1000) return;
+	this.frameRate = 1000 * this.frames / dt;
+	this.frames = 0;
+	console.log( "frame rate: " + this.frameRate.toFixed(3) );
+    }
+    this.timeLastFrameRateMeasured = now;
 }
 
 AsteroidsGame.prototype.redrawCanvas = function() {

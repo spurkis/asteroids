@@ -188,10 +188,43 @@ function GrenadeCannon(context) {
 
 GrenadeCannon.inheritsFrom( Cannon );
 
+GrenadeCannon.prototype.initialize = function(context) {
+    this.is_grenade_cannon = true;
+
+    if (!context.maxAmmo) context.maxAmmo = 10;
+    GrenadeCannon.prototype.parent.initialize.call(this, context);
+}
+
 GrenadeCannon.prototype.createBullet = function(ship, params) {
     params.color = "#a9f";
-    params.mass = 1;
     params.damage = 30;
+    params.maxV = 6;
+    return new Grenade(ship, params);
+}
+
+
+/*********************************************************************
+ * GravBender - Launches a gravity bending projectile.
+ */
+function GravBender(context) {
+    if (context) return this.initialize(context);
+    return this;
+}
+
+GravBender.inheritsFrom( Cannon );
+
+GravBender.prototype.initialize = function(context) {
+    this.is_grav_bender = true;
+
+    if (!context.maxAmmo) context.maxAmmo = 2;
+    if (!context.rechargeInterval) context.rechargeInterval = 10000;
+    GrenadeCannon.prototype.parent.initialize.call(this, context);
+}
+
+GravBender.prototype.createBullet = function(ship, params) {
+    params.color = "#f9f";
+    params.mass = 2500;
+    params.damage = 0;
     params.maxV = 6;
     return new Grenade(ship, params);
 }
