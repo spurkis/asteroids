@@ -48,10 +48,14 @@ function AsteroidsGame(ctx, img) {
     this.objects = [];
     this.updated = [];
 
+    // manage timeouts in Game Time:
+    this._timeoutId = 0;
+    this.timeouts = [];
+
     // hard-code 1 player for now & start co-ords
     this.ship = new Ship(this, {});
 
-    this.loadLevel(new Level0(this));
+    this.loadLevel(new Level3(this));
 
     this.setDefaultCanvasState();
     this.bindDefaultKeys();
@@ -137,6 +141,8 @@ AsteroidsGame.prototype.killGame = function() {
 }
 
 AsteroidsGame.prototype.updateAndDraw = function() {
+    this.checkTimeouts();
+
     this.updated = [];
     this.updatePositions();
 
@@ -157,9 +163,9 @@ AsteroidsGame.prototype.updateAndDraw = function() {
 }
 
 AsteroidsGame.prototype.measureFrameRate = function() {
-    var now = Date.now(); // ms
+    this.now = Date.now(); // ms
     if (this.timeLastFrameRateMeasured) {
-	var dt = now - this.timeLastFrameRateMeasured;
+	var dt = this.now - this.timeLastFrameRateMeasured;
 	if (dt < 1000) return;
 	this.frameRate = 1000 * this.frames / dt;
 	this.frames = 0;
@@ -172,7 +178,7 @@ AsteroidsGame.prototype.measureFrameRate = function() {
 	    }
 	}
     }
-    this.timeLastFrameRateMeasured = now;
+    this.timeLastFrameRateMeasured = this.now;
 }
 
 AsteroidsGame.prototype.updateViewOffset = function() {
@@ -637,10 +643,9 @@ AsteroidsGame.prototype.objectUpdated = function(object) {
 
 AsteroidsGame.prototype.fireWeapon = function(weapon) {
     var self = this;
-    weapon.timeoutId = setTimeout(function(){
+    weapon.timeoutId = this.setTimeout(function(){
 	self.weaponTimeout(weapon);
     }, weapon.ttl);
-    // this.weaponsFired.push(weapon);
     this.addObject(weapon);
 }
 
@@ -720,4 +725,42 @@ AsteroidsGame.prototype.handleKeyEvent = function(event) {
     }
 }
 
+/**
+ * setTimeout using Game time for performance
+ */
+AsteroidsGame.prototype.setTimeout = function(callback, dt) {
+    var now = this.now || Date.now();
+    var timeout = {
+	id: this._timeoutId++,
+	time: now + dt,
+	callback: callback
+    };
+    //console.log("create timeout "+timeout.id+": " + timeout.time + " <=> " +now);
+    this.timeouts.push(timeout);
+}
 
+AsteroidsGame.prototype.clearTimeout = function(id) {
+    for (var i=0; i <= this.timeouts.length; i++) {
+	if (this.timeouts[i].id == id) {
+	    this.timeouts.splice(i, 1);
+	    return true;
+	}
+    }
+    return false;
+}
+
+AsteroidsGame.prototype.checkTimeouts = function() {
+    var now = this.now || Date.now();
+    var keepTimeouts = []; // new list of timeouts
+    for (var i=0; i < this.timeouts.length; i++) {
+	var timeout = this.timeouts[i];
+	//console.log("test timeout "+timeout.id+": " + timeout.time + " <=> " +now);
+	if (timeout.time <= now) {
+	    timeout.callback();
+	} else {
+	    keepTimeouts.push(timeout);
+	}
+    }
+
+    this.timeouts = keepTimeouts;
+}

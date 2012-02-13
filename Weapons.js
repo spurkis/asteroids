@@ -397,7 +397,7 @@ Bullet.prototype.explode = function() {
     this.update = false;
 
     var self = this;
-    setTimeout(function(){
+    this.game.setTimeout(function(){
 	self.die()
     }, 250);
 }
