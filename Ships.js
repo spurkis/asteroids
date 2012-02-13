@@ -58,7 +58,7 @@ Ship.prototype.initialize = function(game, spatial) {
     // TODO: move these into their own objects
     this.healthWidth = 100;
     this.healthHeight = 10;
-    this.healthX = spatial.healthX || this.maxX - this.healthWidth - 10;
+    this.healthX = spatial.healthX || this.ctx.canvas.width - this.healthWidth - 10;
     this.healthY = 10;
 
     // draw shield status on top of health bar:
@@ -387,22 +387,10 @@ Ship.prototype.getClearAmmoBarCanvas = function() {
  * Draw
  */
 Ship.prototype.draw = function() {
-    // all objects should set:
-    this.x_last = this.x;
-    this.y_last = this.y;
-
     var ctx = this.ctx;
     ctx.save();
     ctx.translate( this.x, this.y );
     if (this.facing > 0) ctx.rotate( this.facing );
-
-    /* TODO: handle health change
-    if (this.healthChanged || this.shipStrokeStyle == null) {
-	var color = this.color;
-	color.newR = (color.r +(100 - this.health)*2) % 255;
-	this.shipStrokeStyle = 'rgb('+ color.newR +',' + color.g +','+ color.b +')';
-    }
-    */
 
     // render this ship
     if (this.shieldActive) {

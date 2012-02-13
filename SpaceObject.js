@@ -38,6 +38,9 @@ SpaceObject.prototype.draw = function() {
 
 SpaceObject.prototype.redraw = function() {
     throw this.constructor.toString() + ".redraw not overriden";
+    // all objects should set:
+    this.x_last = this.x;
+    this.y_last = this.y;
 };
 
 SpaceObject.prototype.initialize = function(game, spatial) {
@@ -54,8 +57,6 @@ SpaceObject.prototype.initialize = function(game, spatial) {
     // call updateX/Y to set on-screen coords
     this.x = 0; this.updateX(spatial.x);      // starting position on x axis
     this.y = 0; this.updateY(spatial.y);      // starting position on y axis
-    this.maxX = this.ctx.canvas.width;
-    this.maxY = this.ctx.canvas.height;
 
     this.image = spatial.image;		      // image used to draw object
 
@@ -131,29 +132,37 @@ SpaceObject.prototype.resetBeforeUpdate = function() {
  *    false if they're the same
  */
 SpaceObject.prototype.updateX = function(dX) {
+    if (this.stationary) return false;
     if (dX == 0) return false;
 
     this.x += dX;
-    if (this.x < 0) this.x = this.maxX + this.x;
-    if (this.x > this.maxX) this.x = this.x - this.maxX;
 
     // TODO: incremental draws
     //would this movement be visible?
-    if (Math.abs(this.x_last - this.x) < 0.1) return false;
+    //if (Math.abs(this.x_last - this.x) < 0.1) return false;
     return true;
 }
 
+SpaceObject.prototype.setX = function(x) {
+    if (this.stationary) return false;
+    this.x = x;
+}
+
 SpaceObject.prototype.updateY = function(dY) {
+    if (this.stationary) return false;
     if (dY == 0) return false;
 
     this.y += dY;
-    if (this.y < 0) this.y = this.maxY + this.y;
-    if (this.y > this.maxY) this.y = this.y - this.maxY;
 
     // TODO: incremental draws
     // would this movement be visible?
     //if (Math.abs(this.y_last - this.y) < 0.1) return false;
     return true;
+}
+
+SpaceObject.prototype.setY = function(y) {
+    if (this.stationary) return false;
+    this.y = y;
 }
 
 SpaceObject.prototype.updateFacing = function(delta) {
@@ -212,6 +221,8 @@ SpaceObject.prototype.applyDelayedUpdates = function() {
 }
 
 SpaceObject.prototype.updateVelocity = function(dX, dY) {
+    if (this.stationary) return false;
+
     var newVx = this.vX + dX;
     var newVy = this.vY + dY;
     

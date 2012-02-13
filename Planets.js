@@ -74,10 +74,6 @@ Planetoid.prototype.preRender = function() {
 }
 
 Planetoid.prototype.draw = function() {
-    // all objects should set:
-    this.x_last = this.x;
-    this.y_last = this.y;
-
     var ctx = this.ctx;
     ctx.drawImage(this.render.canvas, this.x-this.radius, this.y-this.radius);
 
@@ -136,7 +132,7 @@ Planet.prototype.initialize = function(game, spatial) {
     this.fillStyle = "rgba(100,0,0,0.75)";
     this.is_planet = true;
     this.landingThresholdSpeed = 0.4;
-    this.landingThresholdAngle = deg_to_rad[5];
+    this.landingThresholdAngle = deg_to_rad[8];
 
     return this;
 }
@@ -145,12 +141,14 @@ Planet.prototype.collided = function(object, collision) {
     if (object.is_ship) {
 	// if the magnitude of the delta-V is small & the ship is
 	// facing away from this, then let them land without damage
+	//console.log("checking for landing: "+ collision.impactSpeed + "< "+this.landingThresholdSpeed);
 	if (collision.impactSpeed < this.landingThresholdSpeed) {
 	    var this_collision = collision[this.id];
 	    var planet_to_ship_angle = Math.atan2(-this_collision.dY, -this_collision.dX);
-	    var delta_angle = Math.abs(object.facing - planet_to_ship_angle);
+	    var delta_angle = Math.abs(object.facing - planet_to_ship_angle) % deg_to_rad[360];
+	    //console.log("landing angles: "+ delta_angle + "< "+this.landingThresholdAngle);
 	    if (delta_angle <= this.landingThresholdAngle) {
-		console.log(object.id + " landed on " + this.id);
+		//console.log(object.id + " landed on " + this.id);
 		this.attach(object);
 		object.attach(this);
 	    }
@@ -158,16 +156,6 @@ Planet.prototype.collided = function(object, collision) {
 	}
     }
     this.parent.collided.call( this, object, collision );
-}
-
-Planet.prototype.updateVelocity = function(dX, dY) {
-    if (this.stationary) return;
-    this.parent.updateVelocity.call(this, dX, dY);
-}
-
-Planet.prototype.setVelocity = function(vX, vY) {
-    if (this.stationary) return;
-    this.parent.setVelocity.call(this, vX, vY);
 }
 
 Planet.prototype.decHealth = function(delta) {

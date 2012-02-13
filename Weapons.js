@@ -346,10 +346,6 @@ Bullet.prototype.preRenderExplosion = function() {
 }
 
 Bullet.prototype.draw = function() {
-    // all objects should set:
-    this.x_last = this.x;
-    this.y_last = this.y;
-
     var ctx = this.ctx;
     ctx.save();
     ctx.translate( this.x, this.y );
@@ -359,29 +355,12 @@ Bullet.prototype.draw = function() {
     if (this.exploding) {
 	var r = this.render.explosion;
 	ctx.drawImage(r.canvas, r.x, r.y);
-	/*
-	ctx.strokeStyle = this.color;
-	ctx.beginPath();
-	ctx.moveTo(0,3);
-	ctx.lineTo(0,-3);
-	ctx.moveTo(3,0);
-	ctx.lineTo(-3,0);
-	ctx.closePath();
-	ctx.stroke();
-	*/
     } else {
 	if (this.fading >= 0) {
 	    ctx.globalAlpha = this.fading / 10;
 	}
 	var r = this.render.bullet;
 	ctx.drawImage(r.canvas, r.x, r.y);
-	/*
-	ctx.beginPath();
-	ctx.moveTo(r.x,r.y);
-	ctx.lineTo(0,0);
-	ctx.closePath();
-	ctx.stroke();
-	*/
     }
 
     ctx.restore();
@@ -447,10 +426,6 @@ Grenade.prototype.initialize = function(ship, spatial) {
 }
 
 Grenade.prototype.draw = function() {
-    // all objects should set:
-    this.x_last = this.x;
-    this.y_last = this.y;
-
     var ctx = this.ctx;
     ctx.save();
     ctx.translate( this.x, this.y );
