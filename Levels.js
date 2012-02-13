@@ -89,21 +89,22 @@ Level1.inheritsFrom( Level );
 
 Level1.prototype.initialize = function(game) {
     Level1.prototype.parent.initialize.call(this, game);
-    //this.maxX = 500;
-    //this.maxy = 500;
-    this.wrapX = true;
+    this.maxX = 1500;
+    this.maxY = 700;
+    this.wrapX = false;
     this.wrapY = false;
 
     var maxX = this.maxX;
     var maxY = this.maxY;
 
+    var canvas = this.game.ctx.canvas;
     this.planets.push(
-	{x: 1/2*maxX, y: maxY + 900, mass: 5000, radius: 1000, stationary: true}
+	{x: 1/2*maxX, y: canvas.height + 900, mass: 5000, radius: 1000, stationary: true}
     );
 
     this.ships.push(
-	{x: 4/5*maxX, y: 2/3*maxY}
-	, {x: 1/5*maxX, y: 2/3*maxY, color: {r: 0,g:100,b:100}, healthX: 10}
+	{x: 4/5*maxX, y: 2/3*canvas.height}
+	, {x: 1/5*maxX, y: 2/3*canvas.height, color: {r: 0,g:100,b:100}, healthX: 10}
     );
 
 /**/

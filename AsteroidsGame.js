@@ -55,7 +55,7 @@ function AsteroidsGame(ctx, img) {
     // hard-code 1 player for now & start co-ords
     this.ship = new Ship(this, {});
 
-    this.loadLevel(new Level0(this));
+    this.loadLevel(new Level1(this));
 
     this.setDefaultCanvasState();
     this.bindDefaultKeys();
