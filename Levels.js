@@ -78,7 +78,7 @@ Level1.prototype.initialize = function(game) {
     );
 /**/
 
-    // spawn falling asteroid every 2s
+    // spawn falling asteroid
     var self = this;
     var spawnAsteroid = function() {
 	var radius = getRandomInt(3,7);
@@ -95,7 +95,7 @@ Level1.prototype.initialize = function(game) {
 	self.game.addObject(asteroid);
     }
 
-    this.spawnInterval = setInterval(spawnAsteroid, 2000);
+    this.spawnInterval = setInterval(spawnAsteroid, 1000);
 }
 
 

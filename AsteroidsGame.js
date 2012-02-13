@@ -233,13 +233,19 @@ AsteroidsGame.prototype.applyOutOfBounds = function(object) {
 	if (level.wrapX) {
 	    object.setX(level.maxX + object.x);
 	} else {
-	    object.updateVelocity(0.1, 0); // push away
+	    if (! object.is_ship && object.vX < 0) {
+		return object.die();
+	    }
+	    object.updateVelocity(0.1, 0);
 	}
     } else if (object.x > level.maxX) {
 	if (level.wrapX) {
 	    object.setX(object.x - level.maxX);
 	} else {
-	    object.updateVelocity(-0.1, 0); // push away
+	    if (! object.is_ship && object.vX > 0) {
+		return object.die();
+	    }
+	    object.updateVelocity(-0.1, 0);
 	}
     }
 
@@ -247,15 +253,21 @@ AsteroidsGame.prototype.applyOutOfBounds = function(object) {
 	if (level.wrapY) {
 	    object.setY(level.maxY + object.y);
 	} else {
-	    //object.setY(0);
-	    object.updateVelocity(0, 0.1); // push away
+	    if (! object.is_ship && object.vY < 0) {
+		return object.die();
+	    }
+	    // push back into bounds
+	    object.updateVelocity(0, 0.1);
 	}
     } else if (object.y > level.maxY) {
 	if (level.wrapY) {
 	    object.setY(object.y - level.maxY);
 	} else {
-	    //object.setY(level.maxY);
-	    object.updateVelocity(0, -0.1); // push away
+	    if (! object.is_ship && object.vY > 0) {
+		return object.die();
+	    }
+	    // push back into bounds
+	    object.updateVelocity(0, -0.1);
 	}
     }
 }
