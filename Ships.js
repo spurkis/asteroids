@@ -70,7 +70,6 @@ Ship.prototype.initialize = function(game, spatial) {
     this.ammoX = this.healthX;
     this.ammoY = this.thrustY + this.thrustHeight + 5;
 
-
     return this;
 }
 
@@ -81,6 +80,181 @@ Ship.prototype.resetBeforeUpdate = function() {
     Ship.prototype.parent.resetBeforeUpdate.call(this);
 }
 
+/******************************************************************************
+ * Pre-rendered caches
+ */
+Ship.prototype.preRender = function() {
+    this.render = {};
+
+    // TODO: replace these with .png's?
+    this.renderShip();
+    this.renderThrustForward();
+    this.renderThrustBackward();
+    this.renderSpinCW();
+    this.renderSpinCCW();
+
+    // TODO: create flags for ship actions & pre-render each case?
+    // leave room for: accel, decel, spin, health, shields, etc.
+}
+
+Ship.prototype.renderShip = function() {
+    var render = this.createPreRenderCanvas(14,14);
+    var ctx = render.ctx;
+    var color = this.color;
+
+    // corner of image: offset from center of ship
+    render.x = -7;
+    render.y = -7;
+
+    ctx.strokeStyle = 'rgb('+ color.r +',' + color.g +','+ color.b +')';
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.lineTo(14,7);
+    ctx.lineTo(0,14);
+    ctx.quadraticCurveTo(7,7, 0,0);
+    ctx.closePath();
+    ctx.stroke();
+
+    /*
+    // draw facing angle
+    ctx.strokeStyle = "orange";
+    ctx.beginPath();
+    ctx.moveTo(7,7);
+    ctx.lineTo(50,7);
+    ctx.closePath();
+    ctx.stroke();
+
+    // draw facing angle + 90º
+    ctx.strokeStyle = "yellow";
+    ctx.beginPath();
+    ctx.moveTo(7,7);
+    ctx.lineTo(7,50);
+    ctx.closePath();
+    ctx.stroke();
+    */
+
+    this.render.ship = render;
+}
+
+Ship.prototype.renderThrustForward = function() {
+    var render = this.createPreRenderCanvas(8,6);
+    var ctx = render.ctx;
+    var color = this.color;
+
+    // offset from center of ship
+    render.x = -13;
+    render.y = -3;
+
+    ctx.strokeStyle = 'rgb('+ color.r +',' + color.g +','+ color.b +')';
+    ctx.beginPath();
+    ctx.moveTo(8,0);
+    ctx.lineTo(0,0);
+    ctx.moveTo(8,3);
+    ctx.lineTo(3,3);
+    ctx.moveTo(8,6);
+    ctx.lineTo(0,6);
+    ctx.closePath();
+    ctx.stroke();
+
+    this.render.thrustForward = render;
+}
+
+Ship.prototype.renderThrustBackward = function() {
+    var render = this.createPreRenderCanvas(10,12);
+    var ctx = render.ctx;
+    var color = this.color;
+
+    // offset from center of ship
+    render.x = 0;
+    render.y = -6;
+
+    ctx.strokeStyle = 'rgb('+ color.r +',' + color.g +','+ color.b +')';
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.lineTo(8,0);
+    ctx.moveTo(6,3);
+    ctx.lineTo(10,3);
+    ctx.moveTo(6,6);
+    ctx.lineTo(10,6);
+    ctx.moveTo(0,12);
+    ctx.lineTo(8,12);
+    ctx.closePath();
+    ctx.stroke();
+
+    this.render.thrustBackward = render;
+}
+
+Ship.prototype.renderSpinCW = function() {
+    var render = this.createPreRenderCanvas(1,3);
+    var ctx = render.ctx;
+    var color = this.color;
+
+    // offset from center of ship
+    render.x = 5;
+    render.y = -6;
+
+    ctx.strokeStyle = 'rgb('+ color.r +',' + color.g +','+ color.b +')';
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.lineTo(0,3);
+    ctx.closePath();
+    ctx.stroke();
+
+    this.render.spinCW = render;
+}
+
+Ship.prototype.renderSpinCCW = function() {
+    var render = this.createPreRenderCanvas(1,3);
+    var ctx = render.ctx;
+    var color = this.color;
+
+    // offset from center of ship
+    render.x = 5;
+    render.y = 3;
+
+    ctx.strokeStyle = 'rgb('+ color.r +',' + color.g +','+ color.b +')';
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.lineTo(0,3);
+    ctx.closePath();
+    ctx.stroke();
+
+    this.render.spinCCW = render;
+}
+
+Ship.prototype.renderHealthBar = function() {
+    var render = this.getClearHealthRenderCanvas();
+    var ctx = render.ctx;
+
+    var r = 200 - this.health*2;
+    var g = this.health*2 + 50;
+    var b = this.health*2;
+    var fillStyle = 'rgba('+ r +','+ g +','+ b +',0.5)';
+    var fillWidth = Math.floor(this.health/100 * this.healthWidth);
+
+    ctx.beginPath();
+    ctx.fillStyle = fillStyle;
+    ctx.fillRect(0, 0, fillWidth, this.healthHeight);
+    ctx.strokeStyle = 'rgba(5,5,5,0.75)';
+    ctx.strokeRect(0, 0, this.healthWidth, this.healthHeight);
+    ctx.closePath();
+
+    this.render.healthBar = render;
+}
+
+Ship.prototype.getClearHealthRenderCanvas = function() {
+    if (this.render.health) {
+	this.render.health.ctx.clearRect(0, 0, this.healthWidth, this.healthHeight);
+	return this.render.healthBar;
+    }
+    var render = this.createPreRenderCanvas(this.healthWidth, this.healthHeight);
+    render.ctx.globalCompositeOperation = 'source-over';
+    return render;
+}
+
+/******************************************************************************
+ * Draw
+ */
 Ship.prototype.draw = function() {
     // all objects should set:
     this.x_last = this.x;
@@ -91,103 +265,54 @@ Ship.prototype.draw = function() {
     ctx.translate( this.x, this.y );
     if (this.facing > 0) ctx.rotate( this.facing );
 
-    /*
-    // draw facing angle
-    ctx.strokeStyle = "yellow";
-    ctx.beginPath();
-    ctx.moveTo(0,0);
-    ctx.lineTo(0,50);
-    ctx.closePath();
-    ctx.stroke();
-
-    ctx.strokeStyle = "orange";
-    ctx.beginPath();
-    ctx.moveTo(0,0);
-    ctx.lineTo(50,0);
-    ctx.closePath();
-    ctx.stroke();
-    */
-
-    // TODO: replace these with .png's?
-
+    /* TODO: handle health change
     if (this.healthChanged || this.shipStrokeStyle == null) {
 	var color = this.color;
 	color.newR = (color.r +(100 - this.health)*2) % 255;
 	this.shipStrokeStyle = 'rgb('+ color.newR +',' + color.g +','+ color.b +')';
     }
+    */
 
-    ctx.strokeStyle = this.shipStrokeStyle;
-    ctx.beginPath();
-    ctx.moveTo(-7,-7);
-    ctx.lineTo(7,0);
-    ctx.lineTo(-7,7);
-    ctx.quadraticCurveTo(0,0, -7,-7);
+    // render this ship
+    var rs = this.render.ship;
+    ctx.drawImage(rs.canvas, rs.x, rs.y);
 
     if (this.accelerate) {
-	ctx.moveTo(-4,-3);
-	ctx.lineTo(-12,-3);
-	ctx.moveTo(-4,0);
-	ctx.lineTo(-9,0);
-	ctx.moveTo(-4,3);
-	ctx.lineTo(-12,3);
+	var r = this.render.thrustForward;
+	ctx.drawImage(r.canvas, r.x, r.y);
     }
 
     if (this.decelerate) {
-	ctx.moveTo(6,-3);
-	ctx.lineTo(10,-3);
-	ctx.moveTo(0,-6);
-	ctx.lineTo(8,-6);
-	ctx.moveTo(6,3);
-	ctx.lineTo(10,3);
-	ctx.moveTo(0,6);
-	ctx.lineTo(8,6);
+	var r = this.render.thrustBackward;
+	ctx.drawImage(r.canvas, r.x, r.y);
     }
 
     if (this.increaseSpin) {
-	ctx.moveTo(5,-3);
-	ctx.lineTo(5,-6);
+	var r = this.render.spinCW;
+	ctx.drawImage(r.canvas, r.x, r.y);
     }
 
     if (this.decreaseSpin) {
-	ctx.moveTo(5,3);
-	ctx.lineTo(5,6);
+	var r = this.render.spinCCW;
+	ctx.drawImage(r.canvas, r.x, r.y);
     }
 
-    ctx.closePath();
-    ctx.stroke();
     ctx.restore();
 
-    this.drawHealth();
+    this.drawHealthBar();
     this.drawShield();
-    this.drawThrust();
-    this.drawAmmo();
+    this.drawThrustBar();
+    this.drawAmmoBar();
     this.drawWeaponSelection();
 }
 
-Ship.prototype.drawHealth = function() {
-    if (this.healthChanged || this.healthCache == null) {
-	var r = 200 - this.health*2;
-	var g = this.health*2 + 50;
-	var b = this.health*2;
-	this.healthCache = {
-	    fillStyle: 'rgba('+ r +','+ g +','+ b +',0.5)',
-	    fillWidth: Math.floor(this.health/100 * this.healthWidth)
-	};
+Ship.prototype.drawHealthBar = function() {
+    if (this.healthChanged || this.render.healthBar == null) {
+	this.renderHealthBar();
     }
 
-    var ctx = this.ctx;
-    var cache = this.healthCache;
-    ctx.save();
-    ctx.translate( this.healthX, this.healthY );
-
-    ctx.beginPath();
-    ctx.fillStyle = cache.fillStyle;
-    ctx.fillRect(0,0,cache.fillWidth, this.healthHeight);
-    ctx.strokeStyle = 'rgba(5,5,5,0.75)';
-    ctx.strokeRect(0,0,this.healthWidth,this.healthHeight);
-    ctx.closePath();
-
-    ctx.restore();
+    var r = this.render.healthBar;
+    this.ctx.drawImage(r.canvas, this.healthX, this.healthY);
 }
 
 Ship.prototype.drawShield = function() {
@@ -234,7 +359,7 @@ Ship.prototype.drawShield = function() {
     ctx.restore();
 }
 
-Ship.prototype.drawThrust = function() {
+Ship.prototype.drawThrustBar = function() {
     if (this.thrustChanged || this.thrustCache == null) {
 	var thrustPercent = Math.floor(this.thrust/this.maxThrust * 100);
 	var fillWidth = Math.floor(thrustPercent * this.thrustWidth / 100 / 2);
@@ -263,7 +388,7 @@ Ship.prototype.drawThrust = function() {
     ctx.restore();
 }
 
-Ship.prototype.drawAmmo = function() {
+Ship.prototype.drawAmmoBar = function() {
     if (this.ammoChanged || this.ammoCache == null) {
 	var ammoLevel = this.currentWeapon.ammoLevel();
 	var r = 250 - Math.floor(ammoLevel/2);

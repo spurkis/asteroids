@@ -14,6 +14,21 @@ function SpaceObject(game, spatial) {
     return this;
 }
 
+SpaceObject.prototype.preRender = function() {
+    ; // override me
+}
+
+SpaceObject.prototype.createPreRenderCanvas = function(width, height) {
+    var canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    var ctx = canvas.getContext('2d');
+    return render = {
+	canvas: canvas,
+	ctx: ctx,
+    };
+}
+
 SpaceObject.prototype.draw = function() {
     throw this.constructor.toString() + ".draw not overriden";
     // all objects should set:

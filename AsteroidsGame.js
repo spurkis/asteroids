@@ -52,18 +52,19 @@ function AsteroidsGame(ctx, img) {
 
     // enemy ships
     this.addObjects([
-	new ComputerShip(this, {x: 1/5*this.maxX, y: 2/3*this.maxY, color: {r: 0,g:100,b:100}, healthX: 10}),
+//	new ComputerShip(this, {x: 1/5*this.maxX, y: 2/3*this.maxY, color: {r: 0,g:100,b:100}, healthX: 10}),
 //	new ComputerShip(this, {x: 4/5*this.maxX, y: 2/3*this.maxY, healthX: Math.floor(this.maxX/2)}),
     ]);
 
     this.addObjects([
 //	new Planet(this, {x: 3/4*this.maxX, y: 1/4*this.maxY, mass: 195, radius: 45, vX: -0.5, vY: 0}),
 //	new Planet(this, {x: 1/5*this.maxX, y: 2/5*this.maxY, mass: 15, radius: 15, vX: -0.5, vY: 0.5, image: this.planetImg }) ,
-	new Planet(this, {x: 5/7*this.maxX, y: 4/5*this.maxY, mass: 30, radius: 20}),
+//	new Planet(this, {x: 5/7*this.maxX, y: 4/5*this.maxY, mass: 30, radius: 20}),
 //	new Planet(this, {x: 1/2*this.maxX-60, y: 1/2*this.maxY, mass: 15, radius: 15, vY: 0.5}),
 //	new Planet(this, {x: 1/2*this.maxX, y: this.maxY+900, mass: 100, radius: 1000, stationary: true})
     ]);
 
+/*
     for (var i=50; i<this.maxX; i+= getRandomInt(80,120)) {
 	for (var j=50; j<this.maxY; j+= getRandomInt(80,120)) {
 	    var a = new Asteroid(this, {
@@ -80,6 +81,7 @@ function AsteroidsGame(ctx, img) {
 	    this.addObject(a);
 	}
     }
+*/
 
 /*
     this.addObjects([
@@ -182,7 +184,7 @@ AsteroidsGame.prototype.measureFrameRate = function() {
 	if (dt < 1000) return;
 	this.frameRate = 1000 * this.frames / dt;
 	this.frames = 0;
-	console.log( "frame rate: " + this.frameRate.toFixed(3) );
+	//console.log( "frame rate: " + this.frameRate.toFixed(3) );
     }
     this.timeLastFrameRateMeasured = now;
 }
@@ -545,6 +547,7 @@ AsteroidsGame.prototype.addObject = function(object) {
     //console.log('adding ' + object);
     this.objects.push( object );
     this.objectUpdated( object );
+    object.preRender();
     this.cachePhysicsFor(object);
 }
 

@@ -27,21 +27,15 @@ Planetoid.prototype.initialize = function(game, spatial) {
     return this;
 }
 
-Planetoid.prototype.draw = function() {
-    // all objects should set:
-    this.x_last = this.x;
-    this.y_last = this.y;
-
-    var ctx = this.ctx;
-
-    ctx.save();
-    ctx.translate( this.x, this.y );
-
+// TODO: one cache for each radius...
+Planetoid.prototype.preRender = function() {
+    this.render = this.createPreRenderCanvas(this.radius*2,this.radius*2);
+    var ctx = this.render.ctx;
     if (this.image != null) {
-	ctx.drawImage(this.image, -this.radius, -this.radius, this.radius*2, this.radius*2);
+	ctx.drawImage(this.image, this.radius, this.radius, this.radius*2, this.radius*2);
     } else {
 	ctx.beginPath();
-	ctx.arc(0, 0, this.radius, 0, deg_to_rad[360], false);
+	ctx.arc(this.radius, this.radius, this.radius, 0, deg_to_rad[360], false);
 	ctx.closePath()
 	if (this.fillStyle) {
 	    ctx.fillStyle = this.fillStyle;
@@ -51,17 +45,28 @@ Planetoid.prototype.draw = function() {
 	    ctx.stroke();
 	}
     }
+}
+
+Planetoid.prototype.draw = function() {
+    // all objects should set:
+    this.x_last = this.x;
+    this.y_last = this.y;
+
+    var ctx = this.ctx;
+    ctx.drawImage(this.render.canvas, this.x-this.radius, this.y-this.radius);
 
     // draw trajectory:
     /*
+    ctx.save();
+    ctx.translate( this.x, this.y );
     ctx.beginPath();
     ctx.moveTo(0,0);
     ctx.strokeStyle = 'orange';
     ctx.lineTo(this.vX*100,this.vY*100);
     ctx.closePath();
     ctx.stroke();
-    */
     ctx.restore();
+    */
 }
 
 Planetoid.prototype.redraw = function() {
