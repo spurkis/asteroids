@@ -252,7 +252,6 @@ Bullet.prototype.initialize = function(ship, spatial) {
     this.ship = ship;
     this.ttl = 2500;
     this.exploding = false;
-    this.fading = -1;
     this.color = spatial.color || "#f22";
 
     return this;
@@ -260,21 +259,7 @@ Bullet.prototype.initialize = function(ship, spatial) {
 
 
 Bullet.prototype.weaponTimeout = function() {
-    this.fading = 10;
-    var self = this;
-    this.fadeIntervalId = setInterval(function(){
-	self.fadeOut();
-    }, 100);
-}
-
-Bullet.prototype.fadeOut = function() {
-    this.fading--;
-
-    if (this.fading <= 0) {
-	clearInterval(this.fadeIntervalId);
-	delete this.fadeIntervalId;
-	this.die();
-    }
+    this.die();
 }
 
 Bullet.prototype.preRender = function() {
@@ -346,6 +331,8 @@ Bullet.prototype.preRenderExplosion = function() {
 }
 
 Bullet.prototype.draw = function() {
+    if (this.died) return;
+
     var ctx = this.ctx;
     ctx.save();
     ctx.translate( this.x, this.y );
@@ -356,9 +343,6 @@ Bullet.prototype.draw = function() {
 	var r = this.render.explosion;
 	ctx.drawImage(r.canvas, r.x, r.y);
     } else {
-	if (this.fading >= 0) {
-	    ctx.globalAlpha = this.fading / 10;
-	}
 	var r = this.render.bullet;
 	ctx.drawImage(r.canvas, r.x, r.y);
     }
@@ -429,18 +413,14 @@ Grenade.prototype.draw = function() {
     var ctx = this.ctx;
     ctx.save();
     ctx.translate( this.x, this.y );
-    if (this.facing > 0) ctx.rotate( this.facing );
+    // if (this.facing > 0) ctx.rotate( this.facing );
 
     // TODO: fancy graphics
     if (this.exploding) {
 	this.radius += 2;
     }
 
-    if (this.fading >= 0) {
-	ctx.strokeStyle = "rgba(150,150,100,"+ this.fading / 10 +")";
-    } else {
-	ctx.strokeStyle = this.color;
-    }
+    ctx.strokeStyle = this.color;
 
     ctx.strokeStyle = this.color;
     ctx.beginPath();

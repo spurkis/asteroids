@@ -775,11 +775,16 @@ Ship.prototype.startFireWeapon = function() {
     this.firing = true;
     // console.log("firing");
 
+    var self = this;
+    var game = this.game;
     var weapon = this.currentWeapon;
-    weapon.fire(); // fire one, then wait
-    this.firingIntervalId = setInterval(function(){
+    var fireFunc = function() {
+	if (self.firing != true) return;
 	weapon.fire();
-    }, weapon.fireInterval);
+	self.firingIntervalId = game.setTimeout(fireFunc, weapon.fireInterval);
+    }
+
+    fireFunc(); // fire once & setup first timeout
 
     // TODO: weapon change should reset interval
 };

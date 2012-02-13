@@ -55,7 +55,7 @@ function AsteroidsGame(ctx, img) {
     // hard-code 1 player for now & start co-ords
     this.ship = new Ship(this, {});
 
-    this.loadLevel(new Level3(this));
+    this.loadLevel(new Level0(this));
 
     this.setDefaultCanvasState();
     this.bindDefaultKeys();
@@ -96,15 +96,14 @@ AsteroidsGame.prototype.loadLevel = function(level) {
 }
 
 AsteroidsGame.prototype.startGameLoop = function() {
-    if (this.updateIntervalId || this.drawIntervalId) {
-	console.log("startGameLoop aborted: already started with intervals=" +
-		    this.updateIntervalId +", "+ this.drawIntervalId );
+    if (this.animationTimeoutId) {
+	console.log("startGameLoop aborted: already started with id=" +
+		    this.animationTimeoutId );
 	return;
     }
 
     // draw current game state
     this.redrawCanvas();
-
 
     var self = this;
     animationFunc = function(lastCalled){    // set this global for debugging
@@ -643,7 +642,7 @@ AsteroidsGame.prototype.objectUpdated = function(object) {
 
 AsteroidsGame.prototype.fireWeapon = function(weapon) {
     var self = this;
-    weapon.timeoutId = this.setTimeout(function(){
+    weapon.timeoutId = setTimeout(function(){
 	self.weaponTimeout(weapon);
     }, weapon.ttl);
     this.addObject(weapon);
@@ -742,8 +741,8 @@ AsteroidsGame.prototype.setTimeout = function(callback, dt) {
 AsteroidsGame.prototype.clearTimeout = function(id) {
     for (var i=0; i <= this.timeouts.length; i++) {
 	if (this.timeouts[i].id == id) {
-	    this.timeouts.splice(i, 1);
-	    return true;
+            this.timeouts.splice(i, 1);
+            return true;
 	}
     }
     return false;
@@ -756,9 +755,23 @@ AsteroidsGame.prototype.checkTimeouts = function() {
 	var timeout = this.timeouts[i];
 	//console.log("test timeout "+timeout.id+": " + timeout.time + " <=> " +now);
 	if (timeout.time <= now) {
-	    timeout.callback();
+            timeout.callback();
 	} else {
-	    keepTimeouts.push(timeout);
+            keepTimeouts.push(timeout);
+	}
+    }
+}
+
+AsteroidsGame.prototype.checkTimeouts = function() {
+    var now = this.now || Date.now();
+    var keepTimeouts = []; // new list of timeouts
+    for (var i=0; i < this.timeouts.length; i++) {
+	var timeout = this.timeouts[i];
+	//console.log("test timeout "+timeout.id+": " + timeout.time + " <=> " +now);
+	if (timeout.time <= now) {
+            timeout.callback();
+	} else {
+            keepTimeouts.push(timeout);
 	}
     }
 
