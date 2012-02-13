@@ -78,6 +78,11 @@ Ship.prototype.initialize = function(game, spatial) {
     this.ammoX = this.healthX;
     this.ammoY = this.thrustY + this.thrustHeight + 5;
 
+    this.weaponsWidth = 100;
+    this.weaponsHeight = 10;
+    this.weaponsX = this.healthX;
+    this.weaponsY = this.ammoY + this.ammoHeight + 5;
+
     return this;
 }
 
@@ -383,6 +388,43 @@ Ship.prototype.getClearAmmoBarCanvas = function() {
 }
 
 
+Ship.prototype.renderWeaponsBar = function() {
+    var render = this.getClearWeaponsBarCanvas();
+    var ctx = render.ctx;
+
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+
+    var selectedIdx = this.weapons.indexOf(this.currentWeapon);
+    for (var i=0; i < this.weapons.length; i++) {
+	var weapon = this.weapons[i];
+	ctx.moveTo(i*10+5, 0);
+	ctx.lineWidth = 1;
+	ctx.lineTo(i*10+5, this.weaponsHeight);
+
+	if (i == selectedIdx) {
+	    ctx.moveTo(i*10+1, this.weaponsHeight/2);
+	    ctx.lineTo(i*10+9, this.weaponsHeight/2);
+	}
+    }
+    ctx.closePath();
+    ctx.stroke();
+
+    this.render.weaponsBar = render;
+}
+
+Ship.prototype.getClearWeaponsBarCanvas = function() {
+    var render = this.render.weaponsBar;
+    if (render) {
+	render.ctx.clearRect(0, 0, this.weaponsWidth, this.weaponsHeight);
+	return render;
+    }
+    render = this.createPreRenderCanvas(this.weaponsWidth, this.weaponsHeight);
+    render.ctx.globalCompositeOperation = 'source-over';
+    return render;
+}
+
+
 /******************************************************************************
  * Draw
  */
@@ -492,7 +534,12 @@ Ship.prototype.drawAmmoBar = function() {
 }
 
 Ship.prototype.drawWeaponsBar = function() {
-    // TODO
+    if (this.weaponChanged || this.render.weaponsBar == null) {
+	this.renderWeaponsBar();
+    }
+
+    var r = this.render.weaponsBar;
+    this.ctx.drawImage(r.canvas, this.weaponsX, this.weaponsY );
 }
 
 
