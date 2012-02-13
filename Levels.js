@@ -194,3 +194,44 @@ Level2.prototype.initialize = function(game) {
     }
 /**/
 }
+
+/******************************************************************************
+ * Level3: basic asteroid field with 1 ship
+ */
+
+function Level3(game) {
+    if (game) return this.initialize(game);
+    return this;
+}
+
+Level3.inheritsFrom( Level );
+
+Level3.prototype.initialize = function(game) {
+    Level3.prototype.parent.initialize.call(this, game);
+    //this.maxX = 500;
+    //this.maxy = 500;
+    this.wrapX = true;
+    this.wrapY = true;
+
+    var maxX = this.maxX;
+    var maxY = this.maxY;
+
+    this.ships.push(
+	{x: 4/5*maxX, y: 2/3*maxY}
+    );
+
+/**/
+    this.asteroids.push(
+	{x: 1/10*maxX, y: 6/10*maxY, mass: 0.5, radius: 14, vX: 0, vY: 0, spawn: 3, health: 1 },
+        {x: 1/10*maxX, y: 2/10*maxY, mass: 1, radius: 5, vX: 0, vY: -0.1 },
+        {x: 5/10*maxX, y: 1/10*maxY, mass: 2, radius: 6, vX: -0.2, vY: 0.25 },
+        {x: 5/10*maxX, y: 2/10*maxY, mass: 3, radius: 8, vX: -0.22, vY: 0.2 },
+        {x: 6/10*maxX, y: 8/10*maxY, mass: 2, radius: 6, vX: -0.4, vY: 0.1 },
+        {x: 6/10*maxX, y: 9/10*maxY, mass: 3, radius: 8, vX: 0.5, vY: -0.5 },
+        {x: 9/10*maxX, y: 8/10*maxY, mass: 2, radius: 6, vX: 0.6, vY: 0.4 },
+        {x: 9/10*maxX, y: 9/10*maxY, mass: 3, radius: 8, vX: 0.7, vY: 0.6 },
+	{x: 3/10*maxX, y: 1/10*maxY, mass: 2, radius: 6, vX: 0.8, vY: -0.2 },
+	{x: 3/10*maxX, y: 2/10*maxY, mass: 3, radius: 8, vX: 0.9, vY: -0.1 }
+    );
+/**/
+}
