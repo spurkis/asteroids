@@ -277,6 +277,74 @@ Bullet.prototype.fadeOut = function() {
     }
 }
 
+Bullet.prototype.preRender = function() {
+    this.render = {};
+    this.preRenderBullet();
+    this.preRenderExplosion();
+}
+
+var _bulletRenderCache = {};
+Bullet.prototype.preRenderBullet = function() {
+    var render = _bulletRenderCache[this.color];
+    if (render) {
+	// already exists in cache:
+	this.render.bullet = render;
+	return; // already exists
+    }
+
+    // doesn't exist, so create:
+    render = this.createPreRenderCanvas(5, 5);
+
+    // corner of image: offset from bullet strike point
+    render.x = -5;
+    render.y = 0;
+
+    var ctx = render.ctx;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.beginPath();
+    ctx.strokeStyle = this.color;
+    ctx.moveTo(0,0);
+    ctx.lineTo(5,0);
+    ctx.closePath();
+    ctx.stroke();
+
+    // cache it
+    _bulletRenderCache[this.color] = render;
+    this.render.bullet = render;
+}
+
+var _explosionRenderCache = {};
+Bullet.prototype.preRenderExplosion = function() {
+    var render = _explosionRenderCache[this.color];
+    if (render) {
+	// already exists in cache:
+	this.render.explosion = render;
+	return; // already exists
+    }
+
+    // doesn't exist, so create:
+    render = this.createPreRenderCanvas(6, 6);
+
+    // corner of image: offset from bullet strike point
+    render.x = -3;
+    render.y = -3;
+
+    var ctx = render.ctx;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = this.color;
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.lineTo(6,6);
+    ctx.moveTo(0,6);
+    ctx.lineTo(6,0);
+    ctx.closePath();
+    ctx.stroke();
+
+    // cache it
+    _explosionRenderCache[this.color] = render;
+    this.render.explosion = render;
+}
+
 Bullet.prototype.draw = function() {
     // all objects should set:
     this.x_last = this.x;
@@ -289,6 +357,9 @@ Bullet.prototype.draw = function() {
 
     // TODO: fancy graphics
     if (this.exploding) {
+	var r = this.render.explosion;
+	ctx.drawImage(r.canvas, r.x, r.y);
+	/*
 	ctx.strokeStyle = this.color;
 	ctx.beginPath();
 	ctx.moveTo(0,3);
@@ -296,19 +367,23 @@ Bullet.prototype.draw = function() {
 	ctx.moveTo(3,0);
 	ctx.lineTo(-3,0);
 	ctx.closePath();
+	ctx.stroke();
+	*/
     } else {
 	if (this.fading >= 0) {
-	    ctx.strokeStyle = "rgba(150,150,100,"+ this.fading / 10 +")";
-	} else {
-	    ctx.strokeStyle = this.color;
+	    ctx.globalAlpha = this.fading / 10;
 	}
+	var r = this.render.bullet;
+	ctx.drawImage(r.canvas, r.x, r.y);
+	/*
 	ctx.beginPath();
-	ctx.moveTo(-5,0);
+	ctx.moveTo(r.x,r.y);
 	ctx.lineTo(0,0);
 	ctx.closePath();
+	ctx.stroke();
+	*/
     }
 
-    ctx.stroke();
     ctx.restore();
 }
 

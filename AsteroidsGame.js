@@ -59,7 +59,7 @@ function AsteroidsGame(ctx, img) {
     this.addObjects([
 //	new Planet(this, {x: 3/4*this.maxX, y: 1/4*this.maxY, mass: 195, radius: 45, vX: -0.5, vY: 0}),
 //	new Planet(this, {x: 1/5*this.maxX, y: 2/5*this.maxY, mass: 15, radius: 15, vX: -0.5, vY: 0.5, image: this.planetImg }) ,
-//	new Planet(this, {x: 5/7*this.maxX, y: 4/5*this.maxY, mass: 30, radius: 20}),
+	new Planet(this, {x: 5/7*this.maxX, y: 4/5*this.maxY, mass: 30, radius: 20}),
 //	new Planet(this, {x: 1/2*this.maxX-60, y: 1/2*this.maxY, mass: 15, radius: 15, vY: 0.5}),
 //	new Planet(this, {x: 1/2*this.maxX, y: this.maxY+900, mass: 100, radius: 1000, stationary: true})
     ]);
