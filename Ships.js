@@ -386,7 +386,11 @@ Ship.prototype.getClearAmmoBarCanvas = function() {
 /******************************************************************************
  * Draw
  */
-Ship.prototype.draw = function() {
+Ship.prototype.shouldDraw = function(offset) {
+    return true; // always draw ships, b/c of their status bars
+}
+
+Ship.prototype.draw = function(offset) {
     var ctx = this.ctx;
     ctx.save();
     ctx.translate( this.x, this.y );
@@ -421,13 +425,20 @@ Ship.prototype.draw = function() {
     }
 
     ctx.restore();
+    this.drawStatusBars(offset);
+}
 
-    // Status Bars:
+Ship.prototype.drawStatusBars = function(offset) {
+    var ctx = this.ctx;
+    ctx.save();
+    // undo the Game's translate so we can draw relative to the canvas:
+    ctx.translate( offset.x, offset.y );
     this.drawHealthBar();
     this.drawShieldBar();
     this.drawThrustBar();
     this.drawAmmoBar();
     this.drawWeaponsBar();
+    ctx.restore();
 }
 
 Ship.prototype.drawHealthBar = function() {

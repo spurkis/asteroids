@@ -32,6 +32,8 @@ function AsteroidsGame(ctx, img) {
     this.maxAccel = 1;
     this.G = 0.1;
 
+    this.viewOffset = {x: 0, y: 0};
+
     this.elasticity = 0.8;       // collision elasticity: velocity modifier
     this.attachThreshold = 0.01; // min impact speed for objects to become attached
     this.detachThreshold = 5;    // min distance before attached objects detach
@@ -47,7 +49,7 @@ function AsteroidsGame(ctx, img) {
     // hard-code 1 player for now & start co-ords
     this.ship = new Ship(this, {});
 
-    this.loadLevel(new Level1(this));
+    this.loadLevel(new Level0(this));
 
     this.setDefaultCanvasState();
     this.bindDefaultKeys();
@@ -136,6 +138,8 @@ AsteroidsGame.prototype.updateAndDraw = function() {
     this.updated = [];
     this.updatePositions();
 
+    this.updateViewOffset();
+
     this.redrawCanvas();
     /* TODO: only draw updates
     if (this.updated.length > 50) {
@@ -162,14 +166,40 @@ AsteroidsGame.prototype.measureFrameRate = function() {
     this.timeLastFrameRateMeasured = now;
 }
 
+AsteroidsGame.prototype.updateViewOffset = function() {
+    var canvas = this.ctx.canvas;
+    var offset = this.viewOffset;
+    var dX = Math.round(this.ship.x - offset.x - canvas.width/2);
+    var dY = Math.round(this.ship.y - offset.y - canvas.height/2);
+
+    // keep the ship centered in the current view, but don't let the view
+    // go out of bounds
+    offset.x += dX;
+    if (offset.x < 0) offset.x = 0;
+    if (offset.x > this.level.maxX-canvas.width) offset.x = this.level.maxX-canvas.width;
+
+    offset.y += dY;
+    if (offset.y < 0) offset.y = 0;
+    if (offset.y > this.level.maxY-canvas.height) offset.y = this.level.maxY-canvas.height;
+}
+
 AsteroidsGame.prototype.redrawCanvas = function() {
     // clear entire canvas: not good for performance, but good enough for now
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    var ctx = this.ctx;
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // shift view to compensate for current offset
+    var offset = this.viewOffset;
+    ctx.save();
+    ctx.translate(-offset.x, -offset.y);
+
     for (var i=0; i < this.objects.length; i++) {
 	var object = this.objects[i];
-	object.draw();
+	if (object.shouldDraw(offset)) object.draw(offset);
 	object.resetBeforeUpdate();
     }
+
+    ctx.restore();
 };
 
 AsteroidsGame.prototype.redrawUpdated = function() {
@@ -368,7 +398,7 @@ AsteroidsGame.prototype.applyGravity = function(object1, object2, physics) {
     };
 
     var dvX_2 = 0, dvY_2 = 0;
-    if (! object1.stationary) {
+    if (! object2.stationary) {
 	var accel_2 = object1.cache.G_x_mass / physics.dist_squared;
 	if (accel_2 > 1e-5) { // skip if it's too small to notice
 	    if (accel_2 > this.maxAccel) accel_2 = this.maxAccel;

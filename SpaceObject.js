@@ -29,7 +29,14 @@ SpaceObject.prototype.createPreRenderCanvas = function(width, height) {
     };
 }
 
-SpaceObject.prototype.draw = function() {
+SpaceObject.prototype.shouldDraw = function(offset) {
+    var dX = this.x+this.radius - offset.x;
+    var dY = this.y+this.radius - offset.y;
+    if (dX < 0 || dY < 0) return false;
+    return true;
+}
+
+SpaceObject.prototype.draw = function(offset) {
     throw this.constructor.toString() + ".draw not overriden";
     // all objects should set:
     this.x_last = this.x;
