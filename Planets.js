@@ -30,11 +30,15 @@ Planetoid.prototype.initialize = function(game, spatial) {
 // TODO: one cache for each radius...
 var _planetoidRenderCache = {};
 Planetoid.prototype.preRender = function() {
-    // TODO: handle images!
+    // Handle images as a special un-cached case:
     if (this.image != null) {
-	//ctx.drawImage(this.image, this.radius, this.radius, this.radius*2, this.radius*2);
-	throw "TODO: can't pre-render images yet";
+	this.render = this.createPreRenderCanvas(this.radius*2, this.radius*2);
+	this.render.ctx.drawImage(this.image, 0, 0,
+				  this.radius*2, this.radius*2);
+	return;
     }
+
+    // cache & share others:
     var key = this.strokeStyle + ":" + this.fillStyle + ":" + this.radius;
     var render = _planetoidRenderCache[key];
     if (render) {
