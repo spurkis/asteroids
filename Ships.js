@@ -781,7 +781,7 @@ Ship.prototype.startFireWeapon = function() {
     var fireFunc = function() {
 	if (self.firing != true) return;
 	weapon.fire();
-	self.firingIntervalId = game.setTimeout(fireFunc, weapon.fireInterval);
+	self.firingTimeoutId = game.setTimeout(fireFunc, weapon.fireInterval);
     }
 
     fireFunc(); // fire once & setup first timeout
@@ -791,9 +791,9 @@ Ship.prototype.startFireWeapon = function() {
 
 Ship.prototype.stopFireWeapon = function() {
     // console.log("stop firing");
-    if (this.firingIntervalId) {
-	clearInterval(this.firingIntervalId);
-	this.firingIntervalId = null;
+    if (this.firingTimeoutId) {
+	this.game.clearInterval(this.firingTimeoutId);
+	this.firingTimeoutId = null;
     }
     this.firing = false;
 };
