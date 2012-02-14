@@ -25,8 +25,7 @@ function setupCanvas() {
 		asteroids.stop();
 	    }
 */	}
-	//img.src = "twitter-logo.png";
-	img.src = "moon.png";
+	img.src = "planet.png";
     } else {
 	console.log("no canvas available");
     }

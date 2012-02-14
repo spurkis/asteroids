@@ -56,7 +56,7 @@ Level0.prototype.initialize = function(game) {
 
     var canvas = this.game.ctx.canvas;
     this.planets.push(
-	{x: 1/2*maxX, y: 1/2*maxY, mass: 500, radius: 100, damage: 5, stationary: true}
+	{x: 1/2*maxX, y: 1/2*maxY, mass: 500, radius: 100, damage: 5, stationary: true, image: this.game.planetImg }
 	, {x: 0, y: 0, mass: 5, radius: 40, stationary: true}
 	, {x: maxX, y: maxY, mass: 5, radius: 40, stationary: true}
 	, {x: maxX, y: 0, mass: 5, radius: 40, stationary: true}
@@ -69,7 +69,7 @@ Level0.prototype.initialize = function(game) {
     );
 
     this.asteroids.push(
-	{x: 1/10*maxX, y: 6/10*maxY, mass: 0.5, radius: 14, vX: 0, vY: 0, spawn: 3, health: 1 },
+	{x: 1/10*maxX, y: 6/10*maxY, mass: 0.5, radius: 14, vX: 0, vY: 0, spawn: 3, health: 1},
         {x: 1/10*maxX, y: 2/10*maxY, mass: 1, radius: 5, vX: 0, vY: -0.1 },
         {x: 5/10*maxX, y: 1/10*maxY, mass: 2, radius: 6, vX: -0.2, vY: 0.25 },
         {x: 5/10*maxX, y: 2/10*maxY, mass: 3, radius: 8, vX: -0.22, vY: 0.2 }
