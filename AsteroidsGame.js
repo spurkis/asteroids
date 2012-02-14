@@ -24,11 +24,10 @@ var cancelAnimationFrame = window.cancelAnimationFrame
     || window.msCancelRequestAnimationFrame
     || clearTimeout;
 
-function AsteroidsGame(ctx, img) {
+function AsteroidsGame(ctx, level) {
     this.ctx = ctx;
     this.canvas = ctx.canvas;
 
-    this.planetImg = img;
     this.maxAccel = 1;
     this.G = 0.1;
 
@@ -55,7 +54,8 @@ function AsteroidsGame(ctx, img) {
     // hard-code 1 player for now & start co-ords
     this.ship = new Ship(this, {});
 
-    this.loadLevel(new Level0(this));
+    if (! level) level = Level0;
+    this.loadLevel(new level(this));
 
     this.setDefaultCanvasState();
     this.bindDefaultKeys();
@@ -93,6 +93,14 @@ AsteroidsGame.prototype.loadLevel = function(level) {
     for (var i=0; i<level.asteroids.length; i++) {
 	this.addObject(new Asteroid(this, level.asteroids[i]));
     }
+}
+
+AsteroidsGame.prototype.loadImages = function() {
+/*
+    var img = new Image();
+    img.onload = function(){}
+    img.src = "planet.png";
+*/
 }
 
 AsteroidsGame.prototype.startGameLoop = function() {

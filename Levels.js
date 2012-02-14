@@ -7,6 +7,8 @@
 
 require('asteroidUtils.js');
 
+var gameLevels = [];
+
 function Level(game) {
     if (game) return this.initialize(game);
     return this;
@@ -43,6 +45,8 @@ function Level0(game) {
 }
 
 Level0.inheritsFrom( Level );
+gameLevels.push(Level0);
+Level0.name = "Level 0";
 
 Level0.prototype.initialize = function(game) {
     Level0.prototype.parent.initialize.call(this, game);
@@ -56,7 +60,7 @@ Level0.prototype.initialize = function(game) {
 
     var canvas = this.game.ctx.canvas;
     this.planets.push(
-	{x: 1/2*maxX, y: 1/2*maxY, mass: 500, radius: 100, damage: 5, stationary: true, image: this.game.planetImg }
+	{x: 1/2*maxX, y: 1/2*maxY, mass: 500, radius: 100, damage: 5, stationary: true, image_src: "planet.png" }
 	, {x: 0, y: 0, mass: 5, radius: 40, stationary: true}
 	, {x: maxX, y: maxY, mass: 5, radius: 40, stationary: true}
 	, {x: maxX, y: 0, mass: 5, radius: 40, stationary: true}
@@ -86,6 +90,8 @@ function Level1(game) {
 }
 
 Level1.inheritsFrom( Level );
+gameLevels.push(Level1);
+Level1.name = "Level 1";
 
 Level1.prototype.initialize = function(game) {
     Level1.prototype.parent.initialize.call(this, game);
@@ -153,6 +159,8 @@ function Level2(game) {
 }
 
 Level2.inheritsFrom( Level );
+gameLevels.push(Level2);
+Level2.name = "Level 2";
 
 Level2.prototype.initialize = function(game) {
     Level2.prototype.parent.initialize.call(this, game);
@@ -166,7 +174,7 @@ Level2.prototype.initialize = function(game) {
 
     this.planets.push(
 	{x: 3/4*maxX, y: 1/4*maxY, mass: 195, radius: 45, vX: -0.5, vY: 0}
-	, {x: 1/5*maxX, y: 2/5*maxY, mass: 15, radius: 15, vX: -0.5, vY: 0.5, image: this.game.planetImg }
+	, {x: 1/5*maxX, y: 2/5*maxY, mass: 15, radius: 15, vX: -0.5, vY: 0.5,  image_src: "planet.png" }
 	, {x: 5/7*maxX, y: 4/5*maxY, mass: 30, radius: 20}
 	, {x: 1/2*maxX-60, y: 1/2*maxY, mass: 15, radius: 15, vY: 0.5}
     );
@@ -206,6 +214,8 @@ function Level3(game) {
 }
 
 Level3.inheritsFrom( Level );
+gameLevels.push(Level3);
+Level3.name = "Level 3";
 
 Level3.prototype.initialize = function(game) {
     Level3.prototype.parent.initialize.call(this, game);

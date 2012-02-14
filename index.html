@@ -18,7 +18,7 @@
 
 
 <script language="javascript">
-$(document).ready(setupCanvas);
+$(document).ready(setupNav);
 </script>
   </head>
   <body>
@@ -26,8 +26,10 @@ $(document).ready(setupCanvas);
 			<h1>Steve's Asteroids Canvas test</h1>
 			<nav class="top">
 				<ul>
-					<li><a href="#">new game</a></li>
-					<li><a href="#">about</a></li>
+					<li id="newgame"><a href="#">new game</a>
+						<ul id="levels"></ul>
+					</li>
+					<li id="nav-about"><a href="#">about</a></li>
 				</ul>
 			</nav>
 		</header>
@@ -37,7 +39,7 @@ $(document).ready(setupCanvas);
 			<div id="controlBox">
 				<input id="controls" type="text" placeholder="click to control" autofocus="autofocus"/>
 				<p>Controls:
-					<ul>
+					<ul class="controlsInfo">
 						<li>up/i: accelerate forward</li>
 						<li>down/k: accelerate backward</li>
 						<li>left/j: spin ccw</li>
@@ -49,12 +51,17 @@ $(document).ready(setupCanvas);
 			</div>
 		</section>
 
-		<section id="features">
+		<section id="about">
+			<h1>Steve's Asteroids HTML5 Canvas Test</h1>
+
+			<p>Features:
 			<ul>
 				<li>gravity</li>
 				<li>planets</li>
 				<li>fired weapons are shootable</li>
 			</ul>
+			</p>
+			<p>Copyright &copy; 2012 Steve Purkis, all rights reserved.</p>
 		</section>
 
 	</body>

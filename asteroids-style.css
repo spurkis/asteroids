@@ -18,14 +18,39 @@ nav.top {
 }
 
 nav.top ul {
+    position: absolute;
     margin: 0px;
+    padding: 0px;
+    text-decoration: none;
 }
 
 nav.top li {
     float: left;
     margin-left: 10px;
+    margin-right: 10px;
     text-decoration: none;
     list-style: none;
+}
+
+nav.top li:hover {
+    color: #06C;
+    background-color: #ddd;
+}
+
+#levels {
+    position: absolute;
+    margin: 0px;
+    display: none;
+    z-index: 10;
+}
+
+#levels li {
+    float: left;
+    clear: both;
+    margin: 2px;
+    text-decoration: none;
+    list-style: none;
+    cursor: pointer;
 }
 
 
@@ -36,7 +61,7 @@ canvas#game {
     position: relative;
     clear: left;
     margin-top: 10px;
-    border: solid 1px #a0a;
+    border: solid 1px #0aa;
     background-color: #fff;
 }
 
@@ -52,4 +77,31 @@ div#controlBox {
     font-size:   60%;
 }
 
+ul.controlsInfo {
+    margin: 0;
+    padding: 0;
+}
 
+ul.controlsInfo li {
+    text-decoration: none;
+    list-style: none;
+}
+
+
+/*********************************************************************
+ * About
+ */
+#about {
+    display: none;
+
+    position: fixed;
+    left: 0;
+    top: 25%;
+    width: 90%;
+    height: 70%;
+    padding-left: 10%;
+
+    background-color: #eee;
+    opacity: 0.75;
+    border-radius: 9px;
+}
