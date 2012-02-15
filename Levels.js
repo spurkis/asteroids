@@ -344,7 +344,7 @@ Level4.prototype.initialize = function(game) {
 	    var badGuy = new ComputerShip(self.game, {
 		x: 9/10*maxX,
 		y: -14,
-		color: {r: 200,g:100,b:220},
+		color: {r: 200,g:225,b:225},
 		healthX: 10
 	    });
 	    self.game.addObject(badGuy);

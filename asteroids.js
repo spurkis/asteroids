@@ -39,6 +39,7 @@ function setupNav() {
 }
 
 function loadLevel(level) {
+    _gaq.push(['_trackEvent', 'loadLevel', level.description])
     var canvas = document.getElementById("game");
     if (canvas.getContext) {
 	var ctx = canvas.getContext('2d');
@@ -49,15 +50,13 @@ function loadLevel(level) {
 	var startGame = function(images) {
 	    $("#controls").focus();
 
-	    // try {
-	    asteroids = new AsteroidsGame(ctx, level, images);
-	    asteroids.startGameLoop();
-	    /*
+	    try {
+		asteroids = new AsteroidsGame(ctx, level, images);
+		asteroids.startGameLoop();
 	      } catch (e) {
-	      console.log("caught exception: " + e);
-	      asteroids.stop();
+		  console.log("caught exception: " + e);
+		  asteroids.stop();
 	      }
-	      /**/
 	}
 
 	var imagesLoaded = function(images, loaded) {
