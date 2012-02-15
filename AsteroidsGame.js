@@ -244,7 +244,7 @@ AsteroidsGame.prototype.drawGameOver = function() {
     ctx.save();
     ctx.globalCompositeOperation = 'source-over';
     ctx.font = "20px Verdana";
-    ctx.fillStyle = "rgba(50,50,50,0.75)";
+    ctx.fillStyle = "rgba(50,50,50,0.9)";
     ctx.fillText("Game Over", this.canvas.width/2 - 50, this.canvas.height/2);
     ctx.restore();
 }
@@ -285,12 +285,13 @@ AsteroidsGame.prototype.applyOutOfBounds = function(object) {
     if (object.stationary) return;
 
     var level = this.level;
+    var die_if_out_of_bounds = !(object.is_ship || object.is_planet);
 
     if (object.x < 0) {
 	if (level.wrapX) {
 	    object.setX(level.maxX + object.x);
 	} else {
-	    if (! object.is_ship && object.vX < 0) {
+	    if (die_if_out_of_bounds && object.vX < 0) {
 		return object.die();
 	    }
 	    object.updateVelocity(0.1, 0);
@@ -299,7 +300,7 @@ AsteroidsGame.prototype.applyOutOfBounds = function(object) {
 	if (level.wrapX) {
 	    object.setX(object.x - level.maxX);
 	} else {
-	    if (! object.is_ship && object.vX > 0) {
+	    if (die_if_out_of_bounds && object.vX > 0) {
 		return object.die();
 	    }
 	    object.updateVelocity(-0.1, 0);
@@ -310,7 +311,7 @@ AsteroidsGame.prototype.applyOutOfBounds = function(object) {
 	if (level.wrapY) {
 	    object.setY(level.maxY + object.y);
 	} else {
-	    if (! object.is_ship && object.vY < 0) {
+	    if (die_if_out_of_bounds && object.vY < 0) {
 		return object.die();
 	    }
 	    // push back into bounds
@@ -320,7 +321,7 @@ AsteroidsGame.prototype.applyOutOfBounds = function(object) {
 	if (level.wrapY) {
 	    object.setY(object.y - level.maxY);
 	} else {
-	    if (! object.is_ship && object.vY > 0) {
+	    if (die_if_out_of_bounds && object.vY > 0) {
 		return object.die();
 	    }
 	    // push back into bounds

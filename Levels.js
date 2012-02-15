@@ -44,6 +44,48 @@ Level.prototype.initialize = function(game) {
 
 
 /******************************************************************************
+ * TrainingLevel: big planet out of field of view with falling asteroids.
+ */
+
+function TrainingLevel(game) {
+    if (game) return this.initialize(game);
+    return this;
+}
+
+TrainingLevel.inheritsFrom( Level );
+TrainingLevel.description = "Training Level - learn how to fly!";
+TrainingLevel.images = [ "planet.png", "planet-80px-green.png" ];
+
+gameLevels.push(TrainingLevel);
+
+TrainingLevel.prototype.initialize = function(game) {
+    TrainingLevel.prototype.parent.initialize.call(this, game);
+    this.wrapX = false;
+    this.wrapY = false;
+
+    var maxX = this.maxX;
+    var maxY = this.maxY;
+
+    var canvas = this.game.ctx.canvas;
+    this.planets.push(
+	{x: 1/2*maxX, y: 1/2*maxY, mass: 100, radius: 50, damage: 5, stationary: true, image_src: "planet.png" }
+	, {x: 40, y: 40, mass: 5, radius: 20, vX: 2, vY: 0, image_src:"planet-80px-green.png"}
+	, {x: maxX-40, y: maxY-40, mass: 5, radius: 20, vX: -2, vY: 0, image_src:"planet-80px-green.png"}
+    );
+
+    this.ships.push(
+	{x: 4/5*canvas.width, y: 1/3*canvas.height}
+    );
+
+    this.asteroids.push(
+	{x: 1/10*maxX, y: 6/10*maxY, mass: 0.5, radius: 14, vX: 0, vY: 0, spawn: 1, health: 1},
+        {x: 1/10*maxX, y: 2/10*maxY, mass: 1, radius: 5, vX: 0, vY: -0.1, spawn: 3 },
+        {x: 5/10*maxX, y: 1/10*maxY, mass: 2, radius: 6, vX: -0.2, vY: 0.25, spawn: 4 },
+        {x: 5/10*maxX, y: 2/10*maxY, mass: 3, radius: 8, vX: -0.22, vY: 0.2, spawn: 7 }
+    );
+}
+
+/******************************************************************************
  * Level0: big planet out of field of view with falling asteroids.
  */
 
