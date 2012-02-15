@@ -1,6 +1,18 @@
+/************************* Body **************************/
+html,body {
+  overflow:hidden;
+  margin:0px;
+}
+
+body {
+  font-family: Verdana, Arial, "Times New Roman", Helvetica;
+}
+
+
 /*********************************************************************
  * Top Nav
  */
+
 nav.top {
   margin-left: auto;
   margin-right: auto;
@@ -8,10 +20,9 @@ nav.top {
 
   width: 100%;
   max-width: 1024px;
-  height: auto;
 
   text-align: left;
-  font-size: 15px;
+  font-size: 10px;
 
   height: 15px;
   border: solid 1px #aca;
@@ -22,6 +33,7 @@ nav.top ul {
     margin: 0px;
     padding: 0px;
     text-decoration: none;
+    width: 50%;
 }
 
 nav.top li {
@@ -35,6 +47,10 @@ nav.top li {
 nav.top li:hover {
     color: #06C;
     background-color: #ddd;
+}
+
+li#survey {
+    float: right;
 }
 
 #levels {
@@ -53,6 +69,10 @@ nav.top li:hover {
     cursor: pointer;
 }
 
+#levels li:hover {
+    color: #06C;
+    background-color: #ddd;
+}
 
 /*********************************************************************
  * Game canvas
@@ -62,6 +82,7 @@ canvas#game {
     clear: left;
     margin-top: 10px;
     border: solid 1px #0aa;
+    /*background-color: #fff; */
     background-color: #fff;
 }
 

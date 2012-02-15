@@ -17,6 +17,10 @@ function setupNav() {
     $("#newgame").mouseout(function(){
 	$levels.hide();
     });
+    $("#newgame").click(function(event){
+	event.preventDefault();
+	$levels.show();
+    });
 
     $("#nav-about").click(function(event){
 	event.preventDefault();
@@ -25,7 +29,7 @@ function setupNav() {
 
     for (var i=0; i < gameLevels.length; i++) {
 	var level = gameLevels[i];
-	var $level = $('<li id="lvl-'+i+'">'+level.name+'</li>');
+	var $level = $('<li id="lvl-'+i+'">'+level.description+'</li>');
 	$level.on('click', {level: level}, function(event) {
 	    loadLevel(event.data.level);
 	    $("#levels").hide();

@@ -45,8 +45,8 @@ function Level0(game) {
 }
 
 Level0.inheritsFrom( Level );
+Level0.description = "Level 0 - Five planets";
 gameLevels.push(Level0);
-Level0.name = "Level 0";
 
 Level0.prototype.initialize = function(game) {
     Level0.prototype.parent.initialize.call(this, game);
@@ -90,8 +90,8 @@ function Level1(game) {
 }
 
 Level1.inheritsFrom( Level );
+Level1.description = "Level 1 - Planetside, falling asteroids";
 gameLevels.push(Level1);
-Level1.name = "Level 1";
 
 Level1.prototype.initialize = function(game) {
     Level1.prototype.parent.initialize.call(this, game);
@@ -159,8 +159,8 @@ function Level2(game) {
 }
 
 Level2.inheritsFrom( Level );
+Level2.description = "Level 2 - Random asteroid field, moving planets, wrapped map";
 gameLevels.push(Level2);
-Level2.name = "Level 2";
 
 Level2.prototype.initialize = function(game) {
     Level2.prototype.parent.initialize.call(this, game);
@@ -214,8 +214,8 @@ function Level3(game) {
 }
 
 Level3.inheritsFrom( Level );
+Level3.description = "Level 3 - Basic asteroid field, wrapped map";
 gameLevels.push(Level3);
-Level3.name = "Level 3";
 
 Level3.prototype.initialize = function(game) {
     Level3.prototype.parent.initialize.call(this, game);
