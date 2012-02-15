@@ -20,6 +20,7 @@ Level.prototype.initialize = function(game) {
     var canvas = this.game.ctx.canvas;
     this.maxX = canvas.width;
     this.maxY = canvas.height;
+    this.canvas = canvas;
 
     this.asteroids = [];
     this.planets = [];
@@ -245,4 +246,94 @@ Level3.prototype.initialize = function(game) {
 	{x: 3/10*maxX, y: 2/10*maxY, mass: 3, radius: 8, vX: 0.9, vY: -0.1 }
     );
 /**/
+}
+
+/******************************************************************************
+ * Level4: horizontal scroller
+ */
+
+function Level4(game) {
+    if (game) return this.initialize(game);
+    return this;
+}
+
+Level4.inheritsFrom( Level );
+Level4.description = "Level 4 - horizontal scroller, bad guy at end";
+gameLevels.push(Level4);
+
+Level4.prototype.initialize = function(game) {
+    Level4.prototype.parent.initialize.call(this, game);
+
+    this.maxX = 2000;
+    this.maxY = this.canvas.height;
+    this.wrapX = false;
+    this.wrapY = false;
+
+    var maxX = this.maxX;
+    var maxY = this.maxY;
+
+    this.ships.push(
+	{x: 1/10*maxX, y: 1/2*maxY}
+    );
+
+    this.planets.push(
+	{x: 1/5*maxX, y: 2/3*maxY, mass: 100, radius: 60, damage: 5, stationary: true, image_src: "planet.png" }
+	, {x: 7/10*maxX, y: 1/2*maxY, mass: 400, radius: 100, stationary: true}
+    );
+
+
+/**/
+    for (var i=50; i<this.maxX; i+= getRandomInt(120,220)) {
+	for (var j=50; j<this.maxY; j+= getRandomInt(80,120)) {
+	    var asteroid = new Asteroid(this, {
+		x: i + getRandomInt(0, 80),
+		y: j + getRandomInt(0, 80),
+		mass: getRandomInt(1, 3),
+		radius: getRandomInt(3, 10),
+		vX: -Math.random(),  // always come from the right.
+		vY: Math.random(),
+	    });
+	    // vary the velocities:
+	    if (j%2) asteroid.vY = -asteroid.vY;
+	    this.asteroids.push(asteroid);
+	}
+    }
+
+    // spawn falling asteroid
+    var self = this;
+    var spawnAsteroid = function() {
+	var radius = getRandomInt(3,7);
+	var negative_vY = -1 * getRandomInt(0,1);
+	var offscreenX = self.game.viewOffset.x + self.canvas.width - radius;
+	var asteroid = new Asteroid(self.game, {
+	    radius: radius,
+	    x: getRandomInt(offscreenX, maxX),
+	    y: getRandomInt(0, self.maxY),
+	    vX: -1,
+	    vY: negative_vY * Math.random(),
+	    health: 2,
+	    spawn: 0
+	});
+	self.game.addObject(asteroid);
+	self.spawnTimeout = self.game.setTimeout(spawnAsteroid, 1000);
+    }
+
+    spawnAsteroid();
+
+    var spawnBadGuy = function() {
+	var offset = self.game.viewOffset;
+	if (self.game.ship.x > 4/5*self.maxX) {
+	    var badGuy = new ComputerShip(self.game, {
+		x: 9/10*maxX,
+		y: -14,
+		color: {r: 0,g:100,b:100},
+		healthX: 10
+	    });
+	    self.game.addObject(badGuy);
+	    return; // only spawn once
+	}
+	self.badGuyTimeout = self.game.setTimeout(spawnBadGuy, 1500);
+    }
+
+    spawnBadGuy();
 }
