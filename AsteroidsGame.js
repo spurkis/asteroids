@@ -102,7 +102,9 @@ AsteroidsGame.prototype.loadLevel = function(level) {
 
     // load asteroids:
     for (var i=0; i<level.asteroids.length; i++) {
-	this.addObject(new Asteroid(this, level.asteroids[i]));
+	var args = level.asteroids[i];
+	if (args.image_src) args.image = this.images[args.image_src];
+	this.addObject(new Asteroid(this, args));
     }
 }
 
@@ -242,7 +244,7 @@ AsteroidsGame.prototype.drawGameOver = function() {
     ctx.save();
     ctx.globalCompositeOperation = 'source-over';
     ctx.font = "20px Verdana";
-    ctx.fillStyle = "rgba(0,0,0,0.75)";
+    ctx.fillStyle = "rgba(50,50,50,0.75)";
     ctx.fillText("Game Over", this.canvas.width/2 - 50, this.canvas.height/2);
     ctx.restore();
 }

@@ -58,6 +58,8 @@ li#survey {
     margin: 0px;
     display: none;
     z-index: 10;
+    background-color: #fff;
+    opacity: 0.8;
 }
 
 #levels li {

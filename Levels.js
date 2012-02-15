@@ -54,7 +54,7 @@ function Level0(game) {
 
 Level0.inheritsFrom( Level );
 Level0.description = "Level 0 - Five planets";
-Level0.images = [ "planet.png" ];
+Level0.images = [ "planet.png", "planet-80px-green.png" ];
 
 gameLevels.push(Level0);
 
@@ -71,10 +71,10 @@ Level0.prototype.initialize = function(game) {
     var canvas = this.game.ctx.canvas;
     this.planets.push(
 	{x: 1/2*maxX, y: 1/2*maxY, mass: 500, radius: 100, damage: 5, stationary: true, image_src: "planet.png" }
-	, {x: 0, y: 0, mass: 5, radius: 40, stationary: true}
-	, {x: maxX, y: maxY, mass: 5, radius: 40, stationary: true}
-	, {x: maxX, y: 0, mass: 5, radius: 40, stationary: true}
-	, {x: 0, y: maxY, mass: 5, radius: 40, stationary: true}
+	, {x: 40, y: 40, mass: 5, radius: 20, stationary: true, image_src:"planet-80px-green.png"}
+	, {x: maxX-40, y: maxY-40, mass: 5, radius: 20, stationary: true, image_src:"planet-80px-green.png"}
+	, {x: maxX-40, y: 40, mass: 5, radius: 20, stationary: true, image_src:"planet-80px-green.png"}
+	, {x: 40, y: maxY-40, mass: 5, radius: 20, stationary: true, image_src:"planet-80px-green.png"}
     );
 
     this.ships.push(
@@ -101,6 +101,7 @@ function Level1(game) {
 
 Level1.inheritsFrom( Level );
 Level1.description = "Level 1 - Planetside, falling asteroids";
+Level1.images = [ "planet-2000px.png", "planet.png", "planet-40px-brown.png" ];
 gameLevels.push(Level1);
 
 Level1.prototype.initialize = function(game) {
@@ -109,32 +110,33 @@ Level1.prototype.initialize = function(game) {
     this.maxY = 700;
     this.wrapX = false;
     this.wrapY = false;
+//    this.backgroundColor = "black";
 
     var maxX = this.maxX;
     var maxY = this.maxY;
 
     var canvas = this.game.ctx.canvas;
     this.planets.push(
-	{x: 1/2*maxX, y: canvas.height + 900, mass: 5000, radius: 1000, stationary: true}
+	{x: 1/2*maxX, y: canvas.height + 900, mass: 5000, radius: 1000, stationary: true, image_src: "planet-2000px.png"}
     );
 
     this.ships.push(
-	{x: 4/5*maxX, y: 2/3*canvas.height}
-	, {x: 1/5*maxX, y: 2/3*canvas.height, color: {r: 0,g:100,b:100}, healthX: 10}
+	{x: 4/5*maxX, y: 2/3*canvas.height, color: {r:0,g:0,b:0}}
+	, {x: 1/5*maxX, y: 2/3*canvas.height, color: {r:0,g:100,b:100}, healthX: 10}
     );
 
 /**/
     this.asteroids.push(
-	{x: 1/10*maxX, y: 6/10*maxY, mass: 0.5, radius: 14, vX: 0, vY: 0, spawn: 3, health: 1 },
-        {x: 1/10*maxX, y: 2/10*maxY, mass: 1, radius: 5, vX: 0, vY: -0.1 },
-        {x: 5/10*maxX, y: 1/10*maxY, mass: 2, radius: 6, vX: -0.2, vY: 0.25 },
-        {x: 5/10*maxX, y: 2/10*maxY, mass: 3, radius: 8, vX: -0.22, vY: 0.2 },
-        {x: 6/10*maxX, y: 8/10*maxY, mass: 2, radius: 6, vX: -0.4, vY: 0.1 },
-        {x: 6/10*maxX, y: 9/10*maxY, mass: 3, radius: 8, vX: 0.5, vY: -0.5 },
-        {x: 9/10*maxX, y: 8/10*maxY, mass: 2, radius: 6, vX: 0.6, vY: 0.4 },
-        {x: 9/10*maxX, y: 9/10*maxY, mass: 3, radius: 8, vX: 0.7, vY: 0.6 },
-	{x: 3/10*maxX, y: 1/10*maxY, mass: 2, radius: 6, vX: 0.8, vY: -0.2 },
-	{x: 3/10*maxX, y: 2/10*maxY, mass: 3, radius: 8, vX: 0.9, vY: -0.1 }
+	{x: 1/10*maxX, y: 6/10*maxY, mass: 0.5, radius: 14, vX: 0, vY: 0, spawn: 3, health: 1, image_src: "planet-40px-brown.png" },
+        {x: 1/10*maxX, y: 2/10*maxY, mass: 1, radius: 5, vX: 0, vY: -0.1, image_src: "planet-40px-brown.png" },
+        {x: 5/10*maxX, y: 1/10*maxY, mass: 2, radius: 6, vX: -0.2, vY: 0.25, image_src: "planet-40px-brown.png" },
+        {x: 5/10*maxX, y: 2/10*maxY, mass: 3, radius: 8, vX: -0.22, vY: 0.2, image_src: "planet-40px-brown.png" },
+        {x: 6/10*maxX, y: 8/10*maxY, mass: 2, radius: 6, vX: -0.4, vY: 0.1, image_src: "planet-40px-brown.png" },
+        {x: 6/10*maxX, y: 9/10*maxY, mass: 3, radius: 8, vX: 0.5, vY: -0.5, image_src: "planet-40px-brown.png" },
+        {x: 9/10*maxX, y: 8/10*maxY, mass: 2, radius: 6, vX: 0.6, vY: 0.4, image_src: "planet-40px-brown.png" },
+        {x: 9/10*maxX, y: 9/10*maxY, mass: 3, radius: 8, vX: 0.7, vY: 0.6, image_src: "planet-40px-brown.png" },
+	{x: 3/10*maxX, y: 1/10*maxY, mass: 2, radius: 6, vX: 0.8, vY: -0.2, image_src: "planet-40px-brown.png" },
+	{x: 3/10*maxX, y: 2/10*maxY, mass: 3, radius: 8, vX: 0.9, vY: -0.1, image_src: "planet-40px-brown.png" }
     );
 /**/
 
@@ -150,7 +152,8 @@ Level1.prototype.initialize = function(game) {
 	    vX: negative_vX * Math.random(),
 	    vY: getRandomInt(0,10)/10,
 	    health: 2,
-	    spawn: 0
+	    spawn: 0,
+	    image: self.game.images["planet-40px-brown.png"]
 	});
 	self.game.addObject(asteroid);
 	self.spawnTimeout = self.game.setTimeout(spawnAsteroid, 1000);
@@ -171,6 +174,7 @@ function Level2(game) {
 
 Level2.inheritsFrom( Level );
 Level2.description = "Level 2 - Random asteroid field, moving planets, wrapped map";
+Level2.images = [ "planet.png", "planet-40px-brown.png", "planet-80px-green.png" ];
 gameLevels.push(Level2);
 
 Level2.prototype.initialize = function(game) {
@@ -184,10 +188,10 @@ Level2.prototype.initialize = function(game) {
     var maxY = this.maxY;
 
     this.planets.push(
-	{x: 3/4*maxX, y: 1/4*maxY, mass: 195, radius: 45, vX: -0.5, vY: 0}
-	, {x: 1/5*maxX, y: 2/5*maxY, mass: 15, radius: 15, vX: -0.5, vY: 0.5,  image_src: "planet.png" }
-	, {x: 5/7*maxX, y: 4/5*maxY, mass: 30, radius: 20}
-	, {x: 1/2*maxX-60, y: 1/2*maxY, mass: 15, radius: 15, vY: 0.5}
+	{x: 3/4*maxX, y: 1/4*maxY, mass: 195, radius: 65, vX: -0.5, vY: 0, image_src: "planet-80px-green.png"}
+	, {x: 1/5*maxX, y: 2/5*maxY, mass: 15, radius: 15, vX: -0.5, vY: 0.5, image_src: "planet-40px-brown.png" }
+	, {x: 5/7*maxX, y: 4/5*maxY, mass: 30, radius: 40, image_src: "planet.png"}
+	, {x: 1/2*maxX-60, y: 1/2*maxY, mass: 15, radius: 15, vY: 0.5, image_src: "planet-40px-brown.png"}
     );
 
     this.ships.push(
@@ -269,6 +273,7 @@ function Level4(game) {
 
 Level4.inheritsFrom( Level );
 Level4.description = "Level 4 - horizontal scroller, bad guy at end";
+Level4.images = [ "planet.png", "planet-40px-brown.png", "planet-80px-green.png" ];
 gameLevels.push(Level4);
 
 Level4.prototype.initialize = function(game) {
@@ -284,12 +289,12 @@ Level4.prototype.initialize = function(game) {
     var maxY = this.maxY;
 
     this.ships.push(
-	{x: 1/10*maxX, y: 1/2*maxY, color: {r: 200, g:200, b:200}}
+	{x: 1/10*maxX, y: 1/2*maxY, color: {r: 220, g:220, b:100}}
     );
 
     this.planets.push(
 	{x: 1/5*maxX, y: 2/3*maxY, mass: 100, radius: 60, damage: 5, stationary: true, image_src: "planet.png" }
-	, {x: 7/10*maxX, y: 1/2*maxY, mass: 400, radius: 100, stationary: true}
+	, {x: 7/10*maxX, y: 1/2*maxY, mass: 400, radius: 100, stationary: true, image_src: "planet-80px-green.png"}
     );
 
 
@@ -303,6 +308,7 @@ Level4.prototype.initialize = function(game) {
 		radius: getRandomInt(3, 10),
 		vX: -Math.random(),  // always come from the right.
 		vY: Math.random(),
+		image: this.game.images["planet-40px-brown.png"]
 	    });
 	    // vary the velocities:
 	    if (j%2) asteroid.vY = -asteroid.vY;
@@ -323,7 +329,8 @@ Level4.prototype.initialize = function(game) {
 	    vX: -1,
 	    vY: negative_vY * Math.random(),
 	    health: 2,
-	    spawn: 0
+	    spawn: 0,
+	    image: self.game.images["planet-40px-brown.png"]
 	});
 	self.game.addObject(asteroid);
 	self.spawnTimeout = self.game.setTimeout(spawnAsteroid, 1000);
@@ -337,7 +344,7 @@ Level4.prototype.initialize = function(game) {
 	    var badGuy = new ComputerShip(self.game, {
 		x: 9/10*maxX,
 		y: -14,
-		color: {r: 100,g:200,b:100},
+		color: {r: 200,g:100,b:220},
 		healthX: 10
 	    });
 	    self.game.addObject(badGuy);
