@@ -2,7 +2,10 @@
  * Level - base class for a level
  * Copyright (c) 2012 Steve Purkis
  *
- * var l = new Level( game, levelDetails );
+ * Note: always use game.setTimeout to avoid random timeouts hanging
+ * around if the user switches levels.
+ *
+ * var l = new Level( game );
  */
 
 require('asteroidUtils.js');
@@ -13,6 +16,7 @@ function Level(game) {
     if (game) return this.initialize(game);
     return this;
 }
+Level.images = []; // populate to auto-load images
 
 Level.prototype.initialize = function(game) {
     this.game = game;
@@ -21,6 +25,9 @@ Level.prototype.initialize = function(game) {
     this.maxX = canvas.width;
     this.maxY = canvas.height;
     this.canvas = canvas;
+
+    this.backgroundColor = "#fff";
+    this.images = {};
 
     this.asteroids = [];
     this.planets = [];
@@ -47,6 +54,8 @@ function Level0(game) {
 
 Level0.inheritsFrom( Level );
 Level0.description = "Level 0 - Five planets";
+Level0.images = [ "planet.png" ];
+
 gameLevels.push(Level0);
 
 Level0.prototype.initialize = function(game) {
@@ -144,9 +153,10 @@ Level1.prototype.initialize = function(game) {
 	    spawn: 0
 	});
 	self.game.addObject(asteroid);
+	self.spawnTimeout = self.game.setTimeout(spawnAsteroid, 1000);
     }
 
-    this.spawnInterval = setInterval(spawnAsteroid, 1000);
+    spawnAsteroid();
 }
 
 
@@ -268,12 +278,13 @@ Level4.prototype.initialize = function(game) {
     this.maxY = this.canvas.height;
     this.wrapX = false;
     this.wrapY = false;
+    this.backgroundColor = "#000";
 
     var maxX = this.maxX;
     var maxY = this.maxY;
 
     this.ships.push(
-	{x: 1/10*maxX, y: 1/2*maxY}
+	{x: 1/10*maxX, y: 1/2*maxY, color: {r: 200, g:200, b:200}}
     );
 
     this.planets.push(
@@ -326,7 +337,7 @@ Level4.prototype.initialize = function(game) {
 	    var badGuy = new ComputerShip(self.game, {
 		x: 9/10*maxX,
 		y: -14,
-		color: {r: 0,g:100,b:100},
+		color: {r: 100,g:200,b:100},
 		healthX: 10
 	    });
 	    self.game.addObject(badGuy);

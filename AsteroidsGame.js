@@ -24,9 +24,12 @@ var cancelAnimationFrame = window.cancelAnimationFrame
     || window.msCancelRequestAnimationFrame
     || clearTimeout;
 
-function AsteroidsGame(ctx, level) {
+function AsteroidsGame(ctx, level, images) {
     this.ctx = ctx;
     this.canvas = ctx.canvas;
+
+    // preloaded images, indexed by src
+    this.images = images || {};
 
     this.maxAccel = 1;
     this.G = 0.1;
@@ -76,31 +79,31 @@ AsteroidsGame.prototype.setDefaultCanvasState = function() {
 AsteroidsGame.prototype.loadLevel = function(level) {
     this.level = level;
 
+    // set background color:
+    if (level.backgroundColor) {
+	$(this.canvas).css('background-color', level.backgroundColor);
+    }
+
     // load ships, setting 1st as this ship:
-    this.ship.x = level.ships[0].x;
-    this.ship.y = level.ships[0].y;
+    this.ship = new Ship(this, level.ships[0]);
     this.addObject( this.ship );
+
     for (var i=1; i<level.ships.length; i++) {
 	this.addObject(new ComputerShip(this, level.ships[i]));
     }
 
     // load planets:
     for (var i=0; i<level.planets.length; i++) {
-	this.addObject(new Planet(this, level.planets[i]));
+	var args = level.planets[i];
+	if (args.image_src) args.image = this.images[args.image_src];
+	var planet = new Planet(this, args);
+	this.addObject(planet);
     }
 
     // load asteroids:
     for (var i=0; i<level.asteroids.length; i++) {
 	this.addObject(new Asteroid(this, level.asteroids[i]));
     }
-}
-
-AsteroidsGame.prototype.loadImages = function() {
-/*
-    var img = new Image();
-    img.onload = function(){}
-    img.src = "planet.png";
-*/
 }
 
 AsteroidsGame.prototype.startGameLoop = function() {

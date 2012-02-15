@@ -44,22 +44,38 @@ function loadLevel(level) {
 	var ctx = canvas.getContext('2d');
 	console.log("canvas available");
 
-	if (asteroids) {
-	    asteroids.killGame();
-	}
+	if (asteroids) asteroids.killGame();
 
-	$("#controls").focus();
+	var startGame = function(images) {
+	    $("#controls").focus();
 
-//      try {
-	    asteroids = new AsteroidsGame(ctx, level);
+	    // try {
+	    asteroids = new AsteroidsGame(ctx, level, images);
 	    asteroids.startGameLoop();
-/*
-	} catch (e) {
-	    console.log("caught exception: " + e);
-	    asteroids.stop();
+	    /*
+	      } catch (e) {
+	      console.log("caught exception: " + e);
+	      asteroids.stop();
+	      }
+	      /**/
 	}
-/**/
 
+	var imagesLoaded = function(images, loaded) {
+	    // TODO: handle errors
+	    level.loadedImages = images;
+	    startGame(images);
+	}
+
+	if (level.images) {
+	    if (level.loadedImages) {
+		startGame(level.loadedImages);
+	    } else {
+		var imageLoader = new ImagePreloader(level.images, imagesLoaded);
+		imageLoader.start();
+	    }
+	} else {
+	    startGame({});
+	}
     } else {
 	console.log("no canvas available");
     }
