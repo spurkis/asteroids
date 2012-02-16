@@ -10,21 +10,27 @@ function require(filename) {
 }
 
 function setupNav() {
+    var $about = $("#about").show();
     var $levels = $("#levels");
+
     $("#newgame").mouseover(function(){
+	$about.hide();
 	$levels.show();
     });
+
     $("#newgame").mouseout(function(){
 	$levels.hide();
     });
+
     $("#newgame").click(function(event){
 	event.preventDefault();
+	$about.hide();
 	$levels.show();
     });
 
     $("#nav-about").click(function(event){
 	event.preventDefault();
-	$("#about").toggle();
+	$about.toggle();
     });
 
     for (var i=0; i < gameLevels.length; i++) {
@@ -32,7 +38,7 @@ function setupNav() {
 	var $level = $('<li id="lvl-'+i+'">'+level.description+'</li>');
 	$level.on('click', {level: level}, function(event) {
 	    loadLevel(event.data.level);
-	    $("#levels").hide();
+	    $levels.hide();
 	});
 	$levels.append($level);
     }
