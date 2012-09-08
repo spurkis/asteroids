@@ -452,6 +452,7 @@ AsteroidsGame.prototype.applyGravity = function(object1, object2, physics) {
 }
 
 AsteroidsGame.prototype.applyPushAway = function(object1, object2, physics) {
+    // return; // watch what happens if you don't apply push!
     // make how much they get pushed relative to their mass
     var dist = Math.sqrt(physics.dist_squared); // dist between center of mass
     var delta = Math.abs(dist - physics.cache1.total_radius);

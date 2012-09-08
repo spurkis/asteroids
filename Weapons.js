@@ -196,6 +196,8 @@ GrenadeCannon.prototype.initialize = function(context) {
 }
 
 GrenadeCannon.prototype.createBullet = function(ship, params) {
+    //params.image = this.game.images["chainsaw.jpg"];
+    //params.radius = 20;
     params.color = "#a9f";
     params.damage = 30;
     params.maxV = 6;
@@ -420,13 +422,15 @@ Grenade.prototype.draw = function() {
 	this.radius += 2;
     }
 
-    ctx.strokeStyle = this.color;
-
+    if (this.image != null) {
+	ctx.drawImage(this.image, 0, 0, this.radius*2, this.radius*2);
+    } else {
     ctx.strokeStyle = this.color;
     ctx.beginPath();
     ctx.arc(0, 0, this.radius, 0, deg_to_rad[360], false);
     ctx.closePath();
     ctx.stroke();
+    }
 
     ctx.restore();
 }
