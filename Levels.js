@@ -410,7 +410,7 @@ function Level5(game) {
 
 Level5.inheritsFrom( Level );
 Level5.description = "Level 5 - blank, unwrapped for demo";
-Level5.images = [ ];
+Level5.images = [ "planet.png" ];
 gameLevels.push(Level5);
 
 Level5.prototype.initialize = function(game) {
@@ -440,8 +440,8 @@ function Level6(game) {
 }
 
 Level6.inheritsFrom( Level );
-Level6.description = "Level 6 - hairballs & chainsaws?";
-Level6.images = [ "hairball-145px.jpg", "planet.png" ];
+Level6.description = "Level 6 - another game demo";
+Level6.images = [ "hairball-145px.jpg", "planet.png", "chainsaw.jpg" ];
 gameLevels.push(Level6);
 
 Level6.prototype.initialize = function(game) {
