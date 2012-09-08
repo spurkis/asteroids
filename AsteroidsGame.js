@@ -242,7 +242,7 @@ AsteroidsGame.prototype.drawGameOver = function() {
 
     var ctx = this.ctx;
     ctx.save();
-    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalCompositeOperation = 'lighter';
     ctx.font = "20px Verdana";
     ctx.fillStyle = "rgba(50,50,50,0.9)";
     ctx.fillText("Game Over", this.canvas.width/2 - 50, this.canvas.height/2);
@@ -411,6 +411,7 @@ AsteroidsGame.prototype.applyGravity = function(object1, object2, physics) {
 	    //console.log("using G cache");
 	    object1.delayUpdateVelocity(g_cache1.dvX, g_cache1.dvY);
 	    object2.delayUpdateVelocity(g_cache2.dvX, g_cache2.dvY);
+            return;
 	}
     }
 
