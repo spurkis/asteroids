@@ -397,3 +397,35 @@ Level4.prototype.initialize = function(game) {
 
     spawnBadGuy();
 }
+
+
+/******************************************************************************
+ * Level5: blank
+ */
+
+function Level5(game) {
+    if (game) return this.initialize(game);
+    return this;
+}
+
+Level5.inheritsFrom( Level );
+Level5.description = "Level 5 - blank, unwrapped for demo";
+Level5.images = [ "planet.png", "planet-50px-brown.png", "planet-80px-green.png" ];
+gameLevels.push(Level5);
+
+Level5.prototype.initialize = function(game) {
+    Level5.prototype.parent.initialize.call(this, game);
+
+    this.maxX = this.canvas.width;
+    this.maxY = this.canvas.height;
+    this.wrapX = false;
+    this.wrapY = false;
+
+    var maxX = this.maxX;
+    var maxY = this.maxY;
+
+    this.ships.push(
+	{x: 1/10*maxX, y: 1/2*maxY}
+    );
+
+}

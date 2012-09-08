@@ -1,0 +1,42 @@
+<html>
+<head>
+<script>
+function drawShip() {
+  var canvas = document.getElementById("demo");
+  var ctx = canvas.getContext('2d');
+
+  var center = {x: canvas.width/2, y: canvas.height/2};
+  ctx.translate( center.x, center.y );
+
+  ctx.strokeStyle = 'black';
+  ctx.beginPath();
+  ctx.moveTo(0,0);
+  ctx.lineTo(14,7);
+  ctx.lineTo(0,14);
+  ctx.quadraticCurveTo(7,7, 0,0);
+  ctx.closePath();
+  ctx.stroke();
+
+  // draw facing angle
+  ctx.strokeStyle = "orange";
+  ctx.beginPath();
+  ctx.moveTo(7,7);
+  ctx.lineTo(50,7);
+  ctx.closePath();
+  ctx.stroke();
+
+  // draw facing angle + 90º
+  ctx.strokeStyle = "yellow";
+  ctx.beginPath();
+  ctx.moveTo(7,7);
+  ctx.lineTo(7,50);
+  ctx.closePath();
+  ctx.stroke();
+}
+</script>
+</head>
+<body onload="drawShip()">
+	<h1>Canvas:</h1>
+	<canvas id="demo" width="300" height="200" style="border: 1px solid black" />
+</body>
+</html>
