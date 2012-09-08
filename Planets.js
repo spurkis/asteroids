@@ -33,8 +33,15 @@ Planetoid.prototype.preRender = function() {
     // Handle images as a special un-cached case:
     if (this.image != null) {
 	this.render = this.createPreRenderCanvas(this.radius*2, this.radius*2);
-	this.render.ctx.drawImage(this.image, 0, 0,
-				  this.radius*2, this.radius*2);
+        var ctx = this.render.ctx;
+        ctx.globalCompositeOperation = 'destination-over';
+        ctx.beginPath();
+        ctx.arc(this.radius, this.radius, this.radius, 0, deg_to_rad[360], false);
+        ctx.closePath();
+	ctx.fillStyle = 'white';
+	ctx.fill();
+        ctx.globalCompositeOperation = 'source-in';
+	ctx.drawImage(this.image, 0, 0, this.radius*2, this.radius*2);
 	return;
     }
 
@@ -214,7 +221,8 @@ Asteroid.prototype.die = function() {
 		vX: this.vY * Math.random(),
 		radius:  radius,
 		health: getRandomInt(0, this.maxSpawnHealth),
-		spawn: getRandomInt(0, this.spawn-1)
+		spawn: getRandomInt(0, this.spawn-1),
+                image: getRandomInt(0, 5) > 0 ? this.image : null,
 		// let physics engine handle movement
 	    });
 	    // TODO: debug the weirdness this causes

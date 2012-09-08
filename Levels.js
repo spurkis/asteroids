@@ -410,7 +410,7 @@ function Level5(game) {
 
 Level5.inheritsFrom( Level );
 Level5.description = "Level 5 - blank, unwrapped for demo";
-Level5.images = [ "planet.png", "planet-50px-brown.png", "planet-80px-green.png" ];
+Level5.images = [ ];
 gameLevels.push(Level5);
 
 Level5.prototype.initialize = function(game) {
@@ -427,5 +427,59 @@ Level5.prototype.initialize = function(game) {
     this.ships.push(
 	{x: 1/10*maxX, y: 1/2*maxY}
     );
+
+}
+
+/******************************************************************************
+ * Level6: hairballs & chainsaws?
+ */
+
+function Level6(game) {
+    if (game) return this.initialize(game);
+    return this;
+}
+
+Level6.inheritsFrom( Level );
+Level6.description = "Level 6 - hairballs & chainsaws?";
+Level6.images = [ "hairball-145px.jpg", "planet.png" ];
+gameLevels.push(Level6);
+
+Level6.prototype.initialize = function(game) {
+    Level6.prototype.parent.initialize.call(this, game);
+
+    this.maxX = this.canvas.width;
+    this.maxY = this.canvas.height;
+    this.wrapX = true;
+    this.wrapY = true;
+
+    var maxX = this.maxX;
+    var maxY = this.maxY;
+
+    this.ships.push(
+	{x: 1/10*maxX, y: 1/2*maxY}
+    );
+
+    this.planets.push(
+	{x: 3/4*maxX, y: 1/4*maxY, mass: 195, radius: 65, vX: -0.5, vY: 0, image_src: "planet.png"}
+    );
+
+    for (var i=50; i<this.maxX; i+= getRandomInt(120,220)) {
+	for (var j=50; j<this.maxY; j+= getRandomInt(80,120)) {
+	    var asteroid = new Asteroid(this, {
+		x: i + getRandomInt(0, 80),
+		y: j + getRandomInt(0, 80),
+		mass: getRandomInt(1, 3),
+		radius: getRandomInt(15, 40),
+		health: getRandomInt(10, 30),
+		vX: -Math.random(),  // always come from the right.
+		vY: Math.random(),
+		image: this.game.images["hairball-145px.jpg"]
+	    });
+	    // vary the velocities:
+	    if (j%2) asteroid.vY = -asteroid.vY;
+	    this.asteroids.push(asteroid);
+	}
+    }
+
 
 }
