@@ -46,6 +46,7 @@ function drawShip() {
 
 function drawGameOver() {
   ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
   ctx.font = "20px Verdana";
   ctx.fillStyle = "rgba(50,50,50,0.9)";
   ctx.fillText("Game Over", this.canvas.width/2 - 50,
