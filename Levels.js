@@ -431,7 +431,43 @@ Level5.prototype.initialize = function(game) {
 }
 
 /******************************************************************************
- * Level6: hairballs & chainsaws?
+ * Level6b: textures made easy
+ */
+
+function Level6b(game) {
+    if (game) return this.initialize(game);
+    return this;
+}
+
+Level6b.inheritsFrom( Level );
+Level6b.description = "Level 6b - textures made easy";
+Level6b.images = [ "chainsaw-guy.jpg" ];
+gameLevels.push(Level6b);
+
+Level6b.prototype.initialize = function(game) {
+    Level6b.prototype.parent.initialize.call(this, game);
+
+    this.maxX = this.canvas.width;
+    this.maxY = this.canvas.height;
+    this.wrapX = true;
+    this.wrapY = true;
+
+    var maxX = this.maxX;
+    var maxY = this.maxY;
+
+    this.ships.push(
+	{x: 1/10*maxX, y: 1/3*maxY}
+    );
+
+    this.planets.push(
+	{x: 5/7*maxX, y: 1/4*maxY, mass: 5, radius: 40, vX: -0.1, vY: 0, image_src: "chainsaw-guy.jpg"},
+	{x: 3/7*maxX, y: 3/4*maxY, mass: 5, radius: 45, vX: +0.1, vY: 0 }
+    );
+}
+
+
+/******************************************************************************
+ * Level6: planets, gravity & bounce
  */
 
 function Level6(game) {
@@ -440,8 +476,8 @@ function Level6(game) {
 }
 
 Level6.inheritsFrom( Level );
-Level6.description = "Level 6 - another game demo";
-Level6.images = [ "hairball-145px.jpg", "planet.png", "chainsaw.jpg" ];
+Level6.description = "Level 6 - planets, gravity & bounce";
+Level6.images = [ "chainsaw-guy.jpg", "chainsaw-girl.jpg" ];
 gameLevels.push(Level6);
 
 Level6.prototype.initialize = function(game) {
@@ -460,26 +496,99 @@ Level6.prototype.initialize = function(game) {
     );
 
     this.planets.push(
-	{x: 3/4*maxX, y: 1/4*maxY, mass: 195, radius: 65, vX: -0.5, vY: 0, image_src: "planet.png"}
+	//{x: 3/4*maxX, y: 3/4*maxY, mass: 195, radius: 65, vX: -0, vY: 0, image_src: "planet.png"},
+	{x: 5/7*maxX, y: 1/4*maxY, mass: 295, radius: 40, vX: -0, vY: 0, image_src: "chainsaw-guy.jpg"},
+	{x: 6/7*maxX, y: 3/4*maxY, mass: 100, radius: 85, vX: -0, vY: 0, image_src: "chainsaw-girl.jpg"}
+    );
+}
+
+/******************************************************************************
+ * Level7: hairballs & chainsaws?
+ */
+
+function Level7(game) {
+    if (game) return this.initialize(game);
+    return this;
+}
+
+Level7.inheritsFrom( Level );
+Level7.description = "Level 7 - hairballs and chainsaws";
+Level7.images = [ "hairball-145px.jpg", "planet.png", "chainsaw-guy.jpg", "chainsaw-girl.jpg" ];
+gameLevels.push(Level7);
+
+Level7.prototype.initialize = function(game) {
+    Level7.prototype.parent.initialize.call(this, game);
+
+    this.maxX = this.canvas.width + 200;
+    this.maxY = this.canvas.height;
+    this.wrapX = true;
+    this.wrapY = false;
+
+    var maxX = this.maxX;
+    var maxY = this.maxY;
+
+    this.ships.push(
+	{x: 1/10*maxX, y: 1/2*maxY}
     );
 
-    for (var i=50; i<this.maxX; i+= getRandomInt(120,220)) {
-	for (var j=50; j<this.maxY; j+= getRandomInt(80,120)) {
-	    var asteroid = new Asteroid(this, {
-		x: i + getRandomInt(0, 80),
-		y: j + getRandomInt(0, 80),
-		mass: getRandomInt(1, 3),
-		radius: getRandomInt(15, 40),
-		health: getRandomInt(10, 30),
-		vX: -Math.random(),  // always come from the right.
-		vY: Math.random(),
-		image: this.game.images["hairball-145px.jpg"]
-	    });
-	    // vary the velocities:
-	    if (j%2) asteroid.vY = -asteroid.vY;
-	    this.asteroids.push(asteroid);
-	}
+    this.planets.push(
+	//{x: 3/4*maxX, y: 3/4*maxY, mass: 195, radius: 65, vX: -0, vY: 0, image_src: "planet.png"},
+	{x: 1/7*maxX, y: 1/4*maxY, mass: 195, radius: 40, vX: -0, vY: 0, image_src: "chainsaw-guy.jpg"},
+	{x: 6/7*maxX, y: 3/4*maxY, mass: 295, radius: 85, vX: -0, vY: 0, image_src: "chainsaw-girl.jpg"}
+    );
+
+    // spawn falling asteroid
+    var self = this;
+    var spawnAsteroid = function() {
+	var radius = getRandomInt(15,40);
+	var negative_vX = -1 * getRandomInt(0,1);
+	var asteroid = new Asteroid(self.game, {
+	    radius: radius,
+	    x: getRandomInt(0,maxX),
+	    y: -radius,
+	    vX: negative_vX * Math.random(),
+	    vY: getRandomInt(0,10)/10, // always falling down
+	    health: getRandomInt(10, 30),
+	    image: self.game.images["hairball-145px.jpg"],
+	});
+        if (self.game.objects.length < 50) {
+	    self.game.addObject(asteroid);
+        }
+	self.spawnTimeout = self.game.setTimeout(spawnAsteroid, 1000);
     }
 
+    spawnAsteroid();
 
+}
+
+
+/******************************************************************************
+ * Level8: Lone Enemy
+ */
+
+function Level8(game) {
+    if (game) return this.initialize(game);
+    return this;
+}
+
+Level8.inheritsFrom( Level );
+Level8.description = "Level 8 - Lone enemy";
+Level8.images = [ "planet.png" ];
+gameLevels.push(Level8);
+
+Level8.prototype.initialize = function(game) {
+    Level8.prototype.parent.initialize.call(this, game);
+
+    this.maxX = this.canvas.width;
+    this.maxY = this.canvas.height;
+    this.wrapX = true;
+    this.wrapY = true;
+
+    var maxX = this.maxX;
+    var maxY = this.maxY;
+
+    this.ships.push(
+	{x: 1/10*maxX, y: 1/2*maxY}
+	, {x: 1/5*maxX, y: 1/3*maxY, color: {r: 150,g:50,b:50}, healthX: 10}
+    );
 }
