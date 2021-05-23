@@ -132,6 +132,11 @@ canvas#game {
     position: fixed;
     bottom: 5px;
     right: 5px;
+    cursor: crosshair;
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+    user-select: none;
 }
 
 #controlUI div.keypad {

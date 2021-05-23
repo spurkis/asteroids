@@ -1,3 +1,5 @@
+const isTouchable = 'createTouch' in document;
+
 /**
  * Simple actions avoid a bunch of repetition
  */
@@ -10,13 +12,43 @@ function ControllerAction(object, onStart, onStop) {
 ControllerAction.prototype.start = function(event) {
     if (this.uiElement) { this.uiElement.classList.add("pressed"); }
     this.onStart.call(this.object, event);
+    if (event) { event.preventDefault() };
 }
 ControllerAction.prototype.stop = function(event) {
     if (this.uiElement) { this.uiElement.classList.remove("pressed"); }
     this.onStop.call(this.object, event);
+    if (event) { event.preventDefault() };
 }
 ControllerAction.prototype.setUIElement = function(uiElement) {
     this.uiElement = uiElement;
+}
+ControllerAction.prototype.initEventHandlers = function() {
+    if (this.uiElement == null) { return this; }
+
+    let self = this;
+    if (isTouchable) {
+        this.eventListeners = {
+            touchstart: function(event) { self.start(event); },
+            touchend:   function(event) { self.stop(event); }
+        };
+    } else {  // mouse events
+        this.eventListeners = {
+            mouseover: function(event) { self.start(event); },
+            mouseout:  function(event) { self.stop(event); }
+        };
+    }
+    for (var [name, listener] of Object.entries(this.eventListeners)) {
+        this.uiElement.addEventListener(name, listener);
+        // $(this.uiElement).on(name, listener);
+    }
+    return self;
+}
+ControllerAction.prototype.removeEventHandlers = function() {
+    if (this.eventListeners) {
+        for (var [name, listener] of Object.entries(this.eventListeners)) {
+            this.uiElement.removeEventListener(name, listener);
+        }
+    }
 }
 
 /**
@@ -67,9 +99,8 @@ KeyboardController.prototype.initKeymap = function() {
 }
 
 KeyboardController.prototype.initEventHandlers = function() {
-    // save them so we can remove them
     let self = this;
-    this.eventListeners = {
+    this.eventListeners = {  // save them so we can remove them later
         keydown: function(event) { self.handleKeyDown(event); },
         keyup:   function(event) { self.handleKeyUp(event); },
         blur:    function(event) { self.handleBlur(event); },
@@ -78,13 +109,23 @@ KeyboardController.prototype.initEventHandlers = function() {
     for (var [name, listener] of Object.entries(this.eventListeners)) {
         this.listenNode.addEventListener(name, listener);
     }
+
+    // add mouse / touch events to each UI element:
+    for (var [id, action] of Object.entries(this.actions)) {
+        action.initEventHandlers();
+    }
+
     return self;
 }
+
 KeyboardController.prototype.removeEventHandlers = function() {
     if (this.eventListeners) {
         for (var [name, listener] of Object.entries(this.eventListeners)) {
             this.listenNode.removeEventListener(name, listener);
         }
+    }
+    for (var [id, action] of Object.entries(this.actions)) {
+        action.removeEventHandlers();
     }
     return self;
 }
@@ -95,19 +136,13 @@ KeyboardController.prototype.removeEventHandlers = function() {
  KeyboardController.prototype.handleKeyDown = function(event) {
     let key = event.which;
     let action = this.keyMap[key];
-    if (action) {
-        action.start(event);
-    	event.preventDefault();
-    }
+    if (action) { action.start(event); }
 }
 
 KeyboardController.prototype.handleKeyUp = function(event) {
     let key = event.which;
     let action = this.keyMap[key];
-    if (action) {
-        action.stop(event);
-    	event.preventDefault();
-    }
+    if (action) { action.stop(event); }
 }
 
 KeyboardController.prototype.handleBlur = function(event) {
@@ -118,29 +153,4 @@ KeyboardController.prototype.handleBlur = function(event) {
 }
 KeyboardController.prototype.handleFocus = function(event) {
     this.messageUI.innerHTML("Regained focus...");
-}
-
-/**
- * Event Actions
- * TODO: link to game
- */
-KeyboardController.prototype.startAccelerateForward = function(event) {
-    this.actionUI.forward.classList.add("pressed");
-    return this;
-}
-KeyboardController.prototype.stopAccelerateForward = function(event) {
-    this.actionUI.forward.classList.remove("pressed");
-    return this;
-}
-KeyboardController.prototype.startAccelerateBackward = function(event) {
-}
-KeyboardController.prototype.accelerateCCW = function(event) {
-}
-KeyboardController.prototype.accelerateCW = function(event) {
-}
-KeyboardController.prototype.fireWeapon = function(event) {
-}
-KeyboardController.prototype.changeWeapon = function(event) {
-}
-KeyboardController.prototype.ignore = function(event) {
 }
