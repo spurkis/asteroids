@@ -9,9 +9,17 @@ function require(filename) {
     ; // do nothing - so I can test with node.js
 }
 
+function resizeCanvas() {
+    var canvas = document.getElementById("game");
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+}
 function setupNav() {
     var $about = $("#about").show();
     var $levels = $("#levels");
+
+	window.addEventListener('resize', resizeCanvas, false);
+	resizeCanvas();
 
     $("#newgame").mouseover(function(){
 	$about.hide();
