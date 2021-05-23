@@ -6,6 +6,7 @@ html,body {
 
 body {
   font-family: Verdana, Arial, "Times New Roman", Helvetica;
+  background-color: #d4d4d4;
 }
 
 
@@ -19,21 +20,31 @@ nav.top {
   position: relative;
 
   width: 100%;
-  max-width: 1024px;
+  /*max-width: 1024px; */
 
   text-align: left;
-  font-size: 10px;
+  font-size: 11px;
 
-  height: 15px;
-  border: solid 1px #aca;
+  height: 16px;
+  background-color: #d4d4d4;
 }
 
 nav.top ul {
     position: absolute;
     margin: 0px;
-    padding: 0px;
+    padding: 5px;
     text-decoration: none;
     width: 50%;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+}
+
+nav.top a {
+    text-decoration: none;
+    color: inherit;
 }
 
 nav.top li {
@@ -42,11 +53,18 @@ nav.top li {
     margin-right: 10px;
     text-decoration: none;
     list-style: none;
+    padding: 2px 6px 2px 6px;
+    color: rgb(0, 36, 56);
+    background-color: rgba(150, 150, 150, 0.8);
+    border-radius: 4px;
 }
 
 nav.top li:hover {
-    color: #06C;
-    background-color: #ddd;
+    background-color: rgba(20, 169, 255, 0.8);
+}
+
+li#home {
+    background-color: inherit;
 }
 
 li#survey {
@@ -58,7 +76,9 @@ li#survey {
     margin: 0px;
     display: none;
     z-index: 10;
-    background-color: #fff;
+    background-color: rgba(150, 150, 150, 0.3);
+    border: 2px solid rgba(20, 169, 255, 0.8);
+    border-radius: 3px;
     opacity: 0.8;
 }
 
@@ -66,51 +86,86 @@ li#survey {
     float: left;
     clear: both;
     margin: 2px;
+    width: calc(100% - 10px);
     text-decoration: none;
     list-style: none;
     cursor: pointer;
+    background-color: rgba(150, 150, 150, 0);
+    border-top: 1px dashed rgba(150, 150, 150, 0.8);
 }
 
 #levels li:hover {
     color: #06C;
-    background-color: #ddd;
+    background-color: rgba(20, 169, 255, 0.8);
 }
 
 /*********************************************************************
  * Game canvas
  */
-canvas#game {
+div#asteroid-game {
+    position:fixed;
+    height: calc(100% - 16px)
+}
+div.canvas-container {
+    align-self: flex-start;
+    width: calc(100% - 2px);
     position: relative;
     clear: left;
     margin-top: 10px;
-    border: solid 1px #0aa;
+    border: solid 1px rgb(138, 138, 138);
+    border-radius: 5px;
+    overflow: hidden;
+    background-color: #fff;
+}
+canvas#game {
+    width: 100%;
+    position: relative;
     /*background-color: #fff; */
     background-color: #fff;
 }
+  
 
 /*********************************************************************
  * Control UI
  */
 #controlUI {
+    position: fixed;
+    bottom: 5px;
+    right: 5px;
+}
+
+#controlUI div.keypad {
     display: flex;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
+/*    max-width: 108px; */
+/*    border: 1px dashed blue; */
 }
+
 #controlUI span {
+    flex: 0 0 auto;
     float: left;
     width: 30px;
     height: 30px;
-    border: 1px solid grey;
+    border: 1px solid rgba(150, 150, 150, 0.2);
+    background-color: rgba(200, 200, 200, 0.2);
+    color: rgba(150, 150, 150, 0.2);
     border-radius: 5px;
     line-height: 30px; /* vertical align */
     text-align: center;
     align-self: center;
     margin: 2px;
     padding: 0px;
+
 }
 #controlUI div.group {
-    float: left;
+    clear: none;
+
+    display: flex;
+    flex-direction: column;
     width: 36px;
+
     align-self: center;
 }
 
@@ -118,23 +173,21 @@ canvas#game {
     clear: left;
 }
 #controlUI span.fire {
-    width: 90px;
+    min-width: 72px;
 }
 
 #controlUI span.pressed {
     font-weight: bold;
-    font-size: 120%;
-    color: green;
-    border: 1px solid green;
-    background-color: #aaeeaa;
+    color: rgba(0, 150, 0, 0.4);
+    border: 1px solid rgba(10, 255, 22, 0.4);
+    background-color: rgba(130, 255, 136, 0.2);
 }
 div#controlBox {
     float: right;
     margin: 5px;
     padding: 5px;
     outline: solid 1px #aaa;
-    font-family: Verdana, Arial, "Times New Roman", Helvetica;
-    font-size:   60%;
+    font-size: 1em;
 }
 
 ul.controlsInfo {
@@ -151,17 +204,19 @@ ul.controlsInfo li {
 /*********************************************************************
  * About
  */
-#about {
+section.info {
     display: none;
 
-    position: fixed;
-    left: 0;
-    top: 25%;
-    width: 90%;
+    position: absolute;
+    left: 0px;
+    bottom: 0px;
+    margin: 10px;
+    width: calc(100% - 30px);
     height: 70%;
-    padding-left: 10%;
+    padding: 10px;
 
     background-color: #eee;
     opacity: 0.75;
     border-radius: 9px;
+    overflow: auto;
 }

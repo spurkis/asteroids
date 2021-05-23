@@ -37,20 +37,21 @@ $(document).ready(setupNav);
   </head>
   <body>
 		<header>
-			<h1>Steve's HTML5 Canvas test</h1>
 			<nav class="top">
 				<ul>
+					<li id="home">Steve's Space Shooter</li>
 					<li id="newgame"><a href="#">new game</a>
 						<ul id="levels"></ul>
 					</li>
-					<li id="nav-about"><a href="#">about</a></li>
-					<li id="nav-help"><a href="#">help</a></li>
+					<li id="nav-about"><a href="#">about / help</a></li>
 				</ul>
 			</nav>
 		</header>
 
 		<section id="asteroid-game">
-			<canvas id="game" width="800" height="400">if you had a real broswer, this would be a canvas</canvas>
+			<div class="canvas-container">
+				<canvas id="game" width="800" height="400">if you had a real broswer, this would be a canvas</canvas>
+			</div>
 			<div id="controlUI">
                 <div class="keypad">
                     <span class="ccw">︎←</span>
@@ -64,23 +65,23 @@ $(document).ready(setupNav);
                 </div>
                 <div id="message"></div>
 				<!-- input id="controls" type="text" placeholder="click to control" autofocus="autofocus"/-->
-                <div id="controlBox">
-                    <p>Controls:
-                    <ul class="controlsInfo">
-                        <li>up/i: accelerate forward</li>
-                        <li>down/k: accelerate backward</li>
-                        <li>left/j: spin ccw</li>
-                        <li>right/l: spin cw</li>
-                        <li>space: shoot</li>
-                        <li>w: switch weapon</li>
-                    </ul>
-                    </p>
-                </div>
             </div>
 		</section>
 
-		<section id="about">
-			<h1>Steve's Asteroids HTML5 Canvas Test</h1>
+		<section id="about" class="info">
+			<h1>Space Shooter using HTML5 Canvas + Javascript</h1>
+			<div id="controlBox">
+				<p>Controls:
+				<ul class="controlsInfo">
+					<li>up/i: accelerate forward</li>
+					<li>down/k: accelerate backward</li>
+					<li>left/j: spin ccw</li>
+					<li>right/l: spin cw</li>
+					<li>space: shoot</li>
+					<li>w: switch weapon</li>
+				</ul>
+				</p>
+			</div>
 			<p><b>Using Internet Explorer?</b>  Try pressing "F12" before you click on a level, then pressing "F12" again.</p>
 			<p>Note that this will perform poorly (if at all) on most mobile devices!  Yes, that includes iPads & Android tablets, as well as phones.</p>
 			<p>Features:
@@ -102,8 +103,8 @@ $(document).ready(setupNav);
 			</p>
 			<p>Copyright &copy; 2012 Steve Purkis, all rights reserved.</p>
 		</section>
-		<section id="help">
-		</section>
+		<section id="help" class="info">
+	</section>
 
 	</body>
 </html>

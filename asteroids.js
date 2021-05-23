@@ -53,8 +53,6 @@ function loadLevel(level) {
 	if (asteroids) asteroids.killGame();
 
 	var startGame = function(images) {
-	    $("#controls").focus();
-
 	    try {
 		asteroids = new AsteroidsGame(ctx, level, images);
 		asteroids.startGameLoop();
