@@ -25,7 +25,6 @@ function setupNav() {
     $("#newgame").click(function(event){
 	event.preventDefault();
 	$about.hide();
-	$levels.show();
     });
 
     $("#nav-about").click(function(event){

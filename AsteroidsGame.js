@@ -8,6 +8,7 @@ require('SpaceObject.js');
 require('Ships.js');
 require('Weapons.js');
 require('Planets.js');
+require('KeyboardController.js');
 
 var animationFunc;    // set this global for debugging
 var requestAnimationFrame = window.requestAnimationFrame
@@ -150,6 +151,7 @@ AsteroidsGame.prototype.killGame = function() {
 	cancelAnimationFrame(this.animationTimeoutId);
 	delete this.animationTimeoutId;
     }
+    if (this.controller) { this.controller.onDestroy(); }
 }
 
 AsteroidsGame.prototype.updateAndDraw = function() {
@@ -671,9 +673,21 @@ AsteroidsGame.prototype.weaponTimeout = function(weapon) {
 
 
 AsteroidsGame.prototype.bindDefaultKeys = function() {
-    var self = this;
-    $("#controls").keydown(function(event) {self.handleKeyEvent(event)});
-    $("#controls").keyup(function(event) {self.handleKeyEvent(event)});
+	let ship = this.ship;
+	let actions = {
+		ccw:      new ControllerAction(ship, ship.startDecreaseSpin, ship.stopDecreaseSpin),
+		cw:       new ControllerAction(ship, ship.startIncreaseSpin, ship.stopIncreaseSpin),
+		forward:  new ControllerAction(ship, ship.startAccelerate, ship.stopAccelerate),
+		backward: new ControllerAction(ship, ship.startDecelerate, ship.stopDecelerate),
+		weapon:     new ControllerAction(ship, ship.startCycleWeapon, ship.stopCycleWeapon),
+		fire:     new ControllerAction(ship, ship.startFireWeapon, ship.stopFireWeapon)
+	};
+	let controlUI = document.getElementById("controlUI");
+	this.controller = new KeyboardController(actions, controlUI);
+	
+    //$("#controls").keydown(function(event) {self.handleKeyEvent(event)});
+    //$("#controls").keyup(function(event) {self.handleKeyEvent(event)});
+	return self;
 }
 
 AsteroidsGame.prototype.handleKeyEvent = function(event) {

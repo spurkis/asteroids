@@ -89,8 +89,45 @@ canvas#game {
 }
 
 /*********************************************************************
- * Control Box
+ * Control UI
  */
+#controlUI {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#controlUI span {
+    float: left;
+    width: 30px;
+    height: 30px;
+    border: 1px solid grey;
+    border-radius: 5px;
+    line-height: 30px; /* vertical align */
+    text-align: center;
+    align-self: center;
+    margin: 2px;
+    padding: 0px;
+}
+#controlUI div.group {
+    float: left;
+    width: 36px;
+    align-self: center;
+}
+
+#controlUI span.weapon {
+    clear: left;
+}
+#controlUI span.fire {
+    width: 90px;
+}
+
+#controlUI span.pressed {
+    font-weight: bold;
+    font-size: 120%;
+    color: green;
+    border: 1px solid green;
+    background-color: #aaeeaa;
+}
 div#controlBox {
     float: right;
     margin: 5px;
